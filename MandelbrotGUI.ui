@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="boton_hacer_fractal">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>50</y>
+      <width>171</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Generar Fractal</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>90</y>
+      <width>171</width>
+      <height>346</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="xmin_label">
+       <property name="text">
+        <string>xmin</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="xmin_entrada">
+       <property name="text">
+        <string>-2</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="xmax_label">
+       <property name="text">
+        <string>xmax</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="xmax_entrada">
+       <property name="text">
+        <string>1.2</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="ymin_label">
+       <property name="text">
+        <string>ymin</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="ymin_entrada">
+       <property name="text">
+        <string>-0.9</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="ymax_label">
+       <property name="text">
+        <string>ymax</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="ymax_entrada">
+       <property name="text">
+        <string>0.9</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="width_label">
+       <property name="text">
+        <string>Ancho</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="width_entrada">
+       <property name="text">
+        <string>1920</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="high_label">
+       <property name="text">
+        <string>Alto</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="high_entrada">
+       <property name="text">
+        <string>1080</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="max_iter_label">
+       <property name="text">
+        <string>Iteraciones</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="max_iter_entrada">
+       <property name="text">
+        <string>256</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QLabel" name="imagen_label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>36</y>
+      <width>721</width>
+      <height>511</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1000</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
