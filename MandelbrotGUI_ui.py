@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'V:\ABoundary\MandelbrotGUI.ui'
+# Form implementation generated from reading ui file 'v:\ABoundary\MandelbrotGUI.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -107,13 +107,3 @@ class Ui_MainWindow(object):
         self.max_iter_entrada.setText(_translate("MainWindow", "256"))
         self.boton_hacer_zoom_in.setText(_translate("MainWindow", "Hacer zoom in"))
         self.boton_hacer_zoom_out.setText(_translate("MainWindow", "Hacer zoom out"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec())
