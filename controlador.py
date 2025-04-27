@@ -1,3 +1,5 @@
+# pyuic6 -x "V:\ABoundary\MandelbrotGUI.ui"  -o "V:\ABoundary\MandelbrotGUI.py"
+
 import TodasFunciones2 as tf
 from PyQt6 import QtCore, QtGui, QtWidgets
 from MandelbrotGUI import Ui_MainWindow
@@ -24,11 +26,6 @@ def generar_mandelbrot():
     tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\ABoundary\mandelbrot.png", width, height, dpi=100)
     mostrar_fractal("V:\ABoundary\mandelbrot.png")
     return "Mandelbrot generado"
-
-
-
-
-
 
 """
 relacion = 0.5
@@ -64,7 +61,22 @@ def zoom_in():
     mostrar_fractal("V:\ABoundary\mandelbrot.png")
     return "Mandelbrot generado"
 
-
+def zoom_out():
+    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())*2))
+    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())*2))
+    ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())*2))
+    ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())*2))
+    xmin      =   float(ui.xmin_entrada.text())
+    xmax      =   float(ui.xmax_entrada.text())
+    ymin      =   float(ui.ymin_entrada.text())
+    ymax      =   float(ui.ymax_entrada.text())
+    width     =   int(ui.width_entrada.text())
+    height    =   int(ui.high_entrada.text())
+    max_iter  =   int(ui.max_iter_entrada.text())
+    M = tf.hacer_mandelbrot(xmin, xmax, ymin, ymax,width,height,max_iter)
+    tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\ABoundary\mandelbrot.png", width, height, dpi=100)
+    mostrar_fractal("V:\ABoundary\mandelbrot.png")
+    return "Mandelbrot generado"
 
 import sys
 app = QtWidgets.QApplication(sys.argv)
@@ -78,10 +90,11 @@ ui.setupUi(MainWindow)
 
 ui.boton_hacer_fractal.clicked.connect(lambda : generar_mandelbrot())
 ui.boton_hacer_zoom_in.clicked.connect(lambda : zoom_in())
-ui.boton_hacer_zoom_out.clicked.connect(lambda : tf.zoom_out())
+ui.boton_hacer_zoom_out.clicked.connect(lambda : zoom_out())
 
 
 MainWindow.show()
+generar_mandelbrot()
 sys.exit(app.exec())
 
     

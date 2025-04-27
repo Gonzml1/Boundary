@@ -26,7 +26,7 @@ def hacer_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter):
         z[mascara] = z[mascara]**2 + C[mascara]
         mascara = cp.logical_and(mascara, cp.abs(z) <= 2)
         M[mascara] = n
-        print("MANDELBROT",n)
+        print(f"\rMANDELBROT {n}", end="", flush=True)
     
     return M.get()
 
@@ -39,7 +39,7 @@ def mandelbrot_gpu_cp(C, max_iter):
         z[mascara] = cp.exp((z[mascara]**2 - 1.00001*z[mascara]) / C[mascara]**4) 
         mascara = cp.logical_and(mascara, cp.abs(z) <= 2)
         M[mascara] = n
-        print("MANDELBROT",n)
+        print(f"\rMANDELBROT {n}", end="", flush=True)
     return M.get()
 
 def mandelbrot_cp2(xmin, xmax, ymin, ymax, width, height, max_iter):
@@ -506,5 +506,5 @@ def mandelbrot_cp_transformado(xmin, xmax, ymin, ymax, width, height, max_iter,e
         z[mask] = eval(expresion)
         mask = cp.logical_and(mask, cp.abs(z) <= 2)
         M[mask] = n
-##        print("MANDELBROT",n)
+##        print(f"\rMANDELBROT {n}", end="", flush=True)
     return M.get()
