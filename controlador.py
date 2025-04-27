@@ -2,7 +2,7 @@
 
 import TodasFunciones2 as tf
 from PyQt6 import QtCore, QtGui, QtWidgets
-from MandelbrotGUI import Ui_MainWindow
+from MandelbrotGUI import Ui_Boundary
 import cupy as cp
 import numpy as np
 from PyQt6.QtGui import QImage, QPixmap
@@ -78,10 +78,79 @@ def zoom_out():
     mostrar_fractal("V:\ABoundary\mandelbrot.png")
     return "Mandelbrot generado"
 
+def izquierda():
+    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())-0.25))
+    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())-0.25))
+    ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())))
+    ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())))
+    xmin      =   float(ui.xmin_entrada.text())
+    xmax      =   float(ui.xmax_entrada.text())
+    ymin      =   float(ui.ymin_entrada.text())
+    ymax      =   float(ui.ymax_entrada.text())
+    width     =   int(ui.width_entrada.text())
+    height    =   int(ui.high_entrada.text())
+    max_iter  =   int(ui.max_iter_entrada.text())
+    M = tf.hacer_mandelbrot(xmin, xmax, ymin, ymax,width,height,max_iter)
+    tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\ABoundary\mandelbrot.png", width, height, dpi=100)
+    mostrar_fractal("V:\ABoundary\mandelbrot.png")
+    return "Mandelbrot generado"
+
+def derecha():
+    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())+0.25))
+    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())+0.25))
+    ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())))
+    ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())))
+    xmin      =   float(ui.xmin_entrada.text())
+    xmax      =   float(ui.xmax_entrada.text())
+    ymin      =   float(ui.ymin_entrada.text())
+    ymax      =   float(ui.ymax_entrada.text())
+    width     =   int(ui.width_entrada.text())
+    height    =   int(ui.high_entrada.text())
+    max_iter  =   int(ui.max_iter_entrada.text())
+    M = tf.hacer_mandelbrot(xmin, xmax, ymin, ymax,width,height,max_iter)
+    tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\ABoundary\mandelbrot.png", width, height, dpi=100)
+    mostrar_fractal("V:\ABoundary\mandelbrot.png")
+    return "Mandelbrot generado"
+
+def subir():
+    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())))
+    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())))
+    ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())-0.25))
+    ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())-0.25))
+    xmin      =   float(ui.xmin_entrada.text())
+    xmax      =   float(ui.xmax_entrada.text())
+    ymin      =   float(ui.ymin_entrada.text())
+    ymax      =   float(ui.ymax_entrada.text())
+    width     =   int(ui.width_entrada.text())
+    height    =   int(ui.high_entrada.text())
+    max_iter  =   int(ui.max_iter_entrada.text())
+    M = tf.hacer_mandelbrot(xmin, xmax, ymin, ymax,width,height,max_iter)
+    tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\ABoundary\mandelbrot.png", width, height, dpi=100)
+    mostrar_fractal("V:\ABoundary\mandelbrot.png")
+    return "Mandelbrot generado"
+
+def bajar():
+    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())))
+    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())))
+    ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())+0.25))
+    ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())+0.25))
+    xmin      =   float(ui.xmin_entrada.text())
+    xmax      =   float(ui.xmax_entrada.text())
+    ymin      =   float(ui.ymin_entrada.text())
+    ymax      =   float(ui.ymax_entrada.text())
+    width     =   int(ui.width_entrada.text())
+    height    =   int(ui.high_entrada.text())
+    max_iter  =   int(ui.max_iter_entrada.text())
+    M = tf.hacer_mandelbrot(xmin, xmax, ymin, ymax,width,height,max_iter)
+    tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\ABoundary\mandelbrot.png", width, height, dpi=100)
+    mostrar_fractal("V:\ABoundary\mandelbrot.png")
+    return "Mandelbrot generado"
+
+
 import sys
 app = QtWidgets.QApplication(sys.argv)
 MainWindow = QtWidgets.QMainWindow()
-ui = Ui_MainWindow()
+ui = Ui_Boundary()
 ui.setupUi(MainWindow)
 
 #########################
@@ -91,6 +160,11 @@ ui.setupUi(MainWindow)
 ui.boton_hacer_fractal.clicked.connect(lambda : generar_mandelbrot())
 ui.boton_hacer_zoom_in.clicked.connect(lambda : zoom_in())
 ui.boton_hacer_zoom_out.clicked.connect(lambda : zoom_out())
+ui.boton_bajar.clicked.connect(lambda : bajar())
+ui.boton_subir.clicked.connect(lambda : subir())
+ui.boton_derecha.clicked.connect(lambda : derecha())
+ui.boton_izquierda.clicked.connect(lambda : izquierda())
+
 
 
 MainWindow.show()

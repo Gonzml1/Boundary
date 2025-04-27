@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>Boundary</class>
+ <widget class="QMainWindow" name="Boundary">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
+    <width>1150</width>
     <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Boundary</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="boton_hacer_fractal">
@@ -173,13 +173,65 @@
      <string>Hacer zoom out</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="boton_subir">
+    <property name="geometry">
+     <rect>
+      <x>1020</x>
+      <y>30</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Subir</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="boton_derecha">
+    <property name="geometry">
+     <rect>
+      <x>1070</x>
+      <y>70</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Derecha</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="boton_izquierda">
+    <property name="geometry">
+     <rect>
+      <x>970</x>
+      <y>70</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Izquierda</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="boton_bajar">
+    <property name="geometry">
+     <rect>
+      <x>1020</x>
+      <y>110</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Bajar</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1000</width>
+     <width>1150</width>
      <height>22</height>
     </rect>
    </property>
