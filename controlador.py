@@ -27,23 +27,6 @@ def generar_mandelbrot():
     mostrar_fractal("V:\ABoundary\mandelbrot.png")
     return "Mandelbrot generado"
 
-"""
-relacion = 0.5
-dimensiones=np.array([xmin,xmax,ymin,ymax])
-for i in range(cantidad_ite):
-    mandelbrot = generate_mandelbrot_gpu(dimensiones[0], dimensiones[1], dimensiones[2], dimensiones[3], width, height, max_iter)
-    ruta_guardado2 = f"V:\\archivosvisual\\zoom2\\mandelbrotvideo{i}.png"
-    plot_mandelbrot(mandelbrot, ruta_guardado2, width, height, dpi1)
-    
-    # Reducir las dimensiones alrededor del punto de zoom
-    dimensiones[0] = centro_x - (centro_x - dimensiones[0]) *relacion
-    dimensiones[1] = centro_x + (dimensiones[1] - centro_x) *relacion  
-    dimensiones[2] = centro_y - (centro_y - dimensiones[2]) *relacion  
-    dimensiones[3] = centro_y + (dimensiones[3] - centro_y) *relacion 
-    print(dimensiones[0],dimensiones[1],dimensiones[2],dimensiones[3])
-    print("ITERACION", i)
-"""
-
 def zoom_in():
     ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())*0.5))
     ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())*0.5))

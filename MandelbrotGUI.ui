@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Boundary</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png</normaloff>Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="boton_hacer_fractal">
     <property name="geometry">
@@ -103,7 +107,7 @@
      <item>
       <widget class="QLineEdit" name="width_entrada">
        <property name="text">
-        <string>2000</string>
+        <string>1000</string>
        </property>
       </widget>
      </item>
@@ -117,7 +121,7 @@
      <item>
       <widget class="QLineEdit" name="high_entrada">
        <property name="text">
-        <string>2000</string>
+        <string>1000</string>
        </property>
       </widget>
      </item>
@@ -142,8 +146,8 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>771</width>
-      <height>521</height>
+      <width>765</width>
+      <height>520</height>
      </rect>
     </property>
    </widget>
