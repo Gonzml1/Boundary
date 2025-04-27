@@ -229,6 +229,32 @@
      <string>Bajar</string>
     </property>
    </widget>
+   <widget class="QLineEdit" name="formula_entrada">
+    <property name="geometry">
+     <rect>
+      <x>990</x>
+      <y>170</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>z = z**2 + C</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="formula_label">
+    <property name="geometry">
+     <rect>
+      <x>990</x>
+      <y>150</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Formula</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

@@ -22,7 +22,8 @@ def generar_mandelbrot():
     width     =   int(ui.width_entrada.text())
     height    =   int(ui.high_entrada.text())
     max_iter  =   int(ui.max_iter_entrada.text())
-    M = tf.hacer_mandelbrot(xmin, xmax, ymin, ymax,width,height,max_iter)
+    formula=   ui.formula_entrada.text()
+    M = tf.hacer_mandelbrot_con_entrada(xmin, xmax, ymin, ymax,width,height,max_iter,formula)
     tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\ABoundary\mandelbrot.png", width, height, dpi=100)
     mostrar_fractal("V:\ABoundary\mandelbrot.png")
     return "Mandelbrot generado"

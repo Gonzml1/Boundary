@@ -13,6 +13,30 @@ def hacer():
     print("HOLA")
     return 0
 
+def transformar_expresion(expression, variables, mask_name="mascara"):
+    for var in variables:
+        expression = expression.replace(var, f"{var}[{mask_name}]")
+    return expression
+
+def hacer_mandelbrot_con_entrada(xmin, xmax, ymin, ymax, width, height, max_iter,formula):
+    operacion = transformar_expresion(formula, ["z", "C"])
+    codigo = compile(operacion, "<string>", "exec")
+    x = cp.linspace(xmin, xmax, width)
+    y = cp.linspace(ymin, ymax, height)
+    X, Y = cp.meshgrid(x, y)
+    C = X + 1j * Y
+    z = cp.zeros(C.shape, dtype=cp.complex128)
+    M = cp.zeros(C.shape, dtype=int)
+    mascara = cp.ones(C.shape, dtype=bool)
+    
+    for n in range(max_iter):
+        exec(codigo)
+        mascara = cp.logical_and(mascara, cp.abs(z) <= 2)
+        M[mascara] = n
+        print(f"\rMANDELBROT {n}", end="", flush=True)
+    
+    return M.get()
+
 def hacer_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter):
     x = cp.linspace(xmin, xmax, width)
     y = cp.linspace(ymin, ymax, height)

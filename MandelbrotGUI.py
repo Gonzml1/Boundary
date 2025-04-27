@@ -90,6 +90,12 @@ class Ui_Boundary(object):
         self.boton_bajar = QtWidgets.QPushButton(parent=self.centralwidget)
         self.boton_bajar.setGeometry(QtCore.QRect(1020, 110, 75, 24))
         self.boton_bajar.setObjectName("boton_bajar")
+        self.formula_entrada = QtWidgets.QLineEdit(parent=self.centralwidget)
+        self.formula_entrada.setGeometry(QtCore.QRect(990, 170, 113, 22))
+        self.formula_entrada.setObjectName("formula_entrada")
+        self.formula_label = QtWidgets.QLabel(parent=self.centralwidget)
+        self.formula_label.setGeometry(QtCore.QRect(990, 150, 71, 16))
+        self.formula_label.setObjectName("formula_label")
         Boundary.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=Boundary)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1150, 22))
@@ -126,6 +132,8 @@ class Ui_Boundary(object):
         self.boton_derecha.setText(_translate("Boundary", "Derecha"))
         self.boton_izquierda.setText(_translate("Boundary", "Izquierda"))
         self.boton_bajar.setText(_translate("Boundary", "Bajar"))
+        self.formula_entrada.setText(_translate("Boundary", "z = z**2 + C"))
+        self.formula_label.setText(_translate("Boundary", "Formula"))
 
 
 if __name__ == "__main__":
