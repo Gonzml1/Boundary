@@ -103,7 +103,7 @@
      <item>
       <widget class="QLineEdit" name="width_entrada">
        <property name="text">
-        <string>1920</string>
+        <string>2000</string>
        </property>
       </widget>
      </item>
@@ -117,7 +117,7 @@
      <item>
       <widget class="QLineEdit" name="high_entrada">
        <property name="text">
-        <string>1080</string>
+        <string>2000</string>
        </property>
       </widget>
      </item>
