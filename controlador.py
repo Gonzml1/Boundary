@@ -29,10 +29,11 @@ def generar_mandelbrot():
     return "Mandelbrot generado"
 
 def zoom_in():
-    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())*0.5))
-    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())*0.5))
-    ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())*0.5))
-    ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())*0.5))
+    zoom_in_factor= float(ui.zoom_in_factor_entrada.text())
+    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())*zoom_in_factor))
+    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())*zoom_in_factor))
+    ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())*zoom_in_factor))
+    ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())*zoom_in_factor))
     xmin      =   float(ui.xmin_entrada.text())
     xmax      =   float(ui.xmax_entrada.text())
     ymin      =   float(ui.ymin_entrada.text())
@@ -47,10 +48,11 @@ def zoom_in():
     return "Mandelbrot generado"
 
 def zoom_out():
-    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())*2))
-    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())*2))
-    ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())*2))
-    ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())*2))
+    zoom_out_factor= float(ui.zoom_out_factor_entrada.text())
+    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())*zoom_out_factor))
+    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())*zoom_out_factor))
+    ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())*zoom_out_factor))
+    ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())*zoom_out_factor))
     xmin      =   float(ui.xmin_entrada.text())
     xmax      =   float(ui.xmax_entrada.text())
     ymin      =   float(ui.ymin_entrada.text())
@@ -65,8 +67,9 @@ def zoom_out():
     return "Mandelbrot generado"
 
 def izquierda():
-    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())-0.25))
-    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())-0.25))
+    mover= float(ui.mover_entrada.text())
+    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())-mover))
+    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())-mover))
     ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())))
     ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())))
     xmin      =   float(ui.xmin_entrada.text())
@@ -83,8 +86,9 @@ def izquierda():
     return "Mandelbrot generado"
 
 def derecha():
-    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())+0.25))
-    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())+0.25))
+    mover= float(ui.mover_entrada.text())
+    ui.xmin_entrada.setText(str(float(ui.xmin_entrada.text())+mover))
+    ui.xmax_entrada.setText(str(float(ui.xmax_entrada.text())+mover))
     ui.ymin_entrada.setText(str(float(ui.ymin_entrada.text())))
     ui.ymax_entrada.setText(str(float(ui.ymax_entrada.text())))
     xmin      =   float(ui.xmin_entrada.text())
