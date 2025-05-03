@@ -37,7 +37,7 @@
       <x>790</x>
       <y>150</y>
       <width>171</width>
-      <height>391</height>
+      <height>396</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -243,13 +243,13 @@
      <string>Bajar</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>980</x>
       <y>150</y>
       <width>135</width>
-      <height>141</height>
+      <height>246</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -292,6 +292,34 @@
       <widget class="QLineEdit" name="zoom_in_factor_entrada">
        <property name="text">
         <string>0.5</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="centro_x_label">
+       <property name="text">
+        <string>Centro X</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="centro_x_entrada">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="centro_y_label">
+       <property name="text">
+        <string>Centro Y</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="centro_y_entrada">
+       <property name="text">
+        <string>0</string>
        </property>
       </widget>
      </item>

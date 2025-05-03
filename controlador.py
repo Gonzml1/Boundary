@@ -27,4 +27,3 @@ MainWindow.show()
 md.generar_mandelbrot(ui)
 sys.exit(app.exec())
 
-    
