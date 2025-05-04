@@ -1,7 +1,7 @@
 # pyuic6 -x "V:\ABoundary\MandelbrotGUI.ui"  -o "V:\ABoundary\MandelbrotGUI.py"
-import modelo as md
+import core.funciones_ui as md
 from PyQt6 import QtCore, QtGui, QtWidgets
-from MandelbrotGUI import Ui_Boundary
+from gui.MandelbrotGUI import Ui_Boundary
 from PyQt6.QtGui import QImage, QPixmap,QPalette, QColor
 import sys
 from PyQt6.QtWidgets import QApplication
