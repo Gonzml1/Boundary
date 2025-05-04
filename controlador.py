@@ -10,7 +10,6 @@ from PyQt6.QtWidgets import QApplication
 app = QtWidgets.QApplication(sys.argv)
 QtWidgets.QApplication.setStyle("Fusion")
 
-# 🎨 Paleta oscura
 dark_palette = QPalette()
 dark_palette.setColor(QPalette.ColorRole.Window, QColor(53, 53, 53))
 dark_palette.setColor(QPalette.ColorRole.WindowText, QtGui.QColor("white"))
@@ -26,6 +25,7 @@ dark_palette.setColor(QPalette.ColorRole.Highlight, QColor(142, 45, 197))
 dark_palette.setColor(QPalette.ColorRole.HighlightedText, QtGui.QColor("black"))
 
 app.setPalette(dark_palette)
+
 MainWindow = QtWidgets.QMainWindow()
 ui = Ui_Boundary()
 ui.setupUi(MainWindow)

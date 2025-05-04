@@ -102,13 +102,13 @@ def mandelbrot_gpu_cp(C, max_iter):
         print(f"\rMANDELBROT {n}", end="", flush=True)
     return M.get()
 
-def guardar_mandelbrot(M,xmin,xmax,ymin,ymax,filepath, width, height, dpi):
+def guardar_mandelbrot(M,xmin,xmax,ymin,ymax,filepath, width, height, cmap1,dpi ):
     figsize = ((width) / dpi, height / dpi)
     
     fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
     ax.axis('off')
     
-    ax.imshow(M, extent=(xmin, xmax, ymin, ymax), cmap="twilight_shifted")
+    ax.imshow(M, extent=(xmin, xmax, ymin, ymax), cmap=cmap1)
     
     fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
     
