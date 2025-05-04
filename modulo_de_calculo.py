@@ -15,7 +15,7 @@ mandelbrot_kernel = cp.ElementwiseKernel(
     operation="""
         complex<float> z = 0.0f;  
         for (int i = 0; i < max_iter; ++i) {
-            z = z * z*z + c;  
+            z = z*z + c;  
             if (real(z)*real(z) + imag(z)*imag(z) > 4.0f) {
                 result = i;
                 return;
@@ -41,7 +41,7 @@ def hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter):
     tiempo = time.time() - inicio
     
     print(f"{max_iter} iteraciones")
-    print(f"\nTiempo total: {tiempo:.3f} segundos")
+    print(f"\nTiempo total: {tiempo:.5f} segundos")
 
     return resultado_cpu
 
