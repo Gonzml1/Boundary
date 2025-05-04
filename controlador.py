@@ -43,8 +43,9 @@ ui.boton_derecha.clicked.connect(lambda : md.derecha(ui))
 ui.boton_izquierda.clicked.connect(lambda : md.izquierda(ui))
 
 
+if __name__ == "__main__":
 
-MainWindow.show()
-md.generar_mandelbrot(ui)
-sys.exit(app.exec())
+    MainWindow.show()
+    md.generar_mandelbrot(ui)
+    sys.exit(app.exec())
 
