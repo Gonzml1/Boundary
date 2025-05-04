@@ -13,15 +13,15 @@ mandelbrot_kernel = cp.ElementwiseKernel(
     in_params='complex64 c, int32 max_iter',
     out_params='int32 result',
     operation="""
-        complex<float> z = 0.0f;  // Inicializar z en 0 para Mandelbrot
+        complex<float> z = 0.0f;  
         for (int i = 0; i < max_iter; ++i) {
-            z = z * z*z + c;  // Iteración de Mandelbrot: z = z^2 + c
+            z = z * z*z + c;  
             if (real(z)*real(z) + imag(z)*imag(z) > 4.0f) {
                 result = i;
                 return;
             }
         }
-        result = max_iter;  // Punto pertenece al conjunto
+        result = max_iter;  
     """,
     name='mandelbrot_kernel'
 )
@@ -29,22 +29,17 @@ mandelbrot_kernel = cp.ElementwiseKernel(
 def hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter):
     inicio = time.time()
 
-    # Crear la cuadrícula en la GPU
     x = cp.linspace(xmin, xmax, width, dtype=cp.float32)
     y = cp.linspace(ymin, ymax, height, dtype=cp.float32)
     X, Y = cp.meshgrid(x, y)
     C = X + 1j * Y  
     C = C.ravel()   
-
     resultado = cp.empty(C.shape, dtype=cp.int32)
-
     mandelbrot_kernel(C, max_iter, resultado)
-
     resultado = resultado.reshape((height, width))
-    
     resultado_cpu = resultado.get()
-
     tiempo = time.time() - inicio
+    
     print(f"{max_iter} iteraciones")
     print(f"\nTiempo total: {tiempo:.3f} segundos")
 

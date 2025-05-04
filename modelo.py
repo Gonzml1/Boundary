@@ -1,4 +1,4 @@
-import TodasFunciones2 as tf
+import modulo_de_calculo as tf
 from MandelbrotGUI import Ui_Boundary
 from PyQt6 import QtCore, QtGui, QtWidgets
 
