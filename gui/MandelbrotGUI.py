@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'V:\ABoundary\MandelbrotGUI.ui'
+# Form implementation generated from reading ui file 'V:\ABoundary\gui\MandelbrotGUI.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -14,7 +14,7 @@ class Ui_Boundary(object):
         Boundary.setObjectName("Boundary")
         Boundary.resize(1150, 600)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("V:\\ABoundary\\Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("V:\\ABoundary\\gui\\Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         Boundary.setWindowIcon(icon)
         Boundary.setAutoFillBackground(False)
         self.centralwidget = QtWidgets.QWidget(parent=Boundary)
@@ -98,11 +98,17 @@ class Ui_Boundary(object):
         self.boton_bajar.setGeometry(QtCore.QRect(1020, 110, 75, 24))
         self.boton_bajar.setObjectName("boton_bajar")
         self.layoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
-        self.layoutWidget.setGeometry(QtCore.QRect(980, 150, 135, 296))
+        self.layoutWidget.setGeometry(QtCore.QRect(980, 150, 135, 348))
         self.layoutWidget.setObjectName("layoutWidget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.layoutWidget)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.guardar_label = QtWidgets.QLabel(parent=self.layoutWidget)
+        self.guardar_label.setObjectName("guardar_label")
+        self.verticalLayout_2.addWidget(self.guardar_label)
+        self.boton_guardar = QtWidgets.QPushButton(parent=self.layoutWidget)
+        self.boton_guardar.setObjectName("boton_guardar")
+        self.verticalLayout_2.addWidget(self.boton_guardar)
         self.formula_label = QtWidgets.QLabel(parent=self.layoutWidget)
         self.formula_label.setObjectName("formula_label")
         self.verticalLayout_2.addWidget(self.formula_label)
@@ -184,6 +190,8 @@ class Ui_Boundary(object):
         self.boton_derecha.setText(_translate("Boundary", "Derecha"))
         self.boton_izquierda.setText(_translate("Boundary", "Izquierda"))
         self.boton_bajar.setText(_translate("Boundary", "Bajar"))
+        self.guardar_label.setText(_translate("Boundary", "Guardar mandelbrot"))
+        self.boton_guardar.setText(_translate("Boundary", "Guardar"))
         self.formula_label.setText(_translate("Boundary", "Formula"))
         self.formula_entrada.setText(_translate("Boundary", "z = z**2 + C"))
         self.zoom_out_factor_label.setText(_translate("Boundary", "Zoom out factor"))

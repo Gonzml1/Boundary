@@ -252,10 +252,24 @@
       <x>980</x>
       <y>150</y>
       <width>135</width>
-      <height>296</height>
+      <height>348</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QLabel" name="guardar_label">
+       <property name="text">
+        <string>Guardar mandelbrot</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="boton_guardar">
+       <property name="text">
+        <string>Guardar</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QLabel" name="formula_label">
        <property name="text">
