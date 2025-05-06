@@ -5,10 +5,17 @@ from gui.MandelbrotGUI import Ui_Boundary
 import sys
 from gui.tema_oscuro import dark_palette
 
+#########################
+#      TEMA OSCURO      #
+#########################
+
 app = QtWidgets.QApplication(sys.argv)
 QtWidgets.QApplication.setStyle("Fusion")
-
 app.setPalette(dark_palette)
+
+#########################
+#     Creacion Qmain    #
+#########################
 
 MainWindow = QtWidgets.QMainWindow()
 ui = Ui_Boundary()
