@@ -12,7 +12,7 @@ def linkeo_botones(ui=Ui_Boundary()):
     ui.boton_subir.clicked.connect(lambda : subir(ui))
     ui.boton_derecha.clicked.connect(lambda : derecha(ui))
     ui.boton_izquierda.clicked.connect(lambda : izquierda(ui))
-    ui.boton_guardar.clicked.connect(lambda : guardar(ui))
+    #ui.boton_guardar.clicked.connect(lambda : guardar(ui))
 
 
 def mostrar_fractal(ruta_imagen,self=Ui_Boundary()):
