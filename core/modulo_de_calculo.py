@@ -9,14 +9,15 @@ import time
 # z[mascara] = z[mascara]**2 + C[mascara]    
 
 
+
 mandelbrot_kernel = cp.ElementwiseKernel(
-    in_params='complex64 c, int32 max_iter',
+    in_params='complex128 c, int32 max_iter',
     out_params='int32 result',
     operation="""
-        complex<float> z = 0.0f;  
+        complex<double> z = 0.0;  
         for (int i = 0; i < max_iter; ++i) {
             z = z*z + c;  
-            if (real(z)*real(z) + imag(z)*imag(z) > 4.0f) {
+            if (real(z)*real(z) + imag(z)*imag(z) > 4.0) {
                 result = i;
                 return;
             }
@@ -29,8 +30,8 @@ mandelbrot_kernel = cp.ElementwiseKernel(
 def hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter):
     inicio = time.time()
 
-    x = cp.linspace(xmin, xmax, width, dtype=cp.float32)
-    y = cp.linspace(ymin, ymax, height, dtype=cp.float32)
+    x = cp.linspace(xmin, xmax, width, dtype=cp.float64)
+    y = cp.linspace(ymin, ymax, height, dtype=cp.float64)
     X, Y = cp.meshgrid(x, y)
     C = X + 1j * Y  
     C = C.ravel()   
@@ -41,7 +42,7 @@ def hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter):
     tiempo = time.time() - inicio
     
     print(f"{max_iter} iteraciones")
-    print(f"\nTiempo total: {tiempo:.5f} segundos")
+    print(f"Tiempo total: {tiempo:.5f} segundos")
 
     return resultado_cpu
 
