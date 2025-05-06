@@ -4,6 +4,16 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 #hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter)
 
+def linkeo_botones(ui=Ui_Boundary()):
+    ui.boton_hacer_fractal.clicked.connect(lambda : generar_mandelbrot(ui))
+    ui.boton_hacer_zoom_in.clicked.connect(lambda : zoom_in(ui))
+    ui.boton_hacer_zoom_out.clicked.connect(lambda : zoom_out(ui))
+    ui.boton_bajar.clicked.connect(lambda : bajar(ui))
+    ui.boton_subir.clicked.connect(lambda : subir(ui))
+    ui.boton_derecha.clicked.connect(lambda : derecha(ui))
+    ui.boton_izquierda.clicked.connect(lambda : izquierda(ui))
+    ui.boton_guardar.clicked.connect(lambda : guardar(ui))
+
 
 def mostrar_fractal(ruta_imagen,self=Ui_Boundary()):
     pixmap = QtGui.QPixmap(ruta_imagen)

@@ -1,4 +1,4 @@
-# pyuic6 -x "V:\ABoundary\MandelbrotGUI.ui"  -o "V:\ABoundary\MandelbrotGUI.py"
+# pyuic6 -x "V:\ABoundary\gui\MandelbrotGUI.ui"  -o "V:\ABoundary\gui\MandelbrotGUI.py"
 import core.funciones_ui as md
 from PyQt6 import QtCore, QtGui, QtWidgets
 from gui.MandelbrotGUI import Ui_Boundary
@@ -34,13 +34,7 @@ ui.setupUi(MainWindow)
 #   LINKEO DE BOTONES   #
 #########################
 
-ui.boton_hacer_fractal.clicked.connect(lambda : md.generar_mandelbrot(ui))
-ui.boton_hacer_zoom_in.clicked.connect(lambda : md.zoom_in(ui))
-ui.boton_hacer_zoom_out.clicked.connect(lambda : md.zoom_out(ui))
-ui.boton_bajar.clicked.connect(lambda : md.bajar(ui))
-ui.boton_subir.clicked.connect(lambda : md.subir(ui))
-ui.boton_derecha.clicked.connect(lambda : md.derecha(ui))
-ui.boton_izquierda.clicked.connect(lambda : md.izquierda(ui))
+md.linkeo_botones(ui)
 
 
 if __name__ == "__main__":
