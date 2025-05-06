@@ -3,15 +3,14 @@ import core.funciones_ui as md
 from PyQt6 import QtWidgets
 from gui.MandelbrotGUI import Ui_Boundary
 import sys
-from gui.tema_oscuro import dark_palette
+import gui.tema_oscuro as ts
 
 #########################
 #      TEMA OSCURO      #
 #########################
 
 app = QtWidgets.QApplication(sys.argv)
-QtWidgets.QApplication.setStyle("Fusion")
-app.setPalette(dark_palette)
+ts.tema_oscuro(app)
 
 #########################
 #     Creacion Qmain    #

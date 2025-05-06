@@ -14,7 +14,7 @@ class Ui_Boundary(object):
         Boundary.setObjectName("Boundary")
         Boundary.resize(1150, 600)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("v:\\ABoundary\\gui\\Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("v:\\ABoundary\\gui\\../Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         Boundary.setWindowIcon(icon)
         Boundary.setAutoFillBackground(False)
         self.centralwidget = QtWidgets.QWidget(parent=Boundary)

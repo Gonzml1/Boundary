@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png</normaloff>Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png</iconset>
+    <normaloff>../Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png</normaloff>../Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png</iconset>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
