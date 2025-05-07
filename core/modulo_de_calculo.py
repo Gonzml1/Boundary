@@ -8,6 +8,10 @@ import time
 # cp.exp((z[mascara]**2 - 1.00001*z[mascara]) / C[mascara]**4) 
 # z[mascara] = z[mascara]**2 + C[mascara]    
 
+##########################
+#  SELECCION DE FRACTAL  #
+##########################
+
 def calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
     if tipo_fractal in fractales:
         if tipo_calculo in fractales[tipo_fractal]:
@@ -31,6 +35,7 @@ def transformar_expresion(expression, variables, mask_name="mascara"):
     for var in variables:
         expression = expression.replace(var, f"{var}[{mask_name}]")
     return expression
+
 
 def guardar_mandelbrot(M,xmin,xmax,ymin,ymax,filepath, width, height, cmap1,dpi ):
     figsize = ((width) / dpi, height / dpi)
@@ -260,6 +265,10 @@ def hacer_julia_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, 
     print("\nTiempo de ejecución:", fin - inicio, "segundos")
     return M
 
+
+#########################
+#   Funciones en dict   #
+#########################
 
 calculos ={}
 

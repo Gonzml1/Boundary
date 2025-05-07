@@ -34,7 +34,7 @@ def obtener_datos(self=Ui_Boundary()):
     tipo_fractal  =   str(self.tipo_fractal_comboBox.currentText())
     real          =   float(self.real_julia_entrada.text())
     imag          =   float(self.im_julia_entrada.text())
-    formula       =   self.formula_entrada.text()
+    formula       =   str(self.formula_entrada.text())
     
     return cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag
 
