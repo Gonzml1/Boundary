@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1150</width>
+    <width>1250</width>
     <height>600</height>
    </rect>
   </property>
@@ -21,25 +21,12 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="boton_hacer_fractal">
-    <property name="geometry">
-     <rect>
-      <x>790</x>
-      <y>30</y>
-      <width>171</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Generar Fractal</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
       <x>790</x>
       <y>150</y>
-      <width>171</width>
+      <width>141</width>
       <height>396</height>
      </rect>
     </property>
@@ -168,36 +155,10 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="boton_hacer_zoom_in">
-    <property name="geometry">
-     <rect>
-      <x>790</x>
-      <y>110</y>
-      <width>171</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Hacer zoom in</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="boton_hacer_zoom_out">
-    <property name="geometry">
-     <rect>
-      <x>790</x>
-      <y>70</y>
-      <width>171</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Hacer zoom out</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="boton_subir">
     <property name="geometry">
      <rect>
-      <x>1020</x>
+      <x>1050</x>
       <y>30</y>
       <width>75</width>
       <height>24</height>
@@ -210,7 +171,7 @@
    <widget class="QPushButton" name="boton_derecha">
     <property name="geometry">
      <rect>
-      <x>1070</x>
+      <x>1100</x>
       <y>70</y>
       <width>75</width>
       <height>24</height>
@@ -223,7 +184,7 @@
    <widget class="QPushButton" name="boton_izquierda">
     <property name="geometry">
      <rect>
-      <x>970</x>
+      <x>1000</x>
       <y>70</y>
       <width>75</width>
       <height>24</height>
@@ -236,7 +197,7 @@
    <widget class="QPushButton" name="boton_bajar">
     <property name="geometry">
      <rect>
-      <x>1020</x>
+      <x>1050</x>
       <y>110</y>
       <width>75</width>
       <height>24</height>
@@ -249,10 +210,10 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>980</x>
+      <x>950</x>
       <y>150</y>
-      <width>135</width>
-      <height>348</height>
+      <width>131</width>
+      <height>341</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -388,13 +349,157 @@
      </item>
     </layout>
    </widget>
+   <widget class="QWidget" name="layoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>1100</x>
+      <y>150</y>
+      <width>131</width>
+      <height>296</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QLabel" name="tipo_fractal_label">
+       <property name="text">
+        <string>Tipo de fractal</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="tipo_fractal_comboBox">
+       <item>
+        <property name="text">
+         <string>Mandelbrot</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Julia</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="tipo_calculo_label">
+       <property name="text">
+        <string>Tipo de Calculo</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="tipo_calculo_comboBox">
+       <item>
+        <property name="text">
+         <string>CPU_Numpy</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>GPU_Cupy</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>GPU_Cupy_kernel</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="real_julia_label">
+       <property name="text">
+        <string>Parte real de julia</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="real_julia_entrada">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="im_julia_label">
+       <property name="text">
+        <string>Parte im de julia</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="im_julia_entrada">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBox_2"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Exponente</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="horizontalSlider">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>30</y>
+      <width>131</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QPushButton" name="boton_hacer_fractal">
+       <property name="text">
+        <string>Generar Fractal</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="boton_hacer_zoom_out">
+       <property name="text">
+        <string>Hacer zoom out</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="boton_hacer_zoom_in">
+       <property name="text">
+        <string>Hacer zoom in</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1150</width>
+     <width>1250</width>
      <height>22</height>
     </rect>
    </property>

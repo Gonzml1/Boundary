@@ -2,8 +2,6 @@ from PyQt6 import QtGui
 from PyQt6.QtGui import QPalette, QColor
 from PyQt6 import QtWidgets
 import sys
-from gui.MandelbrotGUI import Ui_Boundary
-
 
 def tema_oscuro(app = QtWidgets.QApplication(sys.argv)):
     dark_palette = QPalette()

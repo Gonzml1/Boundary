@@ -2,7 +2,7 @@ import core.modulo_de_calculo as tf
 from gui.MandelbrotGUI import Ui_Boundary
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-#hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter)
+#calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
 
 def linkeo_botones(ui=Ui_Boundary()):
     ui.boton_hacer_fractal.clicked.connect(lambda : generar_mandelbrot(ui))
@@ -22,17 +22,21 @@ def mostrar_fractal(ruta_imagen,self=Ui_Boundary()):
     self.Grafica_mostrar.setScene(scene)
     
 def obtener_datos(self=Ui_Boundary()):
-    cmap      =   str(self.cmap_comboBox.currentText())
-    xmin      =   float(self.xmin_entrada.text())
-    xmax      =   float(self.xmax_entrada.text())
-    ymin      =   float(self.ymin_entrada.text())
-    ymax      =   float(self.ymax_entrada.text())
-    width     =   int(self.width_entrada.text())
-    height    =   int(self.high_entrada.text())
-    max_iter  =   int(self.max_iter_entrada.text())
-    formula=   self.formula_entrada.text()
+    cmap          =   str(self.cmap_comboBox.currentText())
+    xmin          =   float(self.xmin_entrada.text())
+    xmax          =   float(self.xmax_entrada.text())
+    ymin          =   float(self.ymin_entrada.text())
+    ymax          =   float(self.ymax_entrada.text())
+    width         =   int(self.width_entrada.text())
+    height        =   int(self.high_entrada.text())
+    max_iter      =   int(self.max_iter_entrada.text())
+    tipo_calculo  =   str(self.tipo_calculo_comboBox.currentText())
+    tipo_fractal  =   str(self.tipo_fractal_comboBox.currentText())
+    real          =   float(self.real_julia_entrada.text())
+    imag          =   float(self.im_julia_entrada.text())
+    formula       =   self.formula_entrada.text()
     
-    return cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula
+    return cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag
 
 def hacer_dimensiones(zoom_factor,self=Ui_Boundary()):
     dimensiones= [0,0,0,0]
@@ -52,8 +56,8 @@ def hacer_dimensiones(zoom_factor,self=Ui_Boundary()):
     return dimensiones
 
 def generar_mandelbrot(self=Ui_Boundary()):
-    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula = obtener_datos(self)
-    M = tf.hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter)
+    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag = obtener_datos(self)
+    M = tf.calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
     tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\\ABoundary\\recursos\\mandelbrot.png", width, height,cmap,dpi=100)
     mostrar_fractal("V:\\ABoundary\\recursos\\mandelbrot.png",self)
     return "Mandelbrot generado"
@@ -67,9 +71,9 @@ def zoom_in(self=Ui_Boundary()):
     self.ymin_entrada.setText(str(dimensiones[2]))
     self.ymax_entrada.setText(str(dimensiones[3]))
 
-    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula = obtener_datos(self)
+    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag = obtener_datos(self)
     
-    M = tf.hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter)
+    M = tf.calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
     tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\\ABoundary\\recursos\\mandelbrot.png", width, height,cmap,dpi=100)
     mostrar_fractal("V:\\ABoundary\\recursos\\mandelbrot.png",self)
     return "Mandelbrot generado"
@@ -83,8 +87,8 @@ def zoom_out(self=Ui_Boundary()):
     self.ymin_entrada.setText(str(dimensiones[2]))
     self.ymax_entrada.setText(str(dimensiones[3]))
     
-    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula = obtener_datos(self)
-    M = tf.hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter)
+    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag = obtener_datos(self)
+    M = tf.calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
     tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\\ABoundary\\recursos\\mandelbrot.png", width, height,cmap,dpi=100)
     mostrar_fractal("V:\\ABoundary\\recursos\\mandelbrot.png",self)
     return "Mandelbrot generado"
@@ -96,9 +100,9 @@ def izquierda(self=Ui_Boundary()):
     self.ymin_entrada.setText(str(float(self.ymin_entrada.text())))
     self.ymax_entrada.setText(str(float(self.ymax_entrada.text())))
     
-    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula = obtener_datos(self)
+    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag = obtener_datos(self)
     
-    M = tf.hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter)
+    M = tf.calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
     tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\\ABoundary\\recursos\\mandelbrot.png", width, height,cmap,dpi=100)
     mostrar_fractal("V:\\ABoundary\\recursos\\mandelbrot.png",self)
     return "Mandelbrot generado"
@@ -109,8 +113,8 @@ def derecha(self=Ui_Boundary()):
     self.xmax_entrada.setText(str(float(self.xmax_entrada.text())+mover))
     self.ymin_entrada.setText(str(float(self.ymin_entrada.text())))
     self.ymax_entrada.setText(str(float(self.ymax_entrada.text())))
-    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula = obtener_datos(self)
-    M = tf.hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter)
+    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag = obtener_datos(self)
+    M = tf.calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
     tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\\ABoundary\\recursos\\mandelbrot.png", width, height,cmap,dpi=100)
     mostrar_fractal("V:\\ABoundary\\recursos\\mandelbrot.png",self)
     return "Mandelbrot generado"
@@ -121,8 +125,8 @@ def subir(self=Ui_Boundary()):
     self.xmax_entrada.setText(str(float(self.xmax_entrada.text())))
     self.ymin_entrada.setText(str(float(self.ymin_entrada.text())-mover))
     self.ymax_entrada.setText(str(float(self.ymax_entrada.text())-mover))
-    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula = obtener_datos(self)
-    M = tf.hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter)
+    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag = obtener_datos(self)
+    M = tf.calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
     tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\\ABoundary\\recursos\\mandelbrot.png", width, height, cmap, dpi=100)
     mostrar_fractal("V:\\ABoundary\\recursos\\mandelbrot.png",self)
     return "Mandelbrot generado"
@@ -133,8 +137,8 @@ def bajar(self=Ui_Boundary()):
     self.xmax_entrada.setText(str(float(self.xmax_entrada.text())))
     self.ymin_entrada.setText(str(float(self.ymin_entrada.text())+mover))
     self.ymax_entrada.setText(str(float(self.ymax_entrada.text())+mover))
-    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula = obtener_datos(self)
-    M = tf.hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter)
+    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag = obtener_datos(self)
+    M = tf.calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
     tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\\ABoundary\\recursos\\mandelbrot.png", width, height, cmap, dpi=100)
     mostrar_fractal("V:\\ABoundary\\recursos\\mandelbrot.png",self)
     return "Mandelbrot generado"
