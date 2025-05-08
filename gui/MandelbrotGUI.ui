@@ -213,7 +213,7 @@
       <x>950</x>
       <y>150</y>
       <width>131</width>
-      <height>341</height>
+      <height>348</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -460,13 +460,13 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>790</x>
-      <y>30</y>
+      <y>20</y>
       <width>131</width>
-      <height>111</height>
+      <height>121</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_3">
