@@ -82,11 +82,15 @@ def hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formul
     C = X + 1j * Y  
     C = C.ravel()   
     resultado = cp.empty(C.shape, dtype=cp.int32)
-    mandelbrot_kernel(C, max_iter, resultado)
+    try:
+        mandelbrot_kernel(C, max_iter, resultado)
+    except Exception as e:
+        print(f"Error executing Julia kernel: {e}")
+        return None
+        
     resultado = resultado.reshape((height, width))
     resultado_cpu = resultado.get()
     tiempo = time.time() - inicio
-    
     print(f"{max_iter} iteraciones")
     print(f"Tiempo total: {tiempo:.5f} segundos")
 
@@ -183,12 +187,25 @@ julia_kernel = cp.ElementwiseKernel(
                 return;
             }
         }
-        result = max        result = max_iter;  
+        result = max_iter;  
     """,
     name='julia_kernel'
 )
 
-def hacer_julia_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
+def hacer_julia_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula=None, tipo_calculo=None, tipo_fractal=None, real=0.0, imag=0.0):
+    """
+    Compute the Julia set fractal using GPU.
+    
+    Parameters:
+    - xmin, xmax, ymin, ymax: Boundaries of the complex plane
+    - width, height: Resolution of the output image
+    - max_iter: Maximum number of iterations
+    - formula, tipo_calculo, tipo_fractal: Unused parameters (for future extensibility)
+    - real, imag: Real and imaginary parts of the complex parameter c
+    
+    Returns:
+    - 2D NumPy array with iteration counts
+    """
     inicio = time.time()
 
     # Create grid of complex numbers (initial z values)
@@ -205,7 +222,11 @@ def hacer_julia_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula, ti
     resultado = cp.empty(Z.shape, dtype=cp.int32)
     
     # Execute the Julia kernel
-    julia_kernel(Z, C, max_iter, resultado)
+    try:
+        julia_kernel(Z, C, max_iter, resultado)
+    except Exception as e:
+        print(f"Error executing Julia kernel: {e}")
+        return None
     
     # Reshape result to 2D grid
     resultado = resultado.reshape((height, width))
@@ -265,12 +286,211 @@ def hacer_julia_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, 
     print("\nTiempo de ejecución:", fin - inicio, "segundos")
     return M
 
+#########################
+#     Burning ship      #
+#########################
+
+burning_kernel = cp.ElementwiseKernel(
+    in_params='complex128 z, complex128 c, int32 max_iter',
+    out_params='int32 result',
+    operation="""
+        complex<double> z_temp = z;
+        for (int i = 0; i < max_iter; ++i) {
+            double z_real = fabs(real(z_temp));
+            double z_imag = fabs(imag(z_temp));
+            z_temp = complex<double>(z_real * z_real - z_imag * z_imag + real(c),
+                                     2.0 * z_real * z_imag + imag(c));
+            if (real(z_temp) * real(z_temp) + imag(z_temp) * imag(z_temp) > 4.0) {
+                result = i;
+                return;
+            }
+        }
+        result = max_iter;
+    """,
+    name='burning_kernel'
+)
+
+def hacer_burning_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula=None, tipo_calculo=None, tipo_fractal=None, real=0.0, imag=0.0):
+    
+    inicio = time.time()
+
+    x = cp.linspace(xmin, xmax, width, dtype=cp.float64)
+    y = cp.linspace(ymin, ymax, height, dtype=cp.float64)
+    X, Y = cp.meshgrid(x, y)
+    C = X + 1j * Y  
+    C = C.ravel()   
+    Z = cp.zeros_like(C, dtype=cp.complex128)  
+
+    resultado = cp.empty(C.shape, dtype=cp.int32)
+
+    try:
+        burning_kernel(Z, C, max_iter, resultado)
+    except Exception as e:
+        print(f"Error executing Burning Ship kernel: {e}")
+        return None
+
+    resultado = resultado.reshape((height, width))
+    resultado_cpu = resultado.get()
+
+    tiempo = time.time() - inicio
+    print(f"{max_iter} iteraciones")
+    print(f"Tiempo total: {tiempo:.5f} segundos")
+
+    return resultado_cpu
+
+def hacer_burning_cupy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
+    inicio = time.time()
+    
+    x = cp.linspace(xmin, xmax, width)
+    y = cp.linspace(ymin, ymax, height)
+    X, Y = cp.meshgrid(x, y)
+    C = X + 1j * Y
+    z = cp.zeros_like(C, dtype=cp.complex128)
+    M = cp.zeros(C.shape, dtype=int)
+    mascara = cp.ones(C.shape, dtype=bool)
+
+    for n in range(max_iter):
+        z_real = cp.abs(z.real)
+        z_imag = cp.abs(z.imag)
+        z_temp = (z_real + 1j * z_imag) ** 2 + C
+        z[mascara] = z_temp[mascara]
+        mascara = cp.logical_and(mascara, cp.abs(z) <= 2)
+        M[mascara] = n
+        print(f"\rBurning Ship {n}", end="", flush=True)
+
+    fin = time.time()
+    print("\nTiempo de ejecución:", fin - inicio, "segundos")
+    return M.get()
+
+def hacer_burning_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
+    inicio = time.time()
+    
+    x = np.linspace(xmin, xmax, width)
+    y = np.linspace(ymin, ymax, height)
+    X, Y = np.meshgrid(x, y)
+    C = X + 1j * Y
+    z = np.zeros_like(C, dtype=np.complex128)
+    M = np.zeros(C.shape, dtype=int)
+    mascara = np.ones(C.shape, dtype=bool)
+
+    for n in range(max_iter):
+        z_real = np.abs(z.real)
+        z_imag = np.abs(z.imag)
+        z_temp = (z_real + 1j * z_imag) ** 2 + C
+        z[mascara] = z_temp[mascara]
+        mascara = np.logical_and(mascara, np.abs(z) <= 2)
+        M[mascara] = n
+        print(f"\rBurning Ship {n}", end="", flush=True)
+
+    fin = time.time()
+    print("\nTiempo de ejecución:", fin - inicio, "segundos")
+    return M
+
+#########################
+#        TRICORN        #
+#########################
+
+tricorn_kernel = cp.ElementwiseKernel(
+    in_params='complex128 z, complex128 c, int32 max_iter',
+    out_params='int32 result',
+    operation="""
+        complex<double> z_temp = z;
+        for (int i = 0; i < max_iter; ++i) {
+            z_temp = conj(z_temp) * conj(z_temp) + c;
+            if (real(z_temp) * real(z_temp) + imag(z_temp) * imag(z_temp) > 4.0) {
+                result = i;
+                return;
+            }
+        }
+        result = max_iter;
+    """,
+    name='tricorn_kernel'
+)
+
+def hacer_tricorn_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula=None, tipo_calculo=None, tipo_fractal=None, real=0.0, imag=0.0):
+
+    inicio = time.time()
+
+    x = cp.linspace(xmin, xmax, width, dtype=cp.float64)
+    y = cp.linspace(ymin, ymax, height, dtype=cp.float64)
+    X, Y = cp.meshgrid(x, y)
+    C = X + 1j * Y  
+    C = C.ravel()   
+    Z = cp.zeros_like(C, dtype=cp.complex128)  
+
+
+    resultado = cp.empty(C.shape, dtype=cp.int32)
+
+
+    try:
+        tricorn_kernel(Z, C, max_iter, resultado)
+    except Exception as e:
+        print(f"Error executing Tricorn kernel: {e}")
+        return None
+
+    # Reformatear el resultado a una cuadrícula 2D
+    resultado = resultado.reshape((height, width))
+
+    # Transferir el resultado a la CPU
+    resultado_cpu = resultado.get()
+
+    tiempo = time.time() - inicio
+    print(f"{max_iter} iteraciones")
+    print(f"Tiempo total: {tiempo:.5f} segundos")
+
+    return resultado_cpu
+
+def hacer_tricorn_cupy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
+
+    inicio = time.time()
+
+    x = cp.linspace(xmin, xmax, width)
+    y = cp.linspace(ymin, ymax, height)
+    X, Y = cp.meshgrid(x, y)
+    C = X + 1j * Y
+    z = cp.zeros_like(C, dtype=cp.complex128)
+    M = cp.zeros(C.shape, dtype=int)
+    mascara = cp.ones(C.shape, dtype=bool)
+
+    for n in range(max_iter):
+        z_temp = cp.conj(z)**2 + C
+        z[mascara] = z_temp[mascara]
+        mascara = cp.logical_and(mascara, cp.abs(z) <= 2)
+        M[mascara] = n
+        print(f"\rTricorn {n}", end="", flush=True)
+
+    fin = time.time()
+    print("\nTiempo de ejecución:", fin - inicio, "segundos")
+    return M.get()
+
+def hacer_tricorn_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
+    
+    inicio = time.time()
+
+    x = np.linspace(xmin, xmax, width)
+    y = np.linspace(ymin, ymax, height)
+    X, Y = np.meshgrid(x, y)
+    C = X + 1j * Y
+    z = np.zeros_like(C, dtype=np.complex128)
+    M = np.zeros(C.shape, dtype=int)
+    mascara = np.ones(C.shape, dtype=bool)
+
+    for n in range(max_iter):
+        z_temp = np.conj(z)**2 + C
+        z[mascara] = z_temp[mascara]
+        mascara = np.logical_and(mascara, np.abs(z) <= 2)
+        M[mascara] = n
+        print(f"\rTricorn {n}", end="", flush=True)
+
+    fin = time.time()
+    print("\nTiempo de ejecución:", fin - inicio, "segundos")
+    return M
 
 #########################
 #   Funciones en dict   #
 #########################
 
-calculos ={}
+
 
 fractales = {
     
@@ -286,6 +506,20 @@ fractales = {
     "GPU_Cupy": hacer_julia_cupy,
     "GPU_Cupy_kernel": hacer_julia_gpu,
     "CPU_Numpy": hacer_julia_numpy 
+    },
+    
+    "Burning Ship":{
+        
+    "GPU_Cupy": hacer_burning_cupy,
+    "GPU_Cupy_kernel": hacer_burning_gpu, 
+    "CPU_Numpy": hacer_burning_numpy
+    },
+    
+    "Tricorn":{
+        
+    "GPU_Cupy" : hacer_tricorn_cupy,
+    "GPU_Cupy_kernel" : hacer_tricorn_gpu,
+    "CPU_Numpy" : hacer_tricorn_numpy
     }
     
 }

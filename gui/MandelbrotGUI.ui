@@ -24,8 +24,8 @@
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>790</x>
-      <y>150</y>
+      <x>1090</x>
+      <y>160</y>
       <width>141</width>
       <height>396</height>
      </rect>
@@ -155,65 +155,13 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="boton_subir">
-    <property name="geometry">
-     <rect>
-      <x>1050</x>
-      <y>30</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Subir</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="boton_derecha">
-    <property name="geometry">
-     <rect>
-      <x>1100</x>
-      <y>70</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Derecha</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="boton_izquierda">
-    <property name="geometry">
-     <rect>
-      <x>1000</x>
-      <y>70</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Izquierda</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="boton_bajar">
-    <property name="geometry">
-     <rect>
-      <x>1050</x>
-      <y>110</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Bajar</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>950</x>
-      <y>150</y>
+      <x>940</x>
+      <y>160</y>
       <width>131</width>
-      <height>348</height>
+      <height>351</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -228,6 +176,20 @@
       <widget class="QPushButton" name="boton_guardar">
        <property name="text">
         <string>Guardar</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="resetear_label">
+       <property name="text">
+        <string>Resetear</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="boton_resetear">
+       <property name="text">
+        <string>PushButton</string>
        </property>
       </widget>
      </item>
@@ -301,6 +263,75 @@
        </property>
       </widget>
      </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="layoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>160</y>
+      <width>131</width>
+      <height>396</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QLabel" name="tipo_fractal_label">
+       <property name="text">
+        <string>Tipo de fractal</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="tipo_fractal_comboBox">
+       <item>
+        <property name="text">
+         <string>Mandelbrot</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Julia</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Burning Ship</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Tricorn</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="tipo_calculo_label">
+       <property name="text">
+        <string>Tipo de Calculo</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="tipo_calculo_comboBox">
+       <item>
+        <property name="text">
+         <string>CPU_Numpy</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>GPU_Cupy</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>GPU_Cupy_kernel</string>
+        </property>
+       </item>
+      </widget>
+     </item>
      <item>
       <widget class="QLabel" name="cmap_label">
        <property name="text">
@@ -347,65 +378,6 @@
        </item>
       </widget>
      </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="layoutWidget_2">
-    <property name="geometry">
-     <rect>
-      <x>1100</x>
-      <y>150</y>
-      <width>131</width>
-      <height>296</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_4">
-     <item>
-      <widget class="QLabel" name="tipo_fractal_label">
-       <property name="text">
-        <string>Tipo de fractal</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="tipo_fractal_comboBox">
-       <item>
-        <property name="text">
-         <string>Mandelbrot</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Julia</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="tipo_calculo_label">
-       <property name="text">
-        <string>Tipo de Calculo</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="tipo_calculo_comboBox">
-       <item>
-        <property name="text">
-         <string>CPU_Numpy</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>GPU_Cupy</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>GPU_Cupy_kernel</string>
-        </property>
-       </item>
-      </widget>
-     </item>
      <item>
       <widget class="QLabel" name="real_julia_label">
        <property name="text">
@@ -445,7 +417,7 @@
       <widget class="QComboBox" name="comboBox_2"/>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="exponente_label">
        <property name="text">
         <string>Exponente</string>
        </property>
@@ -453,6 +425,12 @@
      </item>
      <item>
       <widget class="QSlider" name="horizontalSlider">
+       <property name="maximum">
+        <number>20</number>
+       </property>
+       <property name="sliderPosition">
+        <number>2</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -488,6 +466,81 @@
       <widget class="QPushButton" name="boton_hacer_zoom_in">
        <property name="text">
         <string>Hacer zoom in</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="gridLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>940</x>
+      <y>20</y>
+      <width>151</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="4" column="1">
+      <widget class="QPushButton" name="boton_bajar">
+       <property name="text">
+        <string>↓</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="boton_subir">
+       <property name="text">
+        <string>↑</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QPushButton" name="boton_no_hace_nada">
+       <property name="text">
+        <string>🟥</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="boton_subir_derecha">
+       <property name="text">
+        <string>↗</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="boton_subir_izquierda">
+       <property name="text">
+        <string>↖</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QPushButton" name="boton_bajar_izquierda">
+       <property name="text">
+        <string>↙</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QPushButton" name="boton_derecha">
+       <property name="text">
+        <string>→</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2">
+      <widget class="QPushButton" name="boton_bajar_derecha">
+       <property name="text">
+        <string>↘</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QPushButton" name="boton_izquierda">
+       <property name="text">
+        <string>←</string>
        </property>
       </widget>
      </item>
