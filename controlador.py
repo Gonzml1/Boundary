@@ -6,7 +6,7 @@ import sys
 import gui.tema_oscuro as ts
 
 # fractales a añadir en un futuro (muy cercano)
-# Burning Ship, Tricorn o Newton-Raphson
+# Newton-Raphson 
 
 #########################
 #      TEMA OSCURO      #

@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import core.modulo_de_calculo_fractales as tf
 
+#Nada terminado en este archivo
+
 def generar_arbol(x, y, angulo, longitud, nivel, factor=0.7, segmentos=None):
     if segmentos is None:
         segmentos = []
