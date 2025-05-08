@@ -81,8 +81,8 @@ def hacer_dimensiones(zoom_factor,self=Ui_Boundary()):
 
 def calcular_guardar_mostrar_fractal(cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag,self = Ui_Boundary()):
     M = tf.calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
-    tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"V:\\ABoundary\\recursos\\mandelbrot.png", width, height,cmap,dpi=100)
-    mostrar_fractal("V:\\ABoundary\\recursos\\mandelbrot.png",self)
+    tf.guardar_mandelbrot(M,xmin,xmax,ymin,ymax,"recursos\mandelbrot.png", width, height,cmap,dpi=100)
+    mostrar_fractal("recursos\mandelbrot.png",self)
     return
 
 def generar_mandelbrot(self=Ui_Boundary()):
