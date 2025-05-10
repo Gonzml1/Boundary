@@ -1,6 +1,6 @@
-from PyQt6 import QtGui
-from PyQt6.QtGui import QPalette, QColor
-from PyQt6 import QtWidgets
+from PyQt5 import QtGui
+from PyQt5.QtGui import QPalette, QColor
+from PyQt5 import QtWidgets
 import sys
 
 def tema_oscuro(app = QtWidgets.QApplication(sys.argv)):

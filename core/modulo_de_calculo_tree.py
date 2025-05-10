@@ -37,7 +37,7 @@ def guardar_mandelbrot(M,xmin,xmax,ymin,ymax,filepath, width, height, cmap1,dpi 
  
 
 
-segmentos =generar_arbol(x=0, y=0, angulo=np.pi/2, longitud=100, nivel=10)
+segmentos = generar_arbol(x=0, y=0, angulo=np.pi/2, longitud=100, nivel=10)
 tf.guardar_mandelbrot(segmentos,)
 
 print(generar_arbol(x=0, y=0, angulo=np.pi/2, longitud=100, nivel=10))

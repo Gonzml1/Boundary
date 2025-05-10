@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1250</width>
-    <height>600</height>
+    <width>1300</width>
+    <height>660</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>1090</x>
+      <x>1130</x>
       <y>160</y>
       <width>141</width>
       <height>396</height>
@@ -97,7 +97,7 @@
      <item>
       <widget class="QLineEdit" name="width_entrada">
        <property name="text">
-        <string>1000</string>
+        <string>800</string>
        </property>
       </widget>
      </item>
@@ -111,7 +111,7 @@
      <item>
       <widget class="QLineEdit" name="high_entrada">
        <property name="text">
-        <string>1000</string>
+        <string>600</string>
        </property>
       </widget>
      </item>
@@ -145,23 +145,13 @@
      </item>
     </layout>
    </widget>
-   <widget class="QGraphicsView" name="Grafica_mostrar">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>765</width>
-      <height>520</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>940</x>
+      <x>980</x>
       <y>160</y>
       <width>131</width>
-      <height>351</height>
+      <height>400</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -263,15 +253,35 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QLabel" name="exponente_label">
+       <property name="text">
+        <string>Exponente</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="horizontalSlider">
+       <property name="maximum">
+        <number>20</number>
+       </property>
+       <property name="sliderPosition">
+        <number>2</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="layoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>790</x>
+      <x>830</x>
       <y>160</y>
       <width>131</width>
-      <height>396</height>
+      <height>341</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -416,32 +426,12 @@
      <item>
       <widget class="QComboBox" name="comboBox_2"/>
      </item>
-     <item>
-      <widget class="QLabel" name="exponente_label">
-       <property name="text">
-        <string>Exponente</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="horizontalSlider">
-       <property name="maximum">
-        <number>20</number>
-       </property>
-       <property name="sliderPosition">
-        <number>2</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>790</x>
+      <x>830</x>
       <y>20</y>
       <width>131</width>
       <height>121</height>
@@ -474,9 +464,9 @@
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>940</x>
+      <x>980</x>
       <y>20</y>
-      <width>151</width>
+      <width>239</width>
       <height>121</height>
      </rect>
     </property>
@@ -546,13 +536,23 @@
      </item>
     </layout>
    </widget>
+   <widget class="QOpenGLWidget" name="grafico_openGLWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>800</width>
+      <height>600</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1250</width>
+     <width>1300</width>
      <height>22</height>
     </rect>
    </property>

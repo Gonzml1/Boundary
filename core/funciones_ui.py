@@ -1,9 +1,35 @@
 import core.modulo_de_calculo_fractales as tf
 from gui.MandelbrotGUI import Ui_Boundary
-from PyQt6 import QtCore, QtGui, QtWidgets
-
+from PyQt5 import QtCore, QtGui, QtWidgets
+from core.modulo_opengl import MandelbrotWidget
 #calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
 
+def mostrar_fractal_opengl(self=Ui_Boundary):
+    try:
+        # Obtener valores desde los campos de entrada
+        cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag = obtener_datos(self)
+
+
+        mandelbrot_widget = MandelbrotWidget(cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag,self)
+
+
+        if self.grafico_openGLWidget.layout() is None:
+            layout = QtWidgets.QVBoxLayout(self.grafico_openGLWidget)
+            layout.setContentsMargins(0, 0, 0, 0)
+            self.grafico_openGLWidget.setLayout(layout)
+        else:
+            layout = self.grafico_openGLWidget.layout()
+
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+                
+        layout.addWidget(mandelbrot_widget)
+
+    except ValueError:
+        print("Error: Asegurate de que los campos tengan valores numéricos válidos.")
+    
 def linkeo_botones(ui=Ui_Boundary()):
     ui.boton_hacer_fractal.clicked.connect(lambda : generar_mandelbrot(ui))
     ui.boton_hacer_zoom_in.clicked.connect(lambda : zoom_in(ui))
@@ -25,8 +51,8 @@ def resetear_entrada(self=Ui_Boundary()):
     self.xmax_entrada.setText("2.0")
     self.ymin_entrada.setText("-0.9")
     self.ymax_entrada.setText("0.9")
-    self.width_entrada.setText("1000")
-    self.high_entrada.setText("1000")
+    self.width_entrada.setText("800")
+    self.high_entrada.setText("600")
     self.max_iter_entrada.setText("256")
     self.real_julia_entrada.setText("0.0")
     self.im_julia_entrada.setText("0.0")
@@ -90,6 +116,10 @@ def generar_mandelbrot(self=Ui_Boundary()):
     calcular_guardar_mostrar_fractal(cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, self)
     return "Mandelbrot generado"
 
+#########################
+#         ZOOM          #
+#########################
+
 def zoom_in(self=Ui_Boundary()):
     zoom_in_factor = float(self.zoom_in_factor_entrada.text())
     dimensiones= hacer_dimensiones(zoom_in_factor,self)
@@ -115,6 +145,10 @@ def zoom_out(self=Ui_Boundary()):
     cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag = obtener_datos(self)
     calcular_guardar_mostrar_fractal(cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, self)
     return "Mandelbrot generado"
+
+#########################
+#      MOVIMIENTO       #
+#########################
 
 def izquierda(self=Ui_Boundary()):
     mover= float(self.mover_entrada.text())
