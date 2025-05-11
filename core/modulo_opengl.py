@@ -7,7 +7,7 @@ import core.modulo_de_calculo_fractales as tf
 
     
 class MandelbrotWidget(QOpenGLWidget):
-    def __init__(self,cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, boundary):
+    def __init__(self,cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, boundary, zoom_in, zoom_out ):
         super().__init__()
         self.cmap           =       cmap
         self.xmin           =       xmin
@@ -23,11 +23,16 @@ class MandelbrotWidget(QOpenGLWidget):
         self.real           =       real
         self.imag           =       imag
         self.ui             =       boundary
+        self.zoom_in        =       zoom_in
+        self.zoom_out       =       zoom_out
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.actualizar_parametros()
 
     def actualizar_parametros(self):
         self.cmap           =   str(self.ui.cmap_comboBox.currentText())
+        self.zoom_in        =   float(self.ui.zoom_in_factor_entrada.text())
+        self.zoom_out       =   float(self.ui.zoom_out_factor_entrada.text()) 
         self.width          =   int(self.ui.width_entrada.text())
         self.height         =   int(self.ui.high_entrada.text())
         self.max_iter       =   int(self.ui.max_iter_entrada.text())
@@ -46,11 +51,9 @@ class MandelbrotWidget(QOpenGLWidget):
         self.ui.label_coordenadas.setText(f"Re: {real:.6f}, Im: {imag:.6f}")
     
     def pixel_a_complejo(self, x, y):
-        y = self.height - y
         real = self.xmin + (x / self.width) * (self.xmax - self.xmin)
         imag = self.ymin + (y / self.height) * (self.ymax - self.ymin)
         return real, imag
-    
     
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT)
@@ -98,16 +101,14 @@ class MandelbrotWidget(QOpenGLWidget):
             c_x = self.xmin + (x_pixel / self.width) * (self.xmax - self.xmin)
             c_y = self.ymin + (y_pixel / self.height) * (self.ymax - self.ymin)
 
-            zoom_factor = 0.5  
-
-            self.xmin = c_x - (c_x - self.xmin) * zoom_factor
-            self.xmax = c_x + (self.xmax - c_x) * zoom_factor
-            self.ymin = c_y - (c_y - self.ymin) * zoom_factor
-            self.ymax = c_y + (self.ymax - c_y) * zoom_factor
+            self.xmin = c_x - (c_x - self.xmin) * self.zoom_in
+            self.xmax = c_x + (self.xmax - c_x) * self.zoom_in
+            self.ymin = c_y - (c_y - self.ymin) * self.zoom_in
+            self.ymax = c_y + (self.ymax - c_y) * self.zoom_in
 
             self.update()
             
-        if event.button() == Qt.RightButton:
+        elif event.button() == Qt.RightButton:
 
             x_pixel = event.x()
             y_pixel = event.y()  
@@ -115,33 +116,29 @@ class MandelbrotWidget(QOpenGLWidget):
             c_x = self.xmin + (x_pixel / self.width) * (self.xmax - self.xmin)
             c_y = self.ymin + (y_pixel / self.height) * (self.ymax - self.ymin)
 
-            zoom_factor1 = 2  
-
-            self.xmin = c_x - (c_x - self.xmin) * zoom_factor1
-            self.xmax = c_x + (self.xmax - c_x) * zoom_factor1
-            self.ymin = c_y - (c_y - self.ymin) * zoom_factor1
-            self.ymax = c_y + (self.ymax - c_y) * zoom_factor1
+            self.xmin = c_x - (c_x - self.xmin) * self.zoom_out
+            self.xmax = c_x + (self.xmax - c_x) * self.zoom_out
+            self.ymin = c_y - (c_y - self.ymin) * self.zoom_out
+            self.ymax = c_y + (self.ymax - c_y) * self.zoom_out
 
             self.update()
     
-            
     def keyPressEvent(self, event):
         
         move = 0.05
         dx = (self.xmax - self.xmin) * move
         dy = (self.ymax - self.ymin) * move
 
-        if event.key() == Qt.Key_Left:
+        if event.key() in (Qt.Key_Left, Qt.Key_A):
             self.xmin -= dx
             self.xmax -= dx
-        elif event.key() == Qt.Key_Right:
+        elif event.key() in (Qt.Key_Right, Qt.Key_D):
             self.xmin += dx
             self.xmax += dx
-        elif event.key() == Qt.Key_Up:
+        elif event.key() in (Qt.Key_Up, Qt.Key_W):
             self.ymin -= dy
             self.ymax -= dy
-        elif event.key() == Qt.Key_Down:
+        elif event.key() in (Qt.Key_Down, Qt.Key_S):
             self.ymin += dy
             self.ymax += dy
-
         self.update()

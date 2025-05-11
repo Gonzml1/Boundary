@@ -7,11 +7,9 @@ from core.modulo_opengl import MandelbrotWidget
 def mostrar_fractal_opengl(self=Ui_Boundary):
     try:
         # Obtener valores desde los campos de entrada
-        cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag = obtener_datos(self)
-
-
-        mandelbrot_widget = MandelbrotWidget(cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag,self)
-
+        cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, zoom_in, zoom_out = obtener_datos(self)
+        
+        mandelbrot_widget = MandelbrotWidget(cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, self, zoom_in, zoom_out)
 
         if self.grafico_openGLWidget.layout() is None:
             layout = QtWidgets.QVBoxLayout(self.grafico_openGLWidget)
@@ -93,8 +91,10 @@ def obtener_datos(self=Ui_Boundary()):
     real          =   float(self.real_julia_entrada.text())
     imag          =   float(self.im_julia_entrada.text())
     formula       =   str(self.formula_entrada.text())
+    zoom_out      =   float(self.zoom_out_factor_entrada.text())
+    zoom_in       =   float(self.zoom_in_factor_entrada.text())
     
-    return cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag
+    return cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, zoom_in, zoom_out   
 
 def hacer_dimensiones(zoom_factor,self=Ui_Boundary()):
     dimensiones= [0,0,0,0]
