@@ -1,6 +1,6 @@
 import core.modulo_de_calculo_fractales as tf
 from gui.MandelbrotGUI import Ui_Boundary
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 from core.modulo_opengl import MandelbrotWidget
 #calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
 
@@ -44,6 +44,8 @@ def linkeo_botones(ui=Ui_Boundary()):
     ui.boton_subir_izquierda.clicked.connect(lambda : subir_izquierda(ui))
     ui.boton_no_hace_nada.clicked.connect(lambda : no_hace_nada(ui))
     ui.boton_resetear.clicked.connect(lambda : resetear_entrada(ui))
+    ui.boton_dividir.clicked.connect(lambda: dividir(ui))
+    ui.boton_duplicar.clicked.connect(lambda: duplicar(ui))
     #ui.boton_guardar.clicked.connect(lambda : guardar(ui))
 
 def resetear_entrada(self=Ui_Boundary()):
@@ -61,6 +63,12 @@ def resetear_entrada(self=Ui_Boundary()):
     self.zoom_in_factor_entrada.setText("0.5")
     self.zoom_out_factor_entrada.setText("2.0")
     return print("Entradas reseteadas")
+
+def duplicar(self=Ui_Boundary()):
+    self.max_iter_entrada.setText(str(int(int(self.max_iter_entrada.text())*2)))
+    
+def dividir(self=Ui_Boundary()):
+    self.max_iter_entrada.setText(str(int(int(self.max_iter_entrada.text())/2)))
 
 def no_hace_nada(self=Ui_Boundary()):
     return print("Te dije que no hace nada")

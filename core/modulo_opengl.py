@@ -1,12 +1,8 @@
-import sys
 import numpy as np
-import cupy as cp
-import time
-from PyQt5.QtWidgets import QApplication, QMainWindow, QOpenGLWidget
+from PyQt5.QtWidgets import QOpenGLWidget
 from PyQt5.QtCore import Qt
 from OpenGL.GL import *
 import core.modulo_de_calculo_fractales as tf
-from gui.MandelbrotGUI import Ui_Boundary
 
 
     
@@ -30,6 +26,9 @@ class MandelbrotWidget(QOpenGLWidget):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
     def actualizar_parametros(self):
+        self.cmap           =   str(self.ui.cmap_comboBox.currentText())
+        self.width          =   int(self.ui.width_entrada.text())
+        self.height         =   int(self.ui.high_entrada.text())
         self.max_iter       =   int(self.ui.max_iter_entrada.text())
         self.tipo_calculo   =   str(self.ui.tipo_calculo_comboBox.currentText())
         self.tipo_fractal   =   str(self.ui.tipo_fractal_comboBox.currentText())
@@ -56,6 +55,7 @@ class MandelbrotWidget(QOpenGLWidget):
         # Normalizamos para color RGB
         norm = data / self.max_iter
         rgb = np.uint8(np.dstack([norm*255, norm**0.5*255, norm**0.3*255]))
+        rgb = rgb[::-1, :]
         glDrawPixels(self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, rgb)
 
     def resizeGL(self, w, h):
@@ -86,10 +86,10 @@ class MandelbrotWidget(QOpenGLWidget):
             self.xmin += dx
             self.xmax += dx
         elif event.key() == Qt.Key_Up:
-            self.ymin += dy
-            self.ymax += dy
-        elif event.key() == Qt.Key_Down:
             self.ymin -= dy
             self.ymax -= dy
+        elif event.key() == Qt.Key_Down:
+            self.ymin += dy
+            self.ymax += dy
 
         self.update()
