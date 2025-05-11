@@ -26,8 +26,8 @@
      <rect>
       <x>1130</x>
       <y>160</y>
-      <width>141</width>
-      <height>431</height>
+      <width>160</width>
+      <height>391</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -146,20 +146,6 @@
         </widget>
        </item>
       </layout>
-     </item>
-     <item>
-      <widget class="QLabel" name="mover_label">
-       <property name="text">
-        <string>Mover </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="mover_entrada">
-       <property name="text">
-        <string>0.25</string>
-       </property>
-      </widget>
      </item>
     </layout>
    </widget>
@@ -330,6 +316,11 @@
        <item>
         <property name="text">
          <string>Tricorn</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Circulo</string>
         </property>
        </item>
       </widget>
@@ -562,6 +553,19 @@
       <width>800</width>
       <height>600</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_coordenadas">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>221</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>

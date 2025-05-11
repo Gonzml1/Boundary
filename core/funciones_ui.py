@@ -44,8 +44,8 @@ def linkeo_botones(ui=Ui_Boundary()):
     ui.boton_subir_izquierda.clicked.connect(lambda : subir_izquierda(ui))
     ui.boton_no_hace_nada.clicked.connect(lambda : no_hace_nada(ui))
     ui.boton_resetear.clicked.connect(lambda : resetear_entrada(ui))
-    ui.boton_dividir.clicked.connect(lambda: dividir(ui))
-    ui.boton_duplicar.clicked.connect(lambda: duplicar(ui))
+    ui.boton_dividir.clicked.connect(lambda : dividir(ui))
+    ui.boton_duplicar.clicked.connect(lambda : duplicar(ui))
     #ui.boton_guardar.clicked.connect(lambda : guardar(ui))
 
 def resetear_entrada(self=Ui_Boundary()):

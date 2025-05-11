@@ -1,15 +1,15 @@
-import mpmath as mp
 import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 
-# cp.exp((z[mascara]**2 - 1.00001*z[mascara]) / C[mascara]**4) 
-# z[mascara] = z[mascara]**2 + C[mascara]    
+# cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
+# z[matriz] = z[matriz]**2 + C[matriz]    
 
 ##########################
 #  SELECCION DE FRACTAL  #
 ##########################
+
 
 def calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
     if tipo_fractal in fractales:
@@ -30,7 +30,7 @@ def calcular_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter, formula
         raise ValueError(f"Tipo de cálculo '{tipo_calculo}' no soportado.")    
 
 
-def transformar_expresion(expression, variables, mask_name="mascara"):
+def transformar_expresion(expression, variables, mask_name="matriz"):
     for var in variables:
         expression = expression.replace(var, f"{var}[{mask_name}]")
     return expression
@@ -106,12 +106,12 @@ def hacer_mandelbrot_con_entrada(xmin, xmax, ymin, ymax, width, height, max_iter
     C = X + 1j * Y
     z = cp.zeros(C.shape, dtype=cp.complex128)
     M = cp.zeros(C.shape, dtype=int)
-    mascara = cp.ones(C.shape, dtype=bool)
+    matriz = cp.ones(C.shape, dtype=bool)
     
     for n in range(max_iter):
         exec(codigo)
-        mascara = cp.logical_and(mascara, cp.abs(z) <= 2)
-        M[mascara] = n
+        matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
+        M[matriz] = n
         print(f"\rMANDELBROT {n}", end="", flush=True)
         
     fin = time.time() 
@@ -130,12 +130,12 @@ def hacer_mandelbrot_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, form
     C = X + 1j * Y
     z = np.zeros(C.shape, dtype=np.complex128)
     M = np.zeros(C.shape, dtype=int)
-    mascara = np.ones(C.shape, dtype=bool)
+    matriz = np.ones(C.shape, dtype=bool)
     
     for n in range(max_iter):
         exec(codigo)
-        mascara = np.logical_and(mascara, np.abs(z) <= 2)
-        M[mascara] = n
+        matriz = np.logical_and(matriz, np.abs(z) <= 2)
+        M[matriz] = n
         print(f"\rMANDELBROT {n}", end="", flush=True)
         
     fin = time.time() 
@@ -155,12 +155,12 @@ def hacer_mandelbrot_cupy(xmin, xmax, ymin, ymax, width, height, max_iter, formu
     C = X + 1j * Y
     z = cp.zeros(C.shape, dtype=cp.complex128)
     M = cp.zeros(C.shape, dtype=int)
-    mascara = cp.ones(C.shape, dtype=bool)
+    matriz = cp.ones(C.shape, dtype=bool)
     
     for n in range(max_iter):
         exec(codigo)
-        mascara = cp.logical_and(mascara, cp.abs(z) <= 2)
-        M[mascara] = n
+        matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
+        M[matriz] = n
         print(f"\rMANDELBROT {n}", end="", flush=True)
         
     fin = time.time() 
@@ -256,7 +256,6 @@ def hacer_julia_cupy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, t
         matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
         M[matriz] = n
         print(f"\rJULIA {n}", end="", flush=True)
-        print(n)
     
     fin = time.time()
     print("\nTiempo de ejecución:", fin - inicio, "segundos")
@@ -279,7 +278,6 @@ def hacer_julia_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, 
         matriz = np.logical_and(matriz, np.abs(z) <= 2)
         M[matriz] = n
         print(f"\rJULIA {n}", end="", flush=True)
-        print(n)
     
     fin = time.time()
     print("\nTiempo de ejecución:", fin - inicio, "segundos")
@@ -346,15 +344,15 @@ def hacer_burning_cupy(xmin, xmax, ymin, ymax, width, height, max_iter, formula,
     C = X + 1j * Y
     z = cp.zeros_like(C, dtype=cp.complex128)
     M = cp.zeros(C.shape, dtype=int)
-    mascara = cp.ones(C.shape, dtype=bool)
+    matriz = cp.ones(C.shape, dtype=bool)
 
     for n in range(max_iter):
         z_real = cp.abs(z.real)
         z_imag = cp.abs(z.imag)
         z_temp = (z_real + 1j * z_imag) ** 2 + C
-        z[mascara] = z_temp[mascara]
-        mascara = cp.logical_and(mascara, cp.abs(z) <= 2)
-        M[mascara] = n
+        z[matriz] = z_temp[matriz]
+        matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
+        M[matriz] = n
         print(f"\rBurning Ship {n}", end="", flush=True)
 
     fin = time.time()
@@ -370,15 +368,15 @@ def hacer_burning_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula
     C = X + 1j * Y
     z = np.zeros_like(C, dtype=np.complex128)
     M = np.zeros(C.shape, dtype=int)
-    mascara = np.ones(C.shape, dtype=bool)
+    matriz = np.ones(C.shape, dtype=bool)
 
     for n in range(max_iter):
         z_real = np.abs(z.real)
         z_imag = np.abs(z.imag)
         z_temp = (z_real + 1j * z_imag) ** 2 + C
-        z[mascara] = z_temp[mascara]
-        mascara = np.logical_and(mascara, np.abs(z) <= 2)
-        M[mascara] = n
+        z[matriz] = z_temp[matriz]
+        matriz = np.logical_and(matriz, np.abs(z) <= 2)
+        M[matriz] = n
         print(f"\rBurning Ship {n}", end="", flush=True)
 
     fin = time.time()
@@ -449,14 +447,14 @@ def hacer_tricorn_cupy(xmin, xmax, ymin, ymax, width, height, max_iter, formula,
     C = X + 1j * Y
     z = cp.zeros_like(C, dtype=cp.complex128)
     M = cp.zeros(C.shape, dtype=int)
-    mascara = cp.ones(C.shape, dtype=bool)
+    matriz = cp.ones(C.shape, dtype=bool)
 
     for n in range(max_iter):
         z_temp = cp.conj(z)**2 + C
-        z[mascara] = z_temp[mascara]
-        mascara = cp.logical_and(mascara, cp.abs(z) <= 2)
-        M[mascara] = n
-        print(f"\rTricorn {n}", end="", flush=True)
+        z[matriz] = z_temp[matriz]
+        matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
+        M[matriz] = n
+        print(f"\rTRICORN {n}", end="", flush=True)
 
     fin = time.time()
     print("\nTiempo de ejecución:", fin - inicio, "segundos")
@@ -472,18 +470,134 @@ def hacer_tricorn_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula
     C = X + 1j * Y
     z = np.zeros_like(C, dtype=np.complex128)
     M = np.zeros(C.shape, dtype=int)
-    mascara = np.ones(C.shape, dtype=bool)
+    matriz = np.ones(C.shape, dtype=bool)
 
     for n in range(max_iter):
         z_temp = np.conj(z)**2 + C
-        z[mascara] = z_temp[mascara]
-        mascara = np.logical_and(mascara, np.abs(z) <= 2)
-        M[mascara] = n
-        print(f"\rTricorn {n}", end="", flush=True)
+        z[matriz] = z_temp[matriz]
+        matriz = np.logical_and(matriz, np.abs(z) <= 2)
+        M[matriz] = n
+        print(f"\rTRICORN {n}", end="", flush=True)
 
     fin = time.time()
     print("\nTiempo de ejecución:", fin - inicio, "segundos")
     return M
+
+
+#########################
+#        CIRCULO        #
+#########################
+
+circulo_kernel = cp.ElementwiseKernel(
+    in_params='complex128 z, complex128 c, int32 max_iter',
+    out_params='int32 result',
+    operation="""
+        complex<double> z_temp = z;
+        for (int i = 0; i < max_iter; ++i) {
+            // z = exp((z^2 - 1.00001*z) / c^4)
+            complex<double> z2 = z_temp * z_temp;
+            complex<double> numerator = z2 - 1.00001 * z_temp;
+            complex<double> c4 = c * c * c * c;
+            z_temp = exp(numerator / c4);
+            if (real(z_temp) * real(z_temp) + imag(z_temp) * imag(z_temp) > 4.0) {
+                result = i;
+                return;
+            }
+        }
+        result = max_iter;
+    """,
+    name='circulo_kernel'
+)
+
+def hacer_circulo_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula=None, tipo_calculo=None, tipo_fractal=None, real=0.0, imag=0.0):
+    """
+    Compute the Circulo fractal using GPU.
+
+    Parameters:
+    - xmin, xmax, ymin, ymax: Boundaries of the complex plane
+    - width, height: Resolution of the output image
+    - max_iter: Maximum number of iterations
+    - formula, tipo_calculo, tipo_fractal: Unused parameters (for future extensibility)
+    - real, imag: Real and imaginary parts of the complex parameter (unused in Circulo)
+
+    Returns:
+    - 2D NumPy array with iteration counts
+    """
+    inicio = time.time()
+
+    # Crear la cuadrícula de números complejos (valores iniciales de z)
+    x = cp.linspace(xmin, xmax, width, dtype=cp.float64)
+    y = cp.linspace(ymin, ymax, height, dtype=cp.float64)
+    X, Y = cp.meshgrid(x, y)
+    C = X + 1j * Y  # Coordenadas complejas (C en la fórmula)
+    C = C.ravel()   # Aplanar para el procesamiento del kernel
+    Z = cp.zeros_like(C, dtype=cp.complex128)  # Inicializar z en 0
+
+    # Arreglo para almacenar los resultados
+    resultado = cp.empty(C.shape, dtype=cp.int32)
+
+    # Ejecutar el kernel
+    try:
+        circulo_kernel(Z, C, max_iter, resultado)
+    except Exception as e:
+        print(f"Error executing Circulo kernel: {e}")
+        return None
+
+    # Reformatear el resultado a una cuadrícula 2D
+    resultado = resultado.reshape((height, width))
+
+    # Transferir el resultado a la CPU
+    resultado_cpu = resultado.get()
+
+    tiempo = time.time() - inicio
+    print(f"{max_iter} iteraciones")
+    print(f"Tiempo total: {tiempo:.5f} segundos")
+
+    return resultado_cpu
+
+def hacer_circulo_cupy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
+    inicio = time.time()
+    
+    x = cp.linspace(xmin, xmax, width)
+    y = cp.linspace(ymin, ymax, height)
+    X, Y = cp.meshgrid(x, y)
+    C = X + 1j * Y
+    z = cp.zeros(C.shape, dtype=cp.complex128)
+    M = cp.zeros(C.shape, dtype=int)
+    matriz = cp.ones(C.shape, dtype=bool)
+    
+    for n in range(max_iter):
+        z[matriz]=cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
+        matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
+        M[matriz] = n
+        print(f"\rCIRCULO {n}", end="", flush=True)
+
+    
+    fin = time.time()
+    print("\nTiempo de ejecución:", fin - inicio, "segundos")
+    return M.get() 
+
+def hacer_circulo_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
+    inicio = time.time()
+    
+    x = np.linspace(xmin, xmax, width)
+    y = np.linspace(ymin, ymax, height)
+    X, Y = np.meshgrid(x, y)
+    C = X + 1j * Y
+    z = np.zeros(C.shape, dtype=np.complex128)
+    M = np.zeros(C.shape, dtype=int)
+    matriz = np.ones(C.shape, dtype=bool)
+    
+    for n in range(max_iter):
+        z[matriz]=np.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4)
+        matriz = np.logical_and(matriz, np.abs(z) <= 2)
+        M[matriz] = n
+        print(f"\rCIRCULO {n}", end="", flush=True)
+    
+    fin = time.time()
+    print("\nTiempo de ejecución:", fin - inicio, "segundos")
+    return M
+
 
 #########################
 #   Funciones en dict   #
@@ -519,6 +633,13 @@ fractales = {
     "GPU_Cupy" : hacer_tricorn_cupy,
     "GPU_Cupy_kernel" : hacer_tricorn_gpu,
     "CPU_Numpy" : hacer_tricorn_numpy
+    },
+    
+    "Circulo":{
+        
+    "GPU_Cupy" : hacer_circulo_cupy,
+    "GPU_Cupy_kernel" : hacer_circulo_gpu,
+    "CPU_Numpy" : hacer_circulo_numpy
     }
     
 }

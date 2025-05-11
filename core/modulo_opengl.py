@@ -23,6 +23,7 @@ class MandelbrotWidget(QOpenGLWidget):
         self.real           =       real
         self.imag           =       imag
         self.ui             =       boundary
+        self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
     def actualizar_parametros(self):
@@ -38,6 +39,19 @@ class MandelbrotWidget(QOpenGLWidget):
         glClearColor(0, 0, 0, 1)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
 
+    def mouseMoveEvent(self, event):
+        x = event.x()
+        y = event.y()
+        real, imag = self.pixel_a_complejo(x, y)
+        self.ui.label_coordenadas.setText(f"Re: {real:.6f}, Im: {imag:.6f}")
+    
+    def pixel_a_complejo(self, x, y):
+        y = self.height - y
+        real = self.xmin + (x / self.width) * (self.xmax - self.xmin)
+        imag = self.ymin + (y / self.height) * (self.ymax - self.ymin)
+        return real, imag
+    
+    
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT)
         glLoadIdentity()
@@ -74,7 +88,45 @@ class MandelbrotWidget(QOpenGLWidget):
         self.ymin, self.ymax = cy - dy, cy + dy
         self.update()
 
+    def mousePressEvent(self, event):
+        
+        if event.button() == Qt.LeftButton:
+
+            x_pixel = event.x()
+            y_pixel = event.y()  
+
+            c_x = self.xmin + (x_pixel / self.width) * (self.xmax - self.xmin)
+            c_y = self.ymin + (y_pixel / self.height) * (self.ymax - self.ymin)
+
+            zoom_factor = 0.5  
+
+            self.xmin = c_x - (c_x - self.xmin) * zoom_factor
+            self.xmax = c_x + (self.xmax - c_x) * zoom_factor
+            self.ymin = c_y - (c_y - self.ymin) * zoom_factor
+            self.ymax = c_y + (self.ymax - c_y) * zoom_factor
+
+            self.update()
+            
+        if event.button() == Qt.RightButton:
+
+            x_pixel = event.x()
+            y_pixel = event.y()  
+
+            c_x = self.xmin + (x_pixel / self.width) * (self.xmax - self.xmin)
+            c_y = self.ymin + (y_pixel / self.height) * (self.ymax - self.ymin)
+
+            zoom_factor1 = 2  
+
+            self.xmin = c_x - (c_x - self.xmin) * zoom_factor1
+            self.xmax = c_x + (self.xmax - c_x) * zoom_factor1
+            self.ymin = c_y - (c_y - self.ymin) * zoom_factor1
+            self.ymax = c_y + (self.ymax - c_y) * zoom_factor1
+
+            self.update()
+    
+            
     def keyPressEvent(self, event):
+        
         move = 0.05
         dx = (self.xmax - self.xmin) * move
         dy = (self.ymax - self.ymin) * move
