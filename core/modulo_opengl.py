@@ -28,7 +28,14 @@ class MandelbrotWidget(QOpenGLWidget):
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.actualizar_parametros()
-
+        
+    def mostrar_parametros(self, xmin, xmax, ymin, ymax):
+        self.ui.xmin_entrada.setText(f"{xmin}")
+        self.ui.xmax_entrada.setText(f"{xmax}")
+        self.ui.ymin_entrada.setText(f"{ymin}")
+        self.ui.ymax_entrada.setText(f"{ymax}")
+    
+    
     def actualizar_parametros(self):
         self.cmap           =   str(self.ui.cmap_comboBox.currentText())
         self.zoom_in        =   float(self.ui.zoom_in_factor_entrada.text())
@@ -55,25 +62,33 @@ class MandelbrotWidget(QOpenGLWidget):
         imag = self.ymin + (y / self.height) * (self.ymax - self.ymin)
         return real, imag
     
+    
     def paintGL(self):
-        glClear(GL_COLOR_BUFFER_BIT)
-        glLoadIdentity()
-        
-        self.actualizar_parametros()
-        data = tf.calcular_fractal(
-            self.xmin, self.xmax,
-            self.ymin, self.ymax,
-            self.width, self.height,
-            self.max_iter, self.formula, 
-            self.tipo_calculo,self.tipo_fractal,
-            self.real, self.imag
-        )
+        if str(self.ui.generador_comboBox.currentText())== "Sucesion":
+            glClear(GL_COLOR_BUFFER_BIT)
+            glLoadIdentity()
 
-        # Normalizamos para color RGB
-        norm = data / self.max_iter
-        rgb = np.uint8(np.dstack([norm*255, norm**0.5*255, norm**0.3*255]))
-        rgb = rgb[::-1, :]
-        glDrawPixels(self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, rgb)
+            self.actualizar_parametros()
+            data = tf.calcular_fractal(
+                self.xmin, self.xmax,
+                self.ymin, self.ymax,
+                self.width, self.height,
+                self.max_iter, self.formula, 
+                self.tipo_calculo,self.tipo_fractal,
+                self.real, self.imag
+            )
+
+            # Normalizamos para color RGB
+            norm = data / self.max_iter
+            rgb = np.uint8(np.dstack([norm*255, norm**0.5*255, norm**0.3*255]))
+            rgb = rgb[::-1, :]
+            glDrawPixels(self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, rgb)
+        if str(self.ui.generador_comboBox.currentText()) == "Lsystem":
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+            glLoadIdentity()
+
+            # Centrar el árbol en el medio inferior de la pantalla
+            tf.draw_branch(0.0, -0.9, 90, 0.3, 15)
 
     def resizeGL(self, w, h):
         self.width = w
@@ -89,6 +104,8 @@ class MandelbrotWidget(QOpenGLWidget):
         dy = (self.ymax - self.ymin) * zoom / 2
         self.xmin, self.xmax = cx - dx, cx + dx
         self.ymin, self.ymax = cy - dy, cy + dy
+        
+        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)
         self.update()
 
     def mousePressEvent(self, event):
@@ -105,7 +122,7 @@ class MandelbrotWidget(QOpenGLWidget):
             self.xmax = c_x + (self.xmax - c_x) * self.zoom_in
             self.ymin = c_y - (c_y - self.ymin) * self.zoom_in
             self.ymax = c_y + (self.ymax - c_y) * self.zoom_in
-
+            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)
             self.update()
             
         elif event.button() == Qt.RightButton:
@@ -120,7 +137,8 @@ class MandelbrotWidget(QOpenGLWidget):
             self.xmax = c_x + (self.xmax - c_x) * self.zoom_out
             self.ymin = c_y - (c_y - self.ymin) * self.zoom_out
             self.ymax = c_y + (self.ymax - c_y) * self.zoom_out
-
+            
+            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)
             self.update()
     
     def keyPressEvent(self, event):
@@ -141,4 +159,5 @@ class MandelbrotWidget(QOpenGLWidget):
         elif event.key() in (Qt.Key_Down, Qt.Key_S):
             self.ymin += dy
             self.ymax += dy
+        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)    
         self.update()

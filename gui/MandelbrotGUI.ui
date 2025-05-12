@@ -257,10 +257,36 @@
       <x>830</x>
       <y>160</y>
       <width>131</width>
-      <height>261</height>
+      <height>296</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QLabel" name="generador_label">
+       <property name="text">
+        <string>Tipo de generador</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="generador_comboBox">
+       <item>
+        <property name="text">
+         <string>Sucesion</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Lsystem</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string/>
+        </property>
+       </item>
+      </widget>
+     </item>
      <item>
       <widget class="QLabel" name="tipo_fractal_label">
        <property name="text">

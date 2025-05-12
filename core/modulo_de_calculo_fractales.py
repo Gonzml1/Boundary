@@ -2,6 +2,8 @@ import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
+from OpenGL.GL import *
+from math import sin, cos, radians
 
 # cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
 # z[matriz] = z[matriz]**2 + C[matriz]    
@@ -10,6 +12,23 @@ import time
 #  SELECCION DE FRACTAL  #
 ##########################
 
+def draw_branch(x, y, angle, length, depth):
+    if depth == 0:
+        return
+    # Coordenadas del extremo de la rama
+    x2 = x + length * cos(radians(angle))
+    y2 = y + length * sin(radians(angle))
+    # Dibujar la rama
+    glBegin(GL_LINES)
+    glColor3f(0.5, 0.3, 0.1)  # Marrón
+    glVertex2f(x, y)
+    glVertex2f(x2, y2)
+    glEnd()
+    # Ramas izquierda y derecha
+    new_length = length * 0.7
+    angle_delta = 30  # grados entre ramas
+    draw_branch(x2, y2, angle - angle_delta, new_length, depth - 1)
+    draw_branch(x2, y2, angle + angle_delta, new_length, depth - 1)
 
 def calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
     if tipo_fractal in fractales:
@@ -602,7 +621,6 @@ def hacer_circulo_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula
 #########################
 #   Funciones en dict   #
 #########################
-
 
 
 fractales = {
