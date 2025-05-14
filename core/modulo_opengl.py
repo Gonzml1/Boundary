@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QOpenGLWidget
 from PyQt5.QtCore import Qt
 from OpenGL.GL import *
 import core.modulo_de_calculo_fractales as tf
-
+from math import sin, cos, radians
 
     
 class MandelbrotWidget(QOpenGLWidget):
@@ -25,17 +25,18 @@ class MandelbrotWidget(QOpenGLWidget):
         self.ui             =       boundary
         self.zoom_in        =       zoom_in
         self.zoom_out       =       zoom_out
+        self.zoom_factor    =       1.0
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.ui.boton_hacer_fractal.clicked.connect(lambda : self.update())
         self.actualizar_parametros()
-        
+    
     def mostrar_parametros(self, xmin, xmax, ymin, ymax):
         self.ui.xmin_entrada.setText(f"{xmin}")
         self.ui.xmax_entrada.setText(f"{xmax}")
         self.ui.ymin_entrada.setText(f"{ymin}")
         self.ui.ymax_entrada.setText(f"{ymax}")
-    
-    
+        
     def actualizar_parametros(self):
         self.cmap           =   str(self.ui.cmap_comboBox.currentText())
         self.zoom_in        =   float(self.ui.zoom_in_factor_entrada.text())
@@ -62,9 +63,28 @@ class MandelbrotWidget(QOpenGLWidget):
         imag = self.ymin + (y / self.height) * (self.ymax - self.ymin)
         return real, imag
     
+    def draw_branch(self, x, y, angle, length, depth):
+        if depth == 0:
+            return
+
+        # Aplicar el factor de zoom a la longitud
+        length *= self.zoom_factor
+
+        x2 = x + length * cos(radians(angle))
+        y2 = y + length * sin(radians(angle))
+
+        glBegin(GL_LINES)
+        glVertex2f(x, y)
+        glVertex2f(x2, y2)
+        glEnd()
+
+        # Llamadas recursivas para las ramas izquierda y derecha
+        self.draw_branch(x2, y2, angle - 30, length * 0.7, depth - 1)
+        self.draw_branch(x2, y2, angle + 30, length * 0.7, depth - 1)
+    
     
     def paintGL(self):
-        if str(self.ui.generador_comboBox.currentText())== "Sucesion":
+        if str(self.ui.generador_comboBox.currentText()) == "Sucesion":
             glClear(GL_COLOR_BUFFER_BIT)
             glLoadIdentity()
 
@@ -83,12 +103,13 @@ class MandelbrotWidget(QOpenGLWidget):
             rgb = np.uint8(np.dstack([norm*255, norm**0.5*255, norm**0.3*255]))
             rgb = rgb[::-1, :]
             glDrawPixels(self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, rgb)
+            
         if str(self.ui.generador_comboBox.currentText()) == "Lsystem":
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             glLoadIdentity()
 
             # Centrar el árbol en el medio inferior de la pantalla
-            tf.draw_branch(0.0, -0.9, 90, 0.3, 15)
+            self.draw_branch(0.0, -0.9, 90, 0.3, 15)
 
     def resizeGL(self, w, h):
         self.width = w
@@ -143,21 +164,29 @@ class MandelbrotWidget(QOpenGLWidget):
     
     def keyPressEvent(self, event):
         
-        move = 0.05
-        dx = (self.xmax - self.xmin) * move
-        dy = (self.ymax - self.ymin) * move
+        if str(self.ui.generador_comboBox.currentText()) == "Sucesion":
+            move = 0.05
+            dx = (self.xmax - self.xmin) * move
+            dy = (self.ymax - self.ymin) * move
 
-        if event.key() in (Qt.Key_Left, Qt.Key_A):
-            self.xmin -= dx
-            self.xmax -= dx
-        elif event.key() in (Qt.Key_Right, Qt.Key_D):
-            self.xmin += dx
-            self.xmax += dx
-        elif event.key() in (Qt.Key_Up, Qt.Key_W):
-            self.ymin -= dy
-            self.ymax -= dy
-        elif event.key() in (Qt.Key_Down, Qt.Key_S):
-            self.ymin += dy
-            self.ymax += dy
-        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)    
-        self.update()
+            if event.key() in (Qt.Key_Left, Qt.Key_A):
+                self.xmin -= dx
+                self.xmax -= dx
+            elif event.key() in (Qt.Key_Right, Qt.Key_D):
+                self.xmin += dx
+                self.xmax += dx
+            elif event.key() in (Qt.Key_Up, Qt.Key_W):
+                self.ymin -= dy
+                self.ymax -= dy
+            elif event.key() in (Qt.Key_Down, Qt.Key_S):
+                self.ymin += dy
+                self.ymax += dy
+            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)    
+            self.update()
+    
+        if str(self.ui.generador_comboBox.currentText()) == "Lsystem":
+            if event.key() == Qt.Key_Plus:
+                self.zoom_factor *= 1.1  # Acercar
+            elif event.key() == Qt.Key_Minus:
+                self.zoom_factor /= 1.1  # Alejar
+            self.update()  # Redibujar la escena

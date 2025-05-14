@@ -155,38 +155,10 @@
       <x>980</x>
       <y>160</y>
       <width>131</width>
-      <height>311</height>
+      <height>211</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <widget class="QLabel" name="guardar_label">
-       <property name="text">
-        <string>Guardar mandelbrot</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="boton_guardar">
-       <property name="text">
-        <string>Guardar</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="resetear_label">
-       <property name="text">
-        <string>Resetear</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="boton_resetear">
-       <property name="text">
-        <string>PushButton</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QLabel" name="formula_label">
        <property name="text">
@@ -257,7 +229,7 @@
       <x>830</x>
       <y>160</y>
       <width>131</width>
-      <height>296</height>
+      <height>311</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -429,30 +401,51 @@
     <property name="geometry">
      <rect>
       <x>830</x>
-      <y>20</y>
+      <y>10</y>
       <width>131</width>
-      <height>121</height>
+      <height>152</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
-      <widget class="QPushButton" name="boton_hacer_fractal">
+      <widget class="QLabel" name="hacer_fractal_label">
        <property name="text">
         <string>Generar Fractal</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="boton_hacer_zoom_out">
+      <widget class="QPushButton" name="boton_hacer_fractal">
        <property name="text">
-        <string>Hacer zoom out</string>
+        <string>Generar</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="boton_hacer_zoom_in">
+      <widget class="QLabel" name="guardar_label">
        <property name="text">
-        <string>Hacer zoom in</string>
+        <string>Guardar mandelbrot</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="boton_guardar">
+       <property name="text">
+        <string>Guardar</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="resetear_label">
+       <property name="text">
+        <string>Resetear</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="boton_resetear">
+       <property name="text">
+        <string>Reset</string>
        </property>
       </widget>
      </item>
@@ -463,71 +456,15 @@
      <rect>
       <x>980</x>
       <y>20</y>
-      <width>131</width>
+      <width>101</width>
       <height>121</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="4" column="1">
-      <widget class="QPushButton" name="boton_bajar">
-       <property name="text">
-        <string>↓</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QPushButton" name="boton_subir">
-       <property name="text">
-        <string>↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
+     <item row="1" column="0">
       <widget class="QPushButton" name="boton_no_hace_nada">
        <property name="text">
         <string>🟥</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QPushButton" name="boton_subir_derecha">
-       <property name="text">
-        <string>↗</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="boton_subir_izquierda">
-       <property name="text">
-        <string>↖</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QPushButton" name="boton_bajar_izquierda">
-       <property name="text">
-        <string>↙</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QPushButton" name="boton_derecha">
-       <property name="text">
-        <string>→</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QPushButton" name="boton_bajar_derecha">
-       <property name="text">
-        <string>↘</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QPushButton" name="boton_izquierda">
-       <property name="text">
-        <string>←</string>
        </property>
       </widget>
      </item>

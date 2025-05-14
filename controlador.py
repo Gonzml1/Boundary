@@ -35,6 +35,5 @@ md.linkeo_botones(ui)
 if __name__ == "__main__":
 
     MainWindow.show()
-    # md.generar_mandelbrot(ui)
     sys.exit(app.exec())
 
