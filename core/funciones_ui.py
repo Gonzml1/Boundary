@@ -3,10 +3,7 @@ from gui.MandelbrotGUI import Ui_Boundary
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from core.modulo_opengl import MandelbrotWidget
-from PIL import Image
 from gui.MandelbrotGUI import Ui_Boundary
-from PyQt5 import uic
-import numpy as np
 import matplotlib.pyplot as plt
 
 #calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
@@ -51,7 +48,6 @@ def mostrar_fractal_opengl(self=Ui_Boundary()):
     
 def linkeo_botones(ui=Ui_Boundary()):
     cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, zoom_in, zoom_out = obtener_datos(ui)
-    ui.boton_no_hace_nada.clicked.connect(lambda : no_hace_nada(ui))
     ui.boton_resetear.clicked.connect(lambda : resetear_entrada(ui))
     ui.boton_dividir.clicked.connect(lambda : dividir(ui))
     ui.boton_duplicar.clicked.connect(lambda : duplicar(ui))
@@ -68,7 +64,7 @@ def resetear_entrada(self=Ui_Boundary()):
     self.max_iter_entrada.setText("256")
     self.real_julia_entrada.setText("0.0")
     self.im_julia_entrada.setText("0.0")
-    self.formula_entrada.setText("z**2 + c")
+    self.formula_entrada.setText("z = z**2 + C")
     self.zoom_in_factor_entrada.setText("0.5")
     self.zoom_out_factor_entrada.setText("2.0")
     return print("Entradas reseteadas")
