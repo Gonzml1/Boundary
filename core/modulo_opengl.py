@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QOpenGLWidget
 from PyQt5.QtCore import Qt
 from OpenGL.GL import *
 import core.modulo_de_calculo_fractales as tf
+from core.modulo_de_calculo_fractales import calculos_mandelbrot
 from math import sin, cos, radians
 
     
@@ -26,6 +27,7 @@ class MandelbrotWidget(QOpenGLWidget):
         self.zoom_in        =       zoom_in
         self.zoom_out       =       zoom_out
         self.zoom_factor    =       1.0
+        self.mandelbrot     =       calculos_mandelbrot(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter,self.formula, self.tipo_calculo, self.tipo_fractal, self.real, self.imag)                               
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.ui.boton_hacer_fractal.clicked.connect(lambda : self.update())
@@ -89,14 +91,8 @@ class MandelbrotWidget(QOpenGLWidget):
             glLoadIdentity()
 
             self.actualizar_parametros()
-            data = tf.calcular_fractal(
-                self.xmin, self.xmax,
-                self.ymin, self.ymax,
-                self.width, self.height,
-                self.max_iter, self.formula, 
-                self.tipo_calculo,self.tipo_fractal,
-                self.real, self.imag
-            )
+            self.mandelbrot.actualizar_fractal(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter,self.formula, self.tipo_calculo, self.tipo_fractal, self.real, self.imag)
+            data = self.mandelbrot.calcular_fractal()
 
             # Normalizamos para color RGB
             norm = data / self.max_iter
