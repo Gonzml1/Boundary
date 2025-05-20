@@ -56,7 +56,7 @@ class MandelbrotWidget(QOpenGLWidget):
         x = event.x()
         y = event.y()
         real, imag = self.pixel_a_complejo(x, y)
-        self.ui.label_coordenadas.setText(f"Re: {real:.6f}, Im: {imag:.6f}")
+        self.ui.label_coordenadas.setText(f"Re: {real:.16f}, Im: {imag:.16f}")
     
     def pixel_a_complejo(self, x, y):
         real = self.xmin + (x / self.width) * (self.xmax - self.xmin)

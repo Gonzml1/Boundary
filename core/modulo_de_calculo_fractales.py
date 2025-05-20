@@ -3,10 +3,50 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-
+from .funciones_kernel import *
 
 # cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
 # z[matriz] = z[matriz]**2 + C[matriz]    
+
+class calculosmandelbrot:
+    def __init__(self, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+        self.width = width
+        self.height = height
+        self.max_iter = max_iter
+        self.formula = formula
+        self.tipo_calculo = tipo_calculo
+        self.tipo_fractal = tipo_fractal
+        self.real = real
+        self.imag = imag
+
+    def calcular(self):
+        pass
+    
+    def calcular_fractal(self):
+        if self.tipo_fractal in fractales:
+            if self.tipo_calculo in fractales[self.tipo_fractal]:
+                M = fractales[self.tipo_fractal][self.tipo_calculo](self.xmin, self.xmax, self.ymin, self.ymax, 
+                                                                    self.width, self.height, self.max_iter, self.formula, 
+                                                                    self.tipo_calculo, self.tipo_fractal, self.real, self.imag)
+                return M
+            else:
+                raise ValueError(f"Tipo de cálculo '{self.tipo_calculo}' no soportado para el fractal '{self.tipo_fractal}'.")
+        else:
+            raise ValueError(f"Fractal '{self.tipo_fractal}' no soportado.")
+
+    @staticmethod
+    def transformar_expresion(expression, variables, mask_name="matriz"):
+        for var in variables:
+            expression = expression.replace(var, f"{var}[{mask_name}]")
+        return expression
+    
+    
+    
+    
 
 ##########################
 #  SELECCION DE FRACTAL  #
@@ -56,22 +96,6 @@ def guardar_mandelbrot(M,xmin,xmax,ymin,ymax,filepath, width, height, cmap1,dpi 
 #########################
 
 
-mandelbrot_kernel = cp.ElementwiseKernel(
-    in_params='complex128 c, int32 max_iter',
-    out_params='int32 result',
-    operation="""
-        complex<double> z = 0.0;  
-        for (int i = 0; i < max_iter; ++i) {
-            z = z*z + c;  
-            if (real(z)*real(z) + imag(z)*imag(z) > 4.0) {
-                result = i;
-                return;
-            }
-        }
-        result = max_iter;  
-    """,
-    name='mandelbrot_kernel'
-)
 
 def hacer_mandelbrot_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
     inicio = time.time()
@@ -174,23 +198,6 @@ def hacer_mandelbrot_cupy(xmin, xmax, ymin, ymax, width, height, max_iter, formu
 #         JULIA         #
 #########################
  
-             
-julia_kernel = cp.ElementwiseKernel(
-    in_params='complex128 z, complex128 c, int32 max_iter',
-    out_params='int32 result',
-    operation="""
-        complex<double> z_temp = z;  
-        for (int i = 0; i < max_iter; ++i) {
-            z_temp = z_temp * z_temp + c;  
-            if (real(z_temp) * real(z_temp) + imag(z_temp) * imag(z_temp) > 4.0) {
-                result = i;
-                return;
-            }
-        }
-        result = max_iter;  
-    """,
-    name='julia_kernel'
-)
 
 def hacer_julia_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula=None, tipo_calculo=None, tipo_fractal=None, real=0.0, imag=0.0):
     """
@@ -288,26 +295,6 @@ def hacer_julia_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula, 
 #     Burning ship      #
 #########################
 
-burning_kernel = cp.ElementwiseKernel(
-    in_params='complex128 z, complex128 c, int32 max_iter',
-    out_params='int32 result',
-    operation="""
-        complex<double> z_temp = z;
-        for (int i = 0; i < max_iter; ++i) {
-            double z_real = fabs(real(z_temp));
-            double z_imag = fabs(imag(z_temp));
-            z_temp = complex<double>(z_real * z_real - z_imag * z_imag + real(c),
-                                     2.0 * z_real * z_imag + imag(c));
-            if (real(z_temp) * real(z_temp) + imag(z_temp) * imag(z_temp) > 4.0) {
-                result = i;
-                return;
-            }
-        }
-        result = max_iter;
-    """,
-    name='burning_kernel'
-)
-
 def hacer_burning_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula=None, tipo_calculo=None, tipo_fractal=None, real=0.0, imag=0.0):
     
     inicio = time.time()
@@ -388,22 +375,6 @@ def hacer_burning_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula
 #        TRICORN        #
 #########################
 
-tricorn_kernel = cp.ElementwiseKernel(
-    in_params='complex128 z, complex128 c, int32 max_iter',
-    out_params='int32 result',
-    operation="""
-        complex<double> z_temp = z;
-        for (int i = 0; i < max_iter; ++i) {
-            z_temp = conj(z_temp) * conj(z_temp) + c;
-            if (real(z_temp) * real(z_temp) + imag(z_temp) * imag(z_temp) > 4.0) {
-                result = i;
-                return;
-            }
-        }
-        result = max_iter;
-    """,
-    name='tricorn_kernel'
-)
 
 def hacer_tricorn_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula=None, tipo_calculo=None, tipo_fractal=None, real=0.0, imag=0.0):
 
@@ -489,26 +460,6 @@ def hacer_tricorn_numpy(xmin, xmax, ymin, ymax, width, height, max_iter, formula
 #        CIRCULO        #
 #########################
 
-circulo_kernel = cp.ElementwiseKernel(
-    in_params='complex128 z, complex128 c, int32 max_iter',
-    out_params='int32 result',
-    operation="""
-        complex<double> z_temp = z;
-        for (int i = 0; i < max_iter; ++i) {
-            // z = exp((z^2 - 1.00001*z) / c^4)
-            complex<double> z2 = z_temp * z_temp;
-            complex<double> numerator = z2 - 1.00001 * z_temp;
-            complex<double> c4 = c * c * c * c;
-            z_temp = exp(numerator / c4);
-            if (real(z_temp) * real(z_temp) + imag(z_temp) * imag(z_temp) > 4.0) {
-                result = i;
-                return;
-            }
-        }
-        result = max_iter;
-    """,
-    name='circulo_kernel'
-)
 
 def hacer_circulo_gpu(xmin, xmax, ymin, ymax, width, height, max_iter, formula=None, tipo_calculo=None, tipo_fractal=None, real=0.0, imag=0.0):
     """
@@ -611,7 +562,7 @@ fractales = {
     
     "GPU_Cupy": hacer_mandelbrot_cupy,
     "GPU_Cupy_kernel": hacer_mandelbrot_gpu, 
-    "CPU_Numpy": hacer_mandelbrot_numpy 
+    "CPU_Numpy": hacer_mandelbrot_numpy,
     },
     
     "Julia":{ 

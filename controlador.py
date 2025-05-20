@@ -10,7 +10,7 @@ from OpenGL.GL import *
 # Newton-Raphson  
 # Mejorar interfaz grafica
 
-#########################
+ #########################
 #      TEMA OSCURO      #
 #########################
 
