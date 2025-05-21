@@ -1,11 +1,12 @@
-import cupy as cp
+#import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-from .funciones_kernel import *
+#from .funciones_kernel import *
 import os
 from functools import wraps
+from PyQt5.QtWidgets import QFileDialog
 
 # cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
 # z[matriz] = z[matriz]**2 + C[matriz]    
@@ -25,19 +26,32 @@ class calculos_mandelbrot:
         self.real = real
         self.imag = imag
         self.fractales= {
-    
-    "Mandelbrot" :{"GPU_Cupy": self.hacer_mandelbrot_cupy, "GPU_Cupy_kernel": self.hacer_mandelbrot_gpu, "CPU_Numpy": self.hacer_mandelbrot_numpy,"CPU_cpp": self.hacer_mandelbrot_cpp
-    },
-    "Julia": {"GPU_Cupy": self.hacer_julia_cupy, "GPU_Cupy_kernel": self.hacer_julia_gpu, "CPU_Numpy": self.hacer_julia_numpy, "CPU_cpp": self.hacer_julia_cpp
-    },
-    "Burning Ship": {"GPU_Cupy": self.hacer_burning_cupy, "GPU_Cupy_kernel": self.hacer_burning_gpu, "CPU_Numpy": self.hacer_burning_numpy, "CPU_cpp": self.hacer_burning_cpp
-    }, 
-    "Tricorn": {"GPU_Cupy" : self.hacer_tricorn_cupy, "GPU_Cupy_kernel" : self.hacer_tricorn_gpu,"CPU_Numpy" : self.hacer_tricorn_numpy, "CPU_cpp": self.hacer_tricorn_cpp
-    },
-    "Circulo": {"GPU_Cupy" : self.hacer_circulo_cupy, "GPU_Cupy_kernel" : self.hacer_circulo_gpu,"CPU_Numpy" : self.hacer_circulo_numpy, "CPU_cpp": self.hacer_circulo_cpp
-    }
-    }
-    
+        "Mandelbrot" :  {"GPU_Cupy": self.hacer_mandelbrot_cupy, "GPU_Cupy_kernel": self.hacer_mandelbrot_gpu, "CPU_Numpy": self.hacer_mandelbrot_numpy,"CPU_cpp": self.hacer_mandelbrot_cpp
+        },
+        "Julia":        {"GPU_Cupy": self.hacer_julia_cupy, "GPU_Cupy_kernel": self.hacer_julia_gpu, "CPU_Numpy": self.hacer_julia_numpy, "CPU_cpp": self.hacer_julia_cpp
+        },
+        "Burning Ship": {"GPU_Cupy": self.hacer_burning_cupy, "GPU_Cupy_kernel": self.hacer_burning_gpu, "CPU_Numpy": self.hacer_burning_numpy, "CPU_cpp": self.hacer_burning_cpp
+        }, 
+        "Tricorn":      {"GPU_Cupy" : self.hacer_tricorn_cupy, "GPU_Cupy_kernel" : self.hacer_tricorn_gpu,"CPU_Numpy" : self.hacer_tricorn_numpy, "CPU_cpp": self.hacer_tricorn_cpp
+        },
+        "Circulo":      {"GPU_Cupy" : self.hacer_circulo_cupy, "GPU_Cupy_kernel" : self.hacer_circulo_gpu,"CPU_Numpy" : self.hacer_circulo_numpy, "CPU_cpp": self.hacer_circulo_cpp
+        }
+        }
+        
+    def guardar_imagen(self):
+        ruta, _ = QFileDialog.getSaveFileName(
+            None,
+            "Guardar imagen",
+            "fractal.png",
+            "Imágenes PNG (*.png);;JPEG (*.jpg *.jpeg);;Todos los archivos (*)"
+        )
+        
+        if ruta:
+            # Reemplazá esto por tu lógica de fractal real
+            imagen_array = self.calcular_fractal()
+            plt.imsave(ruta, imagen_array,cmap='twilight_shifted')
+            print(f"Imagen guardada en: {ruta}")
+
     def medir_tiempo(nombre):
         def decorador(func):
             @wraps(func)
@@ -197,7 +211,7 @@ class calculos_mandelbrot:
     ##############################################################
     @medir_tiempo("Mandelbrot CPP")
     def hacer_mandelbrot_cpp(self):
-        dll_path = r"V:\ABoundary\codigos_cpp\mandelbrot.dll"
+        dll_path = r"codigos_cpp\mandelbrot.dll"
         if not os.path.exists(dll_path):
             print(f"Error: No se encuentra la DLL en {dll_path}")
             exit(1)
@@ -296,7 +310,7 @@ class calculos_mandelbrot:
     
     @medir_tiempo("Julia CPP")
     def hacer_julia_cpp(self):
-        dll_path = r"V:\ABoundary\codigos_cpp\julia.dll"
+        dll_path = r"codigos_cpp\julia.dll"
         if not os.path.exists(dll_path):
             print(f"Error: No se encuentra la DLL en {dll_path}")
             exit(1)
@@ -399,7 +413,7 @@ class calculos_mandelbrot:
     
     @medir_tiempo("Burning Ship CPP")
     def hacer_burning_cpp(self):
-        dll_path = r"V:\ABoundary\codigos_cpp\burning_ship.dll"
+        dll_path = r"codigos_cpp\burning_ship.dll"
         if not os.path.exists(dll_path):
             print(f"Error: No se encuentra la DLL en {dll_path}")
             exit(1)
@@ -497,7 +511,7 @@ class calculos_mandelbrot:
     
     @medir_tiempo("Tricorn CPP")
     def hacer_tricorn_cpp(self):
-        dll_path = r"V:\ABoundary\codigos_cpp\tricorn.dll"
+        dll_path = r"codigos_cpp\tricorn.dll"
         if not os.path.exists(dll_path):
             print(f"Error: No se encuentra la DLL en {dll_path}")
             exit(1)
@@ -596,7 +610,7 @@ class calculos_mandelbrot:
     
     @medir_tiempo("Circulo CPP")
     def hacer_circulo_cpp(self):
-        dll_path = r"V:\ABoundary\codigos_cpp\circulo.dll"
+        dll_path = r"codigos_cpp\circulo.dll"
         if not os.path.exists(dll_path):
             print(f"Error: No se encuentra la DLL en {dll_path}")
             exit(1)
@@ -620,4 +634,6 @@ class calculos_mandelbrot:
         M_copy = np.copy(M).reshape(self.height, self.width)
         lib.free_circulo(M_ptr)
         return M_copy
+    
+    
     

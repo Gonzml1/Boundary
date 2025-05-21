@@ -111,7 +111,7 @@ class MandelbrotWidget(QOpenGLWidget):
         self.height = h
         glViewport(0, 0, w, h)
         self.update()
-
+  
     def wheelEvent(self, event):
         zoom = 0.9 if event.angleDelta().y() > 0 else 1.1
         cx = (self.xmin + self.xmax) / 2
@@ -178,6 +178,7 @@ class MandelbrotWidget(QOpenGLWidget):
                 self.ymax += dy
             self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)    
             self.update()
+            
     
         if str(self.ui.generador_comboBox.currentText()) == "Lsystem":
             if event.key() == Qt.Key_Plus:

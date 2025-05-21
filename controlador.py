@@ -8,6 +8,7 @@ from OpenGL.GL import *
 from PyQt5.QtWidgets import QMainWindow, QGraphicsEllipseItem, QGraphicsScene
 from PyQt5.QtGui import QBrush, QColor
 
+
 # fractales a añadir en un futuro (muy cercano)
 # Newton-Raphson  
 # Mejorar interfaz grafica
@@ -66,6 +67,8 @@ MainWindow = QtWidgets.QMainWindow()
 ui = Ui_Boundary()
 ui.setupUi(MainWindow)
 md.mostrar_fractal_opengl(ui)
+ui.tipo_calculo_comboBox.setCurrentIndex(3)
+
 
 #########################
 #   LINKEO DE BOTONES   #
