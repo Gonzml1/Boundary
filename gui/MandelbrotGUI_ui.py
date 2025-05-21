@@ -16,16 +16,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
-from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
-    QLineEdit, QMainWindow, QMenuBar, QPushButton,
-    QSizePolicy, QSlider, QStatusBar, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QComboBox, QGraphicsView, QHBoxLayout,
+    QLabel, QLineEdit, QMainWindow, QMenuBar,
+    QPushButton, QSizePolicy, QSlider, QStatusBar,
+    QVBoxLayout, QWidget)
 
 class Ui_Boundary(object):
     def setupUi(self, Boundary):
         if not Boundary.objectName():
             Boundary.setObjectName(u"Boundary")
-        Boundary.resize(1300, 660)
+        Boundary.resize(1300, 630)
         icon = QIcon()
         icon.addFile(u"../Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         Boundary.setWindowIcon(icon)
@@ -214,6 +214,7 @@ class Ui_Boundary(object):
         self.tipo_calculo_comboBox.addItem("")
         self.tipo_calculo_comboBox.addItem("")
         self.tipo_calculo_comboBox.addItem("")
+        self.tipo_calculo_comboBox.addItem("")
         self.tipo_calculo_comboBox.setObjectName(u"tipo_calculo_comboBox")
 
         self.verticalLayout_4.addWidget(self.tipo_calculo_comboBox)
@@ -297,6 +298,9 @@ class Ui_Boundary(object):
         self.label_coordenadas = QLabel(self.centralwidget)
         self.label_coordenadas.setObjectName(u"label_coordenadas")
         self.label_coordenadas.setGeometry(QRect(20, 20, 441, 16))
+        self.graphicsView = QGraphicsView(self.centralwidget)
+        self.graphicsView.setObjectName(u"graphicsView")
+        self.graphicsView.setGeometry(QRect(980, 10, 160, 160))
         Boundary.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(Boundary)
         self.menubar.setObjectName(u"menubar")
@@ -351,6 +355,7 @@ class Ui_Boundary(object):
         self.tipo_calculo_comboBox.setItemText(0, QCoreApplication.translate("Boundary", u"GPU_Cupy_kernel", None))
         self.tipo_calculo_comboBox.setItemText(1, QCoreApplication.translate("Boundary", u"CPU_Numpy", None))
         self.tipo_calculo_comboBox.setItemText(2, QCoreApplication.translate("Boundary", u"GPU_Cupy", None))
+        self.tipo_calculo_comboBox.setItemText(3, QCoreApplication.translate("Boundary", u"CPU_cpp", None))
 
         self.cmap_label.setText(QCoreApplication.translate("Boundary", u"Elegir cmap", None))
         self.cmap_comboBox.setItemText(0, QCoreApplication.translate("Boundary", u"twilight_shifted", None))

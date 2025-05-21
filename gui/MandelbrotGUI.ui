@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1300</width>
-    <height>660</height>
+    <height>630</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -314,6 +314,11 @@
          <string>GPU_Cupy</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>CPU_cpp</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
@@ -467,6 +472,16 @@
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="graphicsView">
+    <property name="geometry">
+     <rect>
+      <x>980</x>
+      <y>10</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
     </property>
    </widget>
   </widget>
