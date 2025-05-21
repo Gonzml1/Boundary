@@ -28,7 +28,7 @@ class Punto(QGraphicsEllipseItem):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.ui = Ui_Boundary()  # ✅ Corrección aquí
+        self.ui = Ui_Boundary()  
         self.ui.setupUi(self)
 
         # Tema oscuro

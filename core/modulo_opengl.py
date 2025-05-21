@@ -2,7 +2,6 @@ import numpy as np
 from PyQt5.QtWidgets import QOpenGLWidget
 from PyQt5.QtCore import Qt
 from OpenGL.GL import *
-import core.modulo_de_calculo_fractales as tf
 from core.modulo_de_calculo_fractales import calculos_mandelbrot
 from math import sin, cos, radians
 

@@ -294,6 +294,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
+    @medir_tiempo("Julia CPP")
     def hacer_julia_cpp(self):
         dll_path = r"V:\ABoundary\codigos_cpp\julia.dll"
         if not os.path.exists(dll_path):
