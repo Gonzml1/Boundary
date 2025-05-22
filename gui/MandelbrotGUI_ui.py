@@ -201,6 +201,7 @@ class Ui_Boundary(object):
         self.tipo_fractal_comboBox.addItem("")
         self.tipo_fractal_comboBox.addItem("")
         self.tipo_fractal_comboBox.addItem("")
+        self.tipo_fractal_comboBox.addItem("")
         self.tipo_fractal_comboBox.setObjectName(u"tipo_fractal_comboBox")
 
         self.verticalLayout_4.addWidget(self.tipo_fractal_comboBox)
@@ -350,6 +351,7 @@ class Ui_Boundary(object):
         self.tipo_fractal_comboBox.setItemText(2, QCoreApplication.translate("Boundary", u"Burning Ship", None))
         self.tipo_fractal_comboBox.setItemText(3, QCoreApplication.translate("Boundary", u"Tricorn", None))
         self.tipo_fractal_comboBox.setItemText(4, QCoreApplication.translate("Boundary", u"Circulo", None))
+        self.tipo_fractal_comboBox.setItemText(5, QCoreApplication.translate("Boundary", u"Newton-Raphson", None))
 
         self.tipo_calculo_label.setText(QCoreApplication.translate("Boundary", u"Tipo de Calculo", None))
         self.tipo_calculo_comboBox.setItemText(0, QCoreApplication.translate("Boundary", u"GPU_Cupy_kernel", None))

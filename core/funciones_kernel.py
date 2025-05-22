@@ -1,4 +1,4 @@
-
+import cupy as cp
 
 mandelbrot_kernel = cp.ElementwiseKernel(
     in_params='complex128 c, int32 max_iter',
@@ -91,3 +91,41 @@ circulo_kernel = cp.ElementwiseKernel(
     """,
     name='circulo_kernel'
 )
+
+newton_kernel = cp.ElementwiseKernel(
+        in_params='complex128 c, int32 max_iter',
+        out_params='int32 root_index, int32 iter_count',
+        operation="""
+            complex<double> z = c;
+            complex<double> raices[3] = {
+                complex<double>(1.0, 0.0),
+                complex<double>(-0.5, 0.8660254),
+                complex<double>(-0.5, -0.8660254)
+            };
+            double tolerancia = 1e-6;
+            root_index = 0;
+            iter_count = 0;
+
+            for (int i = 0; i < max_iter; ++i) {
+                complex<double> fz = z*z*z - 1.0;
+                complex<double> dfz = 3.0*z*z;
+                if (abs(dfz) < 1e-10) {  
+                    root_index = 0;
+                    iter_count = i;
+                    return;
+                }
+                z = z - fz / dfz;
+
+                for (int j = 0; j < 3; ++j) {
+                    if (abs(z - raices[j]) < tolerancia) {
+                        root_index = j + 1;
+                        iter_count = i + 1;
+                        return;
+                    }
+                }
+            }
+            root_index = 0;  
+            iter_count = max_iter;
+        """,
+        name='newton_kernel'
+    )

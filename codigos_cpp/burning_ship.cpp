@@ -17,17 +17,10 @@ extern "C" {
                 double x = xmin + i * dx;
                 double y = ymin + j * dy;
 
-                // Verificación del cardioide principal (puede ser menos efectiva en Burning Ship)
-                double q = (x - 0.25) * (x - 0.25) + y * y;
-                if (q * (q + (x - 0.25)) < 0.25 * y * y) {
-                    M[j * width + i] = max_iter - 1;
-                    continue;
-                }
-
                 double zr = 0.0, zi = 0.0;
                 int n = 0;
                 while (n < max_iter && zr * zr + zi * zi <= 4.0) {
-                    // Burning Ship: tomar valores absolutos de zr y zi
+                    // Fórmula explícita del Burning Ship
                     double zr_abs = std::abs(zr);
                     double zi_abs = std::abs(zi);
                     double zr_new = zr_abs * zr_abs - zi_abs * zi_abs + x;
