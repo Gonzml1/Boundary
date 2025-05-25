@@ -25,7 +25,7 @@ class Ui_Boundary(object):
     def setupUi(self, Boundary):
         if not Boundary.objectName():
             Boundary.setObjectName(u"Boundary")
-        Boundary.resize(1300, 630)
+        Boundary.resize(1303, 630)
         icon = QIcon()
         icon.addFile(u"../Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         Boundary.setWindowIcon(icon)
@@ -34,20 +34,10 @@ class Ui_Boundary(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayoutWidget = QWidget(self.centralwidget)
         self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(1130, 180, 160, 391))
+        self.verticalLayoutWidget.setGeometry(QRect(1130, 220, 160, 291))
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.xmin_label = QLabel(self.verticalLayoutWidget)
-        self.xmin_label.setObjectName(u"xmin_label")
-
-        self.verticalLayout.addWidget(self.xmin_label)
-
-        self.xmin_entrada = QLineEdit(self.verticalLayoutWidget)
-        self.xmin_entrada.setObjectName(u"xmin_entrada")
-
-        self.verticalLayout.addWidget(self.xmin_entrada)
-
         self.xmax_label = QLabel(self.verticalLayoutWidget)
         self.xmax_label.setObjectName(u"xmax_label")
 
@@ -57,16 +47,6 @@ class Ui_Boundary(object):
         self.xmax_entrada.setObjectName(u"xmax_entrada")
 
         self.verticalLayout.addWidget(self.xmax_entrada)
-
-        self.ymin_label = QLabel(self.verticalLayoutWidget)
-        self.ymin_label.setObjectName(u"ymin_label")
-
-        self.verticalLayout.addWidget(self.ymin_label)
-
-        self.ymin_entrada = QLineEdit(self.verticalLayoutWidget)
-        self.ymin_entrada.setObjectName(u"ymin_entrada")
-
-        self.verticalLayout.addWidget(self.ymin_entrada)
 
         self.ymax_label = QLabel(self.verticalLayoutWidget)
         self.ymax_label.setObjectName(u"ymax_label")
@@ -125,10 +105,30 @@ class Ui_Boundary(object):
 
         self.layoutWidget = QWidget(self.centralwidget)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(980, 180, 131, 211))
+        self.layoutWidget.setGeometry(QRect(980, 220, 131, 301))
         self.verticalLayout_2 = QVBoxLayout(self.layoutWidget)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.xmin_label = QLabel(self.layoutWidget)
+        self.xmin_label.setObjectName(u"xmin_label")
+
+        self.verticalLayout_2.addWidget(self.xmin_label)
+
+        self.xmin_entrada = QLineEdit(self.layoutWidget)
+        self.xmin_entrada.setObjectName(u"xmin_entrada")
+
+        self.verticalLayout_2.addWidget(self.xmin_entrada)
+
+        self.ymin_label = QLabel(self.layoutWidget)
+        self.ymin_label.setObjectName(u"ymin_label")
+
+        self.verticalLayout_2.addWidget(self.ymin_label)
+
+        self.ymin_entrada = QLineEdit(self.layoutWidget)
+        self.ymin_entrada.setObjectName(u"ymin_entrada")
+
+        self.verticalLayout_2.addWidget(self.ymin_entrada)
+
         self.formula_label = QLabel(self.layoutWidget)
         self.formula_label.setObjectName(u"formula_label")
 
@@ -174,7 +174,7 @@ class Ui_Boundary(object):
 
         self.layoutWidget_2 = QWidget(self.centralwidget)
         self.layoutWidget_2.setObjectName(u"layoutWidget_2")
-        self.layoutWidget_2.setGeometry(QRect(830, 180, 131, 311))
+        self.layoutWidget_2.setGeometry(QRect(830, 220, 131, 311))
         self.verticalLayout_4 = QVBoxLayout(self.layoutWidget_2)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
@@ -301,11 +301,19 @@ class Ui_Boundary(object):
         self.label_coordenadas.setGeometry(QRect(20, 20, 441, 16))
         self.graphicsView = QGraphicsView(self.centralwidget)
         self.graphicsView.setObjectName(u"graphicsView")
-        self.graphicsView.setGeometry(QRect(980, 10, 160, 160))
+        self.graphicsView.setGeometry(QRect(980, 10, 200, 200))
+        self.slider_iteraciones = QSlider(self.centralwidget)
+        self.slider_iteraciones.setObjectName(u"slider_iteraciones")
+        self.slider_iteraciones.setGeometry(QRect(1130, 520, 151, 22))
+        self.slider_iteraciones.setMaximum(512)
+        self.slider_iteraciones.setOrientation(Qt.Horizontal)
+        self.label_coordenadas2 = QLabel(self.centralwidget)
+        self.label_coordenadas2.setObjectName(u"label_coordenadas2")
+        self.label_coordenadas2.setGeometry(QRect(860, 550, 191, 16))
         Boundary.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(Boundary)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1300, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1303, 22))
         Boundary.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(Boundary)
         self.statusbar.setObjectName(u"statusbar")
@@ -318,12 +326,8 @@ class Ui_Boundary(object):
 
     def retranslateUi(self, Boundary):
         Boundary.setWindowTitle(QCoreApplication.translate("Boundary", u"Boundary", None))
-        self.xmin_label.setText(QCoreApplication.translate("Boundary", u"xmin", None))
-        self.xmin_entrada.setText(QCoreApplication.translate("Boundary", u"-2", None))
         self.xmax_label.setText(QCoreApplication.translate("Boundary", u"xmax", None))
         self.xmax_entrada.setText(QCoreApplication.translate("Boundary", u"1.2", None))
-        self.ymin_label.setText(QCoreApplication.translate("Boundary", u"ymin", None))
-        self.ymin_entrada.setText(QCoreApplication.translate("Boundary", u"-0.9", None))
         self.ymax_label.setText(QCoreApplication.translate("Boundary", u"ymax", None))
         self.ymax_entrada.setText(QCoreApplication.translate("Boundary", u"0.9", None))
         self.width_label.setText(QCoreApplication.translate("Boundary", u"Ancho", None))
@@ -334,6 +338,10 @@ class Ui_Boundary(object):
         self.max_iter_entrada.setText(QCoreApplication.translate("Boundary", u"256", None))
         self.boton_duplicar.setText(QCoreApplication.translate("Boundary", u"x2", None))
         self.boton_dividir.setText(QCoreApplication.translate("Boundary", u"/2", None))
+        self.xmin_label.setText(QCoreApplication.translate("Boundary", u"xmin", None))
+        self.xmin_entrada.setText(QCoreApplication.translate("Boundary", u"-2", None))
+        self.ymin_label.setText(QCoreApplication.translate("Boundary", u"ymin", None))
+        self.ymin_entrada.setText(QCoreApplication.translate("Boundary", u"-0.9", None))
         self.formula_label.setText(QCoreApplication.translate("Boundary", u"Formula", None))
         self.formula_entrada.setText(QCoreApplication.translate("Boundary", u"z = z**2 + C", None))
         self.zoom_out_factor_label.setText(QCoreApplication.translate("Boundary", u"Zoom out factor", None))
@@ -379,5 +387,6 @@ class Ui_Boundary(object):
         self.resetear_label.setText(QCoreApplication.translate("Boundary", u"Resetear", None))
         self.boton_resetear.setText(QCoreApplication.translate("Boundary", u"Reset", None))
         self.label_coordenadas.setText("")
+        self.label_coordenadas2.setText("")
     # retranslateUi
 

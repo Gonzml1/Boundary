@@ -4,10 +4,10 @@ from PyQt5.QtCore import Qt
 from OpenGL.GL import *
 from core.modulo_de_calculo_fractales import calculos_mandelbrot
 from math import sin, cos, radians
-
+from gui.MandelbrotGUI import Ui_Boundary
     
 class MandelbrotWidget(QOpenGLWidget):
-    def __init__(self,cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, boundary, zoom_in, zoom_out ):
+    def __init__(self,cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, zoom_in, zoom_out, boundary=Ui_Boundary):
         super().__init__()
         self.cmap           =       cmap
         self.xmin           =       xmin
@@ -30,6 +30,7 @@ class MandelbrotWidget(QOpenGLWidget):
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.ui.boton_hacer_fractal.clicked.connect(lambda : self.update())
+        self.ui.slider_iteraciones.valueChanged.connect(self.update)
         self.actualizar_parametros()
     
     def mostrar_parametros(self, xmin, xmax, ymin, ymax):
@@ -48,6 +49,9 @@ class MandelbrotWidget(QOpenGLWidget):
         self.tipo_calculo   =   str(self.ui.tipo_calculo_comboBox.currentText())
         self.tipo_fractal   =   str(self.ui.tipo_fractal_comboBox.currentText())
         self.formula        =   str(self.ui.formula_entrada.text())
+        self.real           =   float(self.ui.real_julia_entrada.text())
+        self.imag           =   float(self.ui.im_julia_entrada.text())
+
 
     def initializeGL(self):
         glClearColor(0, 0, 0, 1)

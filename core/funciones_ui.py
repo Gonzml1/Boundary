@@ -29,7 +29,7 @@ def mostrar_fractal_opengl(self=Ui_Boundary()):
         # Obtener valores desde los campos de entrada
         cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, zoom_in, zoom_out = obtener_datos(self)
         
-        mandelbrot_widget = MandelbrotWidget(cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, self, zoom_in, zoom_out)
+        mandelbrot_widget = MandelbrotWidget(cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag,zoom_in, zoom_out,self)
 
         if self.grafico_openGLWidget.layout() is None:
             layout = QtWidgets.QVBoxLayout(self.grafico_openGLWidget)
@@ -54,6 +54,8 @@ def linkeo_botones(ui=Ui_Boundary()):
     ui.boton_dividir.clicked.connect(lambda : dividir(ui))
     ui.boton_duplicar.clicked.connect(lambda : duplicar(ui))
     ui.boton_guardar.clicked.connect(lambda : guardar_imagen(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag))
+    ui.slider_iteraciones.valueChanged.connect(lambda value: ui.max_iter_entrada.setText(str(value)))
+    
 
 def resetear_entrada(self=Ui_Boundary()):
     self.xmin_entrada.setText("-2.0")

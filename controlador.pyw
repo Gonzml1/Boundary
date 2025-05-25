@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         ts.tema_oscuro(QtWidgets.QApplication.instance())
 
         # Mostrar fractal
-        mandelbrot=md.mostrar_fractal_opengl(self.ui)
+        md.mostrar_fractal_opengl(self.ui)
 
         # Linkear botones
         md.linkeo_botones(self.ui)
@@ -59,7 +59,7 @@ class MainWindow(QMainWindow):
 
         # Evitar que se pueda hacer zoom o mover con el mouse
         self.ui.graphicsView.setInteractive(True)
-        
+
         # Punto movible
         self.punto = Punto(self.actualizar_coordenadas)
         self.scene.addItem(self.punto)
@@ -67,15 +67,13 @@ class MainWindow(QMainWindow):
 
         # ComboBox por defecto
         self.ui.tipo_calculo_comboBox.setCurrentIndex(3)
-        self.ui.graphicsView.scene().changed.connect(mandelbrot.update)
-        
 
     def actualizar_coordenadas(self, x, y):
         x_real = (x / 100) * 2 -2
         y_real = -((y / 100) * (2)-2)
-        self.ui.real_julia_entrada.setText(f"{x_real:.5f}")
-        self.ui.im_julia_entrada.setText(f"{y_real:.5f}")
-        self.ui.label_coordenadas2.setText(f"Re: {x_real:.5f}, Im: {y_real:.5f}")
+        self.ui.real_julia_entrada.setText(f"{x_real:.2f}")
+        self.ui.im_julia_entrada.setText(f"{y_real:.2f}")
+        self.ui.label_coordenadas2.setText(f"Re: {x_real:.2f}, Im: {y_real:.2f}")
 
 
 
