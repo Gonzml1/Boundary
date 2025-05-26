@@ -19,6 +19,7 @@ def guardar_imagen(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tip
     calculos = calculos_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
     if ruta:
         # Reemplazá esto por tu lógica de fractal real
+        calculos.actualizar_fractal()
         imagen_array = calculos.calcular_fractal()
         plt.imsave(ruta, imagen_array,cmap='twilight_shifted')
         print(f"Imagen guardada en: {ruta}")

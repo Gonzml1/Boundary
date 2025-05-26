@@ -6,12 +6,23 @@ from OpenGL.GL import *
 from .funciones_kernel import *
 import os
 from functools import wraps
-from PyQt5.QtWidgets import QFileDialog
-import numexpr as ne
+import ctypes
 
 # cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
 # z[matriz] = z[matriz]**2 + C[matriz]    
+"""
+FRACTAL_REGISTRY: dict[str, dict[str, callable]] = {}
 
+def register_fractal(fractal: str, calc: str):
+"""
+#    Registra el método decorado bajo FRACTAL_REGISTRY[fractal][calc].
+"""
+    def deco(fn):
+        FRACTAL_REGISTRY.setdefault(fractal, {})[calc] = fn
+        return fn
+    return deco
+"""
+#para añadir en un futuro
 class calculos_mandelbrot:
     def __init__(self, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
         self.xmin = xmin
@@ -28,7 +39,8 @@ class calculos_mandelbrot:
         self.imag = imag
         self.fractales= {
         "Mandelbrot" :      {"GPU_Cupy": self.hacer_mandelbrot_cupy,    "GPU_Cupy_kernel": self.hacer_mandelbrot_gpu,   
-                             "CPU_Numpy": self.hacer_mandelbrot_numpy,   "CPU_cpp": self.hacer_mandelbrot_cpp
+                             "CPU_Numpy": self.hacer_mandelbrot_numpy,   "CPU_cpp": self.hacer_mandelbrot_cpp,
+                             "CPU_c": self.hacer_mandelbrot_c
         },
         "Julia":            {"GPU_Cupy": self.hacer_julia_cupy,         "GPU_Cupy_kernel": self.hacer_julia_gpu,        
                              "CPU_Numpy": self.hacer_julia_numpy,        "CPU_cpp": self.hacer_julia_cpp
@@ -254,7 +266,53 @@ class calculos_mandelbrot:
         M_copy = np.copy(M).reshape(self.height, self.width)
         lib.free_mandelbrot(M_ptr)
         return M_copy
- 
+    
+    ################
+    # Para olvidar #
+    ################
+    
+    @medir_tiempo("Mandelbrot C")
+    def hacer_mandelbrot_c(self, show_plot: bool = False):
+        _here = os.path.dirname(__file__)
+        lib = ctypes.CDLL(os.path.join(_here, "libmandelbrot.so"))
+
+        # Firma para double-precision SIMD
+        lib.mandelbrot_simd_double.argtypes = [
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.POINTER(ctypes.c_int),
+            ctypes.c_int,
+            ctypes.c_int,
+        ]
+        lib.mandelbrot_simd_double.restype = None
+
+        # Ejes en float64
+        xs = np.linspace(self.xmin, self.xmax, self.width, dtype=np.float64)
+        ys = np.linspace(self.ymin, self.ymax, self.height, dtype=np.float64)
+        N  = self.width * self.height
+
+        # Grid ravelizado
+        cx = np.repeat(xs[np.newaxis, :], self.height, axis=0).ravel()
+        cy = np.repeat(ys[:, np.newaxis], self.width, axis=1).ravel()
+        cx = np.ascontiguousarray(cx, dtype=np.float64)
+        cy = np.ascontiguousarray(cy, dtype=np.float64)
+
+        # Memoria para el resultado
+        iters = np.empty(N, dtype=np.int32)
+
+        # Llamada al C
+        lib.mandelbrot_simd_double(
+            cx.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+            cy.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+            iters.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
+            ctypes.c_int(N),
+            ctypes.c_int(self.max_iter)
+        )
+
+        # Devolvemos la matriz en 2D
+        img = iters.reshape((self.height, self.width))
+        return img
+    
     ###################################################################
     def hacer_julia_gpu(self):
         inicio = time.time()
@@ -332,25 +390,46 @@ class calculos_mandelbrot:
         if not os.path.exists(dll_path):
             print(f"Error: No se encuentra la DLL en {dll_path}")
             exit(1)
-            
-        # Cargar la DLL con manejo de errores
         try:
             lib = ctypes.WinDLL(dll_path)
         except OSError as e:
             print(f"Error al cargar la DLL: {e}")
-            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
             raise
+        
+        # ¡Ojo, aquí declarábamos 7, haciéndolo mal!
         lib.julia.argtypes = [
-        ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-        ctypes.c_int, ctypes.c_int, ctypes.c_int
+            ctypes.c_double,  # xmin
+            ctypes.c_double,  # xmax
+            ctypes.c_double,  # ymin
+            ctypes.c_double,  # ymax
+            ctypes.c_int,     # width
+            ctypes.c_int,     # height
+            ctypes.c_int,     # max_iter
+            ctypes.c_double,  # cr
+            ctypes.c_double,  # ci
         ]
         lib.julia.restype = ctypes.POINTER(ctypes.c_int)
+    
         lib.free_julia.argtypes = [ctypes.POINTER(ctypes.c_int)]
         lib.free_julia.restype = None
-        M_ptr = lib.julia(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
-        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M).reshape(self.height, self.width)
+    
+        # Ahora sí pasamos 9 argumentos, incluyendo cr y ci
+        M_ptr = lib.julia(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter,
+            self.real,   # constante real de Julia
+            self.imag    # constante imaginaria de Julia
+        )
+    
+        # Convertimos el puntero a un array de NumPy
+        M_flat = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
+        M_copy = np.copy(M_flat).reshape(self.height, self.width)
+    
+        # Liberamos la memoria en C
         lib.free_julia(M_ptr)
+    
         return M_copy
         
     
