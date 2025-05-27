@@ -1,27 +1,24 @@
-import cupy as cp
+#import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-from .funciones_kernel import *
+#from .funciones_kernel import *
 import os
 from functools import wraps
 import ctypes
 
 # cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
 # z[matriz] = z[matriz]**2 + C[matriz]    
-"""
+
 FRACTAL_REGISTRY: dict[str, dict[str, callable]] = {}
 
 def register_fractal(fractal: str, calc: str):
-"""
-#    Registra el método decorado bajo FRACTAL_REGISTRY[fractal][calc].
-"""
     def deco(fn):
         FRACTAL_REGISTRY.setdefault(fractal, {})[calc] = fn
         return fn
     return deco
-"""
+
 #para añadir en un futuro
 class calculos_mandelbrot:
     def __init__(self, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
@@ -136,9 +133,8 @@ class calculos_mandelbrot:
         plt.close()
         return None
     
-
+    @medir_tiempo("Mandelbrot GPU")
     def hacer_mandelbrot_gpu(self):
-        inicio = time.time()
         
         x = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
         y = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
@@ -156,15 +152,11 @@ class calculos_mandelbrot:
             
         resultado = resultado.reshape((self.height, self.width))
         resultado_cpu = resultado.get()
-        tiempo = time.time() - inicio
-        print(f"{self.max_iter} iteraciones")
-        print(f"Tiempo total: {tiempo:.5f} segundos")
 
         return resultado_cpu
     
+    @medir_tiempo("Mandelbrot Entrada")
     def hacer_mandelbrot_con_entrada(self):
-        inicio=time.time()
-
         operacion = self.transformar_expresion(self.formula, ["z", "C"])
         codigo = compile(operacion, "<string>", "exec")
         x = cp.linspace(self.xmin, self.xmax, self.width)
@@ -181,8 +173,6 @@ class calculos_mandelbrot:
             M[matriz] = n
             print(f"\rMANDELBROT {n}", end="", flush=True)
 
-        fin = time.time() 
-        print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M.get()
 
     
