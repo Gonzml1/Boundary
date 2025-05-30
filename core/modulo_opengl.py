@@ -96,7 +96,7 @@ class MandelbrotWidget(QOpenGLWidget):
 
             self.actualizar_parametros()
             self.mandelbrot.actualizar_fractal(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter,self.formula, self.tipo_calculo, self.tipo_fractal, self.real, self.imag)
-            data = self.mandelbrot.calcular_fractal()
+            data = self.mandelbrot.calcular_fractal2()
 
             # Normalizamos para color RGB
             norm = data / self.max_iter
