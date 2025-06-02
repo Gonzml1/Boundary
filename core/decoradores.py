@@ -2,7 +2,7 @@ import numpy as np
 import time
 from functools import wraps
 import matplotlib.pyplot as plt
-
+import cupy as cp
 # 1. Función lógica: cálculo del fractal
 def mandelbrot_numpy(C: np.ndarray, max_iter: int) -> np.ndarray:
     """Calcula el conjunto de Mandelbrot para una grilla compleja C usando NumPy."""

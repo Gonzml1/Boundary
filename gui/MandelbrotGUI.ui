@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1303</width>
-    <height>630</height>
+    <height>659</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -303,28 +303,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="tipo_calculo_comboBox">
-       <item>
-        <property name="text">
-         <string>GPU_Cupy_kernel</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>CPU_Numpy</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>GPU_Cupy</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>CPU_cpp</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="tipo_calculo_comboBox"/>
      </item>
      <item>
       <widget class="QLabel" name="cmap_label">

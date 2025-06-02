@@ -16,7 +16,7 @@ def guardar_imagen(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tip
         "fractal.png",
         "Imágenes PNG (*.png);;JPEG (*.jpg *.jpeg);;Todos los archivos (*)"
     )
-    calculos = calculos_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
+    calculos = calculos_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag ,Ui_Boundary)
     if ruta:
         # Reemplazá esto por tu lógica de fractal real
         calculos.actualizar_fractal()

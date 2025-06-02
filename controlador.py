@@ -5,8 +5,6 @@ from PyQt5 import QtWidgets,QtCore
 from PyQt5.QtWidgets import QMainWindow, QGraphicsEllipseItem, QGraphicsScene
 from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtCore import QPointF
-
-
 import core.funciones_ui as md
 import gui.tema_oscuro as ts
 from gui.MandelbrotGUI import Ui_Boundary

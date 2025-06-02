@@ -25,7 +25,7 @@ class Ui_Boundary(object):
     def setupUi(self, Boundary):
         if not Boundary.objectName():
             Boundary.setObjectName(u"Boundary")
-        Boundary.resize(1303, 630)
+        Boundary.resize(1303, 659)
         icon = QIcon()
         icon.addFile(u"../Iconos/assets2Ftask_01jsfxefnefwvtb960bws6yaa72Fimg_0.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         Boundary.setWindowIcon(icon)
@@ -212,10 +212,6 @@ class Ui_Boundary(object):
         self.verticalLayout_4.addWidget(self.tipo_calculo_label)
 
         self.tipo_calculo_comboBox = QComboBox(self.layoutWidget_2)
-        self.tipo_calculo_comboBox.addItem("")
-        self.tipo_calculo_comboBox.addItem("")
-        self.tipo_calculo_comboBox.addItem("")
-        self.tipo_calculo_comboBox.addItem("")
         self.tipo_calculo_comboBox.setObjectName(u"tipo_calculo_comboBox")
 
         self.verticalLayout_4.addWidget(self.tipo_calculo_comboBox)
@@ -362,11 +358,6 @@ class Ui_Boundary(object):
         self.tipo_fractal_comboBox.setItemText(5, QCoreApplication.translate("Boundary", u"Newton-Raphson", None))
 
         self.tipo_calculo_label.setText(QCoreApplication.translate("Boundary", u"Tipo de Calculo", None))
-        self.tipo_calculo_comboBox.setItemText(0, QCoreApplication.translate("Boundary", u"GPU_Cupy_kernel", None))
-        self.tipo_calculo_comboBox.setItemText(1, QCoreApplication.translate("Boundary", u"CPU_Numpy", None))
-        self.tipo_calculo_comboBox.setItemText(2, QCoreApplication.translate("Boundary", u"GPU_Cupy", None))
-        self.tipo_calculo_comboBox.setItemText(3, QCoreApplication.translate("Boundary", u"CPU_cpp", None))
-
         self.cmap_label.setText(QCoreApplication.translate("Boundary", u"Elegir cmap", None))
         self.cmap_comboBox.setItemText(0, QCoreApplication.translate("Boundary", u"twilight_shifted", None))
         self.cmap_comboBox.setItemText(1, QCoreApplication.translate("Boundary", u"twilight", None))

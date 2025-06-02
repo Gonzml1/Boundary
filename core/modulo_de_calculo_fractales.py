@@ -1,12 +1,13 @@
-#import cupy as cp
+import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-#from .funciones_kernel import *
+from .funciones_kernel import *
 import os
 from functools import wraps
 import ctypes
+from gui.MandelbrotGUI import Ui_Boundary
 
 # cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
 # z[matriz] = z[matriz]**2 + C[matriz]    
@@ -14,14 +15,24 @@ import ctypes
 FRACTAL_REGISTRY: dict[str, dict[str, callable]] = {}
 
 def register_fractal(fractal: str, calc: str):
+    """
+    Decorador: registra la función en FRACTAL_REGISTRY bajo
+    FRACTAL_REGISTRY[fractal][calc] = fn
+    """
     def deco(fn):
-        FRACTAL_REGISTRY.setdefault(fractal, {})[calc] = fn
+        # Si no existe la clave 'fractal', la creamos:
+        if fractal not in FRACTAL_REGISTRY:
+            FRACTAL_REGISTRY[fractal] = {}
+        # Asociamos el nombre de cálculo a la función concreta:
+        FRACTAL_REGISTRY[fractal][calc] = fn
         return fn
     return deco
 
 #para añadir en un futuro
 class calculos_mandelbrot:
-    def __init__(self, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag):
+    def __init__(self, xmin: float, xmax: float , ymin: float, ymax: float, 
+                 width: int, height: int, max_iter: int, formula: str, 
+                 tipo_calculo: str, tipo_fractal: str, real: float, imag: float , ui=Ui_Boundary()) -> None:
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
@@ -36,10 +47,10 @@ class calculos_mandelbrot:
         self.imag = imag
         self.x_np = np.linspace(self.xmin, self.xmax, self.width, dtype=np.float64)
         self.y_np = np.linspace(self.ymin, self.ymax, self.height, dtype=np.float64)
+        self.ui   = ui
 #        self.x_cp = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
 #        self.y_cp = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
-        
-        
+        self._llenar_combo_fractales()
         self.fractales= {
         "Mandelbrot" :      {"GPU_Cupy": self.hacer_mandelbrot_cupy,    "GPU_Cupy_kernel": self.hacer_mandelbrot_gpu,   
                              "CPU_Numpy": self.hacer_mandelbrot_numpy,   "CPU_cpp": self.hacer_mandelbrot_cpp,
@@ -61,12 +72,42 @@ class calculos_mandelbrot:
                              "CPU_Numpy" : self.hacer_newton_numpy,      "CPU_cpp": self.hacer_newton_cpp
         }
         }
+
+
+    def _llenar_combo_fractales(self):
+
+        # Primero, limpias el comboBox por las dudas:
+        self.ui.tipo_fractal_comboBox.clear()
+        self.ui.tipo_calculo_comboBox.clear()
+
+        for fractal in FRACTAL_REGISTRY:
+            self.ui.tipo_fractal_comboBox.addItem(fractal)
+
+        if FRACTAL_REGISTRY:
+            primer_fractal = next(iter(FRACTAL_REGISTRY))
+            for calc in FRACTAL_REGISTRY[primer_fractal]:
+                self.ui.tipo_calculo_comboBox.addItem(calc)
+
+        self.ui.tipo_fractal_comboBox.currentTextChanged.connect(
+            self._on_fractal_cambiado
+        )
+    
+    def _on_fractal_cambiado(self, nombre_fractal: str):
+        """
+        Se ejecuta cuando el usuario elige otro fractal;
+        recarga el combo de 'cálculos' según lo registrado.
+        """
+        self.ui.tipo_calculo_comboBox.clear()
+        if nombre_fractal in FRACTAL_REGISTRY:
+            for calc in FRACTAL_REGISTRY[nombre_fractal]:
+                self.ui.tipo_calculo_comboBox.addItem(calc)
+    
     
     @staticmethod
-    def medir_tiempo(nombre):
-        def decorador(func):
+    def medir_tiempo(nombre) -> callable:
+        def decorador(func) -> callable:
             @wraps(func)
-            def wrapper(*args, **kwargs):
+            def wrapper(*args, **kwargs) -> any:
                 inicio = time.time()
                 resultado = func(*args, **kwargs)
                 fin = time.time()
@@ -116,7 +157,7 @@ class calculos_mandelbrot:
                 raise ValueError(f"Tipo de cálculo '{self.tipo_calculo}' no soportado para el fractal '{self.tipo_fractal}'.")
 
     @staticmethod
-    def convertir_formula_compleja(formula: str):
+    def convertir_formula_compleja(formula: str)-> tuple [str, str]:
         """
         Convierte una fórmula compleja como 'z**2 + C' en dos fórmulas para partes reales e imaginarias,
         usando variables zr, zi, Cr, Ci.
@@ -135,12 +176,12 @@ class calculos_mandelbrot:
             raise NotImplementedError(f"Fórmula no soportada todavía: {formula}")
     
     @staticmethod
-    def transformar_expresion(expression, variables, mask_name="matriz"):
+    def transformar_expresion(expression: str, variables: str, mask_name :str ="matriz") -> str:
         for var in variables:
             expression = expression.replace(var, f"{var}[{mask_name}]")
         return expression
     
-    def guardar_mandelbrot(self, M,filepath, cmap1, dpi):
+    def guardar_mandelbrot(self, M,filepath, cmap1, dpi) -> None:
         figsize = ((self.width) / dpi, self.height / dpi)
         
         fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
@@ -154,8 +195,47 @@ class calculos_mandelbrot:
         plt.close()
         return None
     
-    @medir_tiempo("Mandelbrot GPU")
+    @register_fractal("Mandelbrot", "GPU_Cupy_kernel_smooth")
+    @medir_tiempo("Mandelbrot GPU (Smooth Coloring)")
+    def hacer_mandelbrot_gpu_smooth(self) -> np.ndarray:
+        # 1) Crear ejes reales en float64
+        x = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
+        y = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
+        # 2) Malla 2D
+        X, Y = cp.meshgrid(x, y)
+        # 3) Construir C en complex128 y aplanar
+        C = (X + 1j * Y).astype(cp.complex128).ravel()
+        # 4) Buffer de salida de float64
+        N = C.size
+        resultado = cp.empty(N, dtype=cp.float64)
+
+        try:
+            # 5) INVOCACIÓN CORRECTA del ElementwiseKernel
+            mandelbrot_smooth_kernel(
+                C,
+                np.int32(self.max_iter),
+                resultado
+            )
+        except Exception as e:
+            print(f"Error ejecutando mandelbrot_smooth_kernel: {e}")
+            raise
+
+        # 6) Remodelar a 2D y bajar a CPU
+        resultado_2d = resultado.reshape((self.height, self.width))
+        return resultado_2d.get()
+
+    def calcular_fractal(self) -> np.ndarray:
+        if self.tipo_fractal in FRACTAL_REGISTRY:
+            if self.tipo_calculo in FRACTAL_REGISTRY[self.tipo_fractal]:
+                func = FRACTAL_REGISTRY[self.tipo_fractal][self.tipo_calculo]
+                return func(self)
+            else:
+                raise ValueError(f"Tipo de cálculo '{self.tipo_calculo}' no soportado.")
+        else:
+            raise ValueError(f"Fractal '{self.tipo_fractal}' no soportado.")
+
     @register_fractal("Mandelbrot", "GPU_Cupy_kernel")
+    @medir_tiempo("Mandelbrot GPU")
     def hacer_mandelbrot_gpu(self) -> np.ndarray:
         
         x = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
@@ -406,7 +486,7 @@ class calculos_mandelbrot:
 
     @register_fractal("Julia", "CPU_cpp")
     @medir_tiempo("Julia CPP")
-    def hacer_julia_cpp(self):
+    def hacer_julia_cpp(self) -> np.ndarray:
         dll_path = r"codigos_cpp\julia.dll"
         if not os.path.exists(dll_path):
             print(f"Error: No se encuentra la DLL en {dll_path}")
@@ -612,7 +692,7 @@ class calculos_mandelbrot:
         return M.get()
     
     @register_fractal("Tricorn", "CPU_Numpy")
-    def hacer_tricorn_numpy(self):
+    def hacer_tricorn_numpy(self) -> np.ndarray:
         inicio = time.time()
 
         x = np.linspace(self.xmin, self.xmax, self.width)
@@ -764,7 +844,7 @@ class calculos_mandelbrot:
         lib.free_circulo(M_ptr)
         return M_copy
     
-    @register_fractal("Newton", "GPU_Cupy_kernel")
+    @register_fractal("Newton-Raphson", "GPU_Cupy_kernel")
     def hacer_newton_gpu(self) -> np.ndarray:
         inicio = time.time()
 
@@ -791,8 +871,8 @@ class calculos_mandelbrot:
 
         return root_index_cpu
     
-    @register_fractal("Newton", "GPU_Cupy")
-    def hacer_newton_cupy(self):
+    @register_fractal("Newton-Raphson", "GPU_Cupy")
+    def hacer_newton_cupy(self) -> np.ndarray:
         inicio = time.time()
         
         def f(z):
@@ -833,7 +913,7 @@ class calculos_mandelbrot:
 
         return M.get() 
     
-    @register_fractal("Newton", "CPU_Numpy")
+    @register_fractal("Newton-Raphson", "CPU_Numpy")
     def hacer_newton_numpy(self) -> np.ndarray:
         inicio = time.time()
         
@@ -876,7 +956,7 @@ class calculos_mandelbrot:
         return M  
 
 
-    @register_fractal("Newton", "CPU_cpp")
+    @register_fractal("Newton-Raphson", "CPU_cpp")
     @medir_tiempo("Newton CPP")
     def hacer_newton_cpp(self) -> np.ndarray:
         dll_path = r"codigos_cpp\newton.dll"

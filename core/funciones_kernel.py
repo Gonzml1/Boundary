@@ -1,4 +1,4 @@
-#import cupy as cp
+import cupy as cp
 
 mandelbrot_kernel = cp.ElementwiseKernel(
     in_params='complex128 c, int32 max_iter',
@@ -129,3 +129,39 @@ newton_kernel = cp.ElementwiseKernel(
         """,
         name='newton_kernel'
     )
+
+mandelbrot_smooth_kernel = cp.ElementwiseKernel(
+    in_params='complex128 c, int32 max_iter',
+    out_params='float64 mu',
+    operation=r'''
+        // z = 0 + 0i en doble precisión
+        complex<double> z = complex<double>(0.0, 0.0);
+        double abs_z = 0.0;
+        int iter;
+
+        for (iter = 0; iter < max_iter; ++iter) {
+            // Iteramos z = z*z + c
+            z = z * z + c;
+            // abs_z = |z|^2
+            abs_z = norm(z);  // Usamos norm para calcular |z|^2 eficientemente
+            if (abs_z > 4.0) {
+                break;  // Escapa si |z|^2 > 4
+            }
+        }
+
+        if (iter == max_iter) {
+            // Nunca escapó
+            mu = static_cast<double>(max_iter);
+        } else {
+            // Escapó: calculamos valor suavizado
+            double mod_z = sqrt(abs_z);  // |z|
+            // Evitamos valores inválidos en el logaritmo
+            if (mod_z > 1e-6) {  // Umbral para evitar log de valores pequeños
+                mu = static_cast<double>(iter) + 1.0 - log(log(mod_z)) / log(2.0);
+            } else {
+                mu = static_cast<double>(iter);  // Valor por defecto si mod_z es muy pequeño
+            }
+        }
+    ''',
+    name='mandelbrot_smooth_kernel'
+)
