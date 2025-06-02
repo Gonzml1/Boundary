@@ -6,6 +6,8 @@ from core.modulo_de_calculo_fractales import calculos_mandelbrot
 from math import sin, cos, radians
 from gui.MandelbrotGUI import Ui_Boundary
 from matplotlib import cm
+from typing import Callable
+from PyQt5 import QtCore
 
 PALETTE_REGISTRY = []
 
@@ -14,7 +16,7 @@ def register_palette(palette_name: str):
     Decorador que registra (nombre, función) en PALETTE_REGISTRY.
     La función _aún no_ está ligada a ninguna instancia.
     """
-    def deco(fn):
+    def deco(fn: Callable[[np.ndarray], np.ndarray]):
         PALETTE_REGISTRY.append((palette_name, fn))
         return fn
     return deco
@@ -50,7 +52,7 @@ class MandelbrotWidget(QOpenGLWidget):
         for name, fn in PALETTE_REGISTRY:
             bound_fn = fn.__get__(self, type(self))
             self.palettes.append((name, bound_fn))
-            
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.palette_index = 0
 
 
@@ -241,6 +243,87 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
     
+    @register_palette("Turbo")
+    def _paleta_turbo(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'turbo' de Matplotlib (espectro de colores vibrantes).
+        """
+        cmap = cm.get_cmap('turbo', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+    
+    @register_palette("Rainbow")
+    def _paleta_rainbow(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'rainbow' de Matplotlib (arcoíris).
+        """
+        cmap = cm.get_cmap('rainbow', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+    
+    @register_palette("Ocean")
+    def _paleta_ocean(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'ocean' de Matplotlib (azul marino a verde).
+        """
+        cmap = cm.get_cmap('ocean', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+    
+    @register_palette("Pink")
+    def _paleta_pink(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'pink' de Matplotlib (rosa claro).
+        """
+        cmap = cm.get_cmap('pink', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+    
+    @register_palette("Accent")
+    def _paleta_accent(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'Accent' de Matplotlib (colores brillantes).
+        """
+        cmap = cm.get_cmap('Accent', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+    
+    @register_palette("Dark2")
+    def _paleta_dark2(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'Dark2' de Matplotlib (colores oscuros y saturados).
+        """
+        cmap = cm.get_cmap('Dark2', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+    
+    @register_palette("Set1")
+    def _paleta_set1(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'Set1' de Matplotlib (colores brillantes y saturados).
+        """
+        cmap = cm.get_cmap('Set1', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+    
+    @register_palette("Set2")
+    def _paleta_set2(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'Set2' de Matplotlib (colores suaves y agradables).
+        """
+        cmap = cm.get_cmap('Set2', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+    
+    
     # ——— Método para pasar a la siguiente paleta ———
     def next_palette(self):
         """
@@ -253,6 +336,17 @@ class MandelbrotWidget(QOpenGLWidget):
 
 
     # ——— paintGL revisitado, usando el índice de paleta ———
+    
+    def reset_view(self):
+        """
+        Resetea la vista a los valores iniciales.
+        """
+        self.xmin = -2.0
+        self.xmax = 1.2
+        self.ymin = -0.9
+        self.ymax = 0.9
+        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)
+        self.update()
 
     def mostrar_parametros(self, xmin, xmax, ymin, ymax):
         self.ui.xmin_entrada.setText(f"{xmin}")
@@ -407,25 +501,32 @@ class MandelbrotWidget(QOpenGLWidget):
             move = 0.05
             dx = (self.xmax - self.xmin) * move
             dy = (self.ymax - self.ymin) * move
-
+            
             if event.key() in (Qt.Key_Left, Qt.Key_A):
                 self.xmin -= dx
                 self.xmax -= dx
+                self.update()
+                
             elif event.key() in (Qt.Key_Right, Qt.Key_D):
                 self.xmin += dx
                 self.xmax += dx
+                self.update()
+                
             elif event.key() in (Qt.Key_Up, Qt.Key_W):
                 self.ymin -= dy
                 self.ymax -= dy
+                self.update()
+                
             elif event.key() in (Qt.Key_Down, Qt.Key_S):
                 self.ymin += dy
                 self.ymax += dy
+                self.update()
                 
             elif event.key() == Qt.Key_P:    
                 self.next_palette()
+            elif event.key() == Qt.Key_R:
+                self.reset_view()
 
-            
-    
         if str(self.ui.generador_comboBox.currentText()) == "Lsystem":
             if event.key() == Qt.Key_Plus:
                 self.zoom_factor *= 1.1  # Acercar
