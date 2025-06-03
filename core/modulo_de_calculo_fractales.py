@@ -1,9 +1,9 @@
-import cupy as cp
+#import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-from .funciones_kernel import *
+#from .funciones_kernel import *
 import os
 from functools import wraps
 import ctypes
@@ -76,7 +76,7 @@ class calculos_mandelbrot:
         }
         }
 
-    def _llenar_combo_fractales(self):
+    def _llenar_combo_fractales(self) -> None:
 
         # Primero, limpias el comboBox por las dudas:
         self.ui.tipo_fractal_comboBox.clear()
@@ -94,7 +94,7 @@ class calculos_mandelbrot:
             self._on_fractal_cambiado
         )
     
-    def _on_fractal_cambiado(self, nombre_fractal: str):
+    def _on_fractal_cambiado(self, nombre_fractal: str) -> None:
         """
         Se ejecuta cuando el usuario elige otro fractal;
         recarga el combo de 'cálculos' según lo registrado.
@@ -107,6 +107,9 @@ class calculos_mandelbrot:
     
     @staticmethod
     def medir_tiempo(nombre) -> callable:
+        """
+        Decorador para medir el tiempo de ejecución de una función.
+        """
         def decorador(func) -> callable:
             @wraps(func)
             def wrapper(*args, **kwargs) -> any:
@@ -125,6 +128,9 @@ class calculos_mandelbrot:
             max_iter: int, formula: str,
             tipo_calculo: str, tipo_fractal: str,
             real: float, imag: float) -> None:
+        """
+        Actualiza los parámetros del fractal.
+        """
         
         self.xmin = xmin
         self.xmax = xmax
@@ -141,6 +147,10 @@ class calculos_mandelbrot:
         return None
     
     def calcular_fractal(self) -> np.ndarray:
+        """
+        Calcula el fractal según los parámetros actuales.
+        Utiliza el registro de fractales para determinar la función a invocar.
+        """
         if self.tipo_fractal in self.fractales:
             if self.tipo_calculo in self.fractales[self.tipo_fractal]:
                 M = self.fractales[self.tipo_fractal][self.tipo_calculo]()
@@ -150,7 +160,7 @@ class calculos_mandelbrot:
         else:
             raise ValueError(f"Fractal '{self.tipo_fractal}' no soportado.")
 
-    def calcular_fractal2(self):
+    def calcular_fractal2(self) -> np.ndarray:
         if self.tipo_fractal in FRACTAL_REGISTRY:
             if self.tipo_calculo in FRACTAL_REGISTRY[self.tipo_fractal]:
                 M = FRACTAL_REGISTRY[self.tipo_fractal][self.tipo_calculo](self)
@@ -179,18 +189,24 @@ class calculos_mandelbrot:
     
     @staticmethod
     def transformar_expresion(expression: str, variables: str, mask_name :str ="matriz") -> str:
+        """
+        Aplica una máscara a las variables en la expresión.
+        """
         for var in variables:
             expression = expression.replace(var, f"{var}[{mask_name}]")
         return expression
     
-    def guardar_mandelbrot(self, M,filepath, cmap1, dpi) -> None:
+    def guardar_mandelbrot(self, M, filepath, cmap1, dpi) -> None:
+        """
+        Guarda la imagen del fractal Mandelbrot en un archivo.
+        """
         figsize = ((self.width) / dpi, self.height / dpi)
         
         fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
         ax.axis('off')
-        
-        ax.imshow(M , extent=(self.xmin, self.xmax, self.ymin, self.ymax), cmap=cmap1)
-        
+
+        ax.imshow(M, extent=(self.xmin, self.xmax, self.ymin, self.ymax), cmap=cmap1)
+
         fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
         
         plt.savefig(filepath, dpi=dpi, bbox_inches='tight', pad_inches=0, format="png")
@@ -226,15 +242,6 @@ class calculos_mandelbrot:
         resultado_2d = resultado.reshape((self.height, self.width))
         return resultado_2d.get()
 
-    def calcular_fractal(self) -> np.ndarray:
-        if self.tipo_fractal in FRACTAL_REGISTRY:
-            if self.tipo_calculo in FRACTAL_REGISTRY[self.tipo_fractal]:
-                func = FRACTAL_REGISTRY[self.tipo_fractal][self.tipo_calculo]
-                return func(self)
-            else:
-                raise ValueError(f"Tipo de cálculo '{self.tipo_calculo}' no soportado.")
-        else:
-            raise ValueError(f"Fractal '{self.tipo_fractal}' no soportado.")
 
     @register_fractal("Mandelbrot", "GPU_Cupy_kernel")
     @medir_tiempo("Mandelbrot GPU")
@@ -985,6 +992,7 @@ class calculos_mandelbrot:
         M_copy = np.copy(M).reshape(self.height, self.width)
         lib.free_newton(M_ptr)
         return M_copy    
+    ######################################################################
     
     @register_fractal("Phoenix", "CPU_Numpy")
     def hacer_phoenix_numpy(self) -> np.ndarray:
@@ -1025,6 +1033,43 @@ class calculos_mandelbrot:
         fin = time.time()
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
+    def hacer_phoenix_cupy(self) -> np.ndarray:
+        """
+        Phoenix Fractal (Mandelbrot‐style): 
+           z_{n+1} = z_n^2 + p*z_{n-1} + C,  con C en la malla.
+        Necesita almacenar z_n y z_{n-1} (aquí z y zp).
+        """
+        inicio = time.time()
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+        z = cp.zeros(C.shape, dtype=cp.complex128)
+        zp = cp.zeros(C.shape, dtype=cp.complex128)
+        M = cp.zeros(C.shape, dtype=int)
+        mask = cp.ones(C.shape, dtype=bool)
+        p = self.p
+        for n in range(self.max_iter):
+            z_next = z[mask] * z[mask] + p * zp[mask] + C[mask]
+            zp[mask] = z[mask]
+            z[mask] = z_next
+            escaped = cp.abs(z) > 2.0
+            just_escaped = mask & escaped
+            M[just_escaped] = n
+            mask[just_escaped] = False
+            print(f"\rPHOENIX {n}", end="", flush=True)
+            if not mask.any():
+                break
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
+    
+    @register_fractal("Phoenix", "GPU_Cupy_kernel")
+    def hacer_phoenix_gpu(self) -> np.ndarray:...
+
+    @register_fractal("Phoenix", "CPU_cpp")
+    def hacer_phoenix_cpp(self) -> np.ndarray:...
+    
 
     @register_fractal("Burning Julia", "CPU_Numpy")
     def hacer_burning_julia_numpy(self) -> np.ndarray:
@@ -1065,6 +1110,53 @@ class calculos_mandelbrot:
         fin = time.time()
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
+
+    @register_fractal("Burning Julia", "GPU_Cupy_kernel")
+    def haer_burning_julia_cupy(self) -> np.ndarray:
+        """
+        Burning Julia: z_{n+1} = (|Re(z_n)| + i|Im(z_n)|)^2 + c
+        con c = self.real + 1j*self.imag y z_0 = X + iY.
+        """
+        inicio = time.time()
+
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        z = X + 1j * Y  # z_0
+        M = cp.zeros(z.shape, dtype=int)
+        mask = cp.ones(z.shape, dtype=bool)
+
+        c = self.real + 1j * self.imag
+
+        for n in range(self.max_iter):
+
+            z_act = z[mask]
+
+            re_abs = cp.abs(z_act.real)
+            im_abs = cp.abs(z_act.imag)
+            z_abs = re_abs + 1j * im_abs
+            z_next = z_abs * z_abs + c
+
+            z[mask] = z_next
+            escaped = cp.abs(z) > 2.0
+            just_escaped = mask & escaped
+            M[just_escaped] = n
+            mask[just_escaped] = False
+
+            print(f"\rBURNING JULIA {n}", end="", flush=True)
+            if not mask.any():
+                break
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
+
+    @register_fractal("Burning Julia", "GPU_Cupy")
+    def hacer_burning_julia_gpu(self) -> np.ndarray:...
+
+    @register_fractal("Burning Julia", "CPU_cpp")
+    def hacer_burning_julia_cpp(self) -> np.ndarray:...
+        
 
     @register_fractal("Celtic Mandelbrot", "CPU_Numpy")
     def hacer_celtic_mandelbrot_numpy(self) -> np.ndarray:
@@ -1110,7 +1202,53 @@ class calculos_mandelbrot:
         fin = time.time()
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
+    
+    def hacer_celtic_mandelbrot_cupy(self) -> np.ndarray:
+        """
+        Celtic Mandelbrot: z_{n+1} = sqrt(|Re(z_n)| + i|Im(z_n)|) + C
+        con C = X + iY y z_0 = 0.
+        """
+        inicio = time.time()
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+        z = cp.zeros(C.shape, dtype=cp.complex128)
+        M = cp.zeros(C.shape, dtype=int)
+        mask = cp.ones(C.shape, dtype=bool)
 
+        for n in range(self.max_iter):
+            z_act = z[mask]
+
+            re_abs = cp.abs(z_act.real)
+            im_abs = cp.abs(z_act.imag)
+            z_abs = re_abs + 1j * im_abs
+            z_sqrt = cp.sqrt(z_abs)
+
+            z_next = z_sqrt + C[mask]
+
+            z[mask] = z_next
+
+            escaped = cp.abs(z) > 2.0
+            just_escaped = mask & escaped
+            M[just_escaped] = n
+            mask[just_escaped] = False
+
+            print(f"\rCELTIC MANDELBROT {n}", end="", flush=True)
+            if not mask.any():
+                break
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
+    
+    @register_fractal("Celtic Mandelbrot", "GPU_Cupy_kernel")
+    def hacer_celtic_mandelbrot_gpu(self) -> np.ndarray:...
+    
+    @register_fractal("Celtic Mandelbrot", "CPU_cpp")
+    def hacer_celtic_mandelbrot_cpp(self) -> np.ndarray:...
+    
+    
     @register_fractal("Nova", "CPU_Numpy")
     def hacer_nova_numpy(self) -> np.ndarray:
         """
@@ -1161,3 +1299,47 @@ class calculos_mandelbrot:
         fin = time.time()
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
+    
+    def hacer_nova_cupy(self) -> np.ndarray:
+        """
+        Nova Fractal: z_{n+1} = z_n^m + C + k * z_n^{-m}
+        con C = X + iY, z_0 = C, m = self.nova_m, k = self.nova_k.
+        """
+        inicio = time.time()
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+        # Inicializamos z0 = C (variante común en Nova)
+        z = cp.copy(C)
+        M = cp.zeros(C.shape, dtype=int)
+        mask = cp.ones(C.shape, dtype=bool)
+        m = self.nova_m
+        k = self.nova_k
+        for n in range(self.max_iter):
+            z_act = z[mask]
+            # Evitar división por cero
+            z_safe = cp.where(z_act == 0, 1e-16 + 0j, z_act)
+            # z^m y z^{-m}
+            z_pow_m = z_safe ** m
+            z_pow_negm = z_safe ** (-m)
+            # Iteración Nova
+            z_next = z_pow_m + C[mask] + k * z_pow_negm
+            z[mask] = z_next
+            # Escape
+            escaped = cp.abs(z) > 2.0
+            just_escaped = mask & escaped
+            M[just_escaped] = n
+            mask[just_escaped] = False
+            print(f"\rNOVA {n}", end="", flush=True)
+            if not mask.any():
+                break
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
+    
+    @register_fractal("Nova", "GPU_Cupy_kernel")
+    def hacer_nova_gpu(self) -> np.ndarray:...
+    
+    @register_fractal("Nova", "CPU_cpp")
+    def hacer_nova_cpp(self) -> np.ndarray:...

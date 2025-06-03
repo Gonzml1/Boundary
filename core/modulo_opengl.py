@@ -351,15 +351,23 @@ class MandelbrotWidget(QOpenGLWidget):
         self.xmax = 1.2
         self.ymin = -0.9
         self.ymax = 0.9
-        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)
+        self.max_iter = 256
+        self.width = 1000
+        self.height = 600
+        self.zoom_factor = 1.0
+        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
         self.update()
 
-    def mostrar_parametros(self, xmin, xmax, ymin, ymax):
+    def mostrar_parametros(self, xmin, xmax, ymin, ymax, width, height, max_iter):
         self.ui.xmin_entrada.setText(f"{xmin}")
         self.ui.xmax_entrada.setText(f"{xmax}")
         self.ui.ymin_entrada.setText(f"{ymin}")
         self.ui.ymax_entrada.setText(f"{ymax}")
-        
+        self.ui.width_entrada.setText(f"{width}")
+        self.ui.high_entrada.setText(f"{height}")
+        self.ui.max_iter_entrada.setText(f"{max_iter}")
+
+
     def actualizar_parametros(self):
         self.cmap           =   str(self.ui.cmap_comboBox.currentText())
         self.zoom_in        =   float(self.ui.zoom_in_factor_entrada.text())
@@ -465,7 +473,7 @@ class MandelbrotWidget(QOpenGLWidget):
         self.xmin, self.xmax = cx - dx, cx + dx
         self.ymin, self.ymax = cy - dy, cy + dy
         
-        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)
+        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
         self.update()
 
     def mousePressEvent(self, event):
@@ -482,7 +490,7 @@ class MandelbrotWidget(QOpenGLWidget):
             self.xmax = c_x + (self.xmax - c_x) * self.zoom_in
             self.ymin = c_y - (c_y - self.ymin) * self.zoom_in
             self.ymax = c_y + (self.ymax - c_y) * self.zoom_in
-            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)
+            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
             self.update()
             
         elif event.button() == Qt.RightButton:
@@ -498,7 +506,7 @@ class MandelbrotWidget(QOpenGLWidget):
             self.ymin = c_y - (c_y - self.ymin) * self.zoom_out
             self.ymax = c_y + (self.ymax - c_y) * self.zoom_out
             
-            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax)
+            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
             self.update()
     
     def keyPressEvent(self, event):
