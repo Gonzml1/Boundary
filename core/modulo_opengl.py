@@ -323,6 +323,16 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
     
+    @register_palette("Set3")
+    def _paleta_set3(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'Set3' de Matplotlib (colores variados y agradables).
+        """
+        cmap = cm.get_cmap('Set3', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+    
     
     # ——— Método para pasar a la siguiente paleta ———
     def next_palette(self):
@@ -433,6 +443,7 @@ class MandelbrotWidget(QOpenGLWidget):
 
             # 1) Actualizar parámetros y generar fractal
             self.actualizar_parametros()
+            self.mandelbrot.calcular_fractal()
 
             data = self.mandelbrot.calcular_fractal()  # np.ndarray float64
 

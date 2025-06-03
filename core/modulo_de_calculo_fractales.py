@@ -506,7 +506,6 @@ class calculos_mandelbrot:
             print(f"Error al cargar la DLL: {e}")
             raise
         
-        # ¡Ojo, aquí declarábamos 7, haciéndolo mal!
         lib.julia.argtypes = [
             ctypes.c_double,  # xmin
             ctypes.c_double,  # xmax
@@ -523,7 +522,7 @@ class calculos_mandelbrot:
         lib.free_julia.argtypes = [ctypes.POINTER(ctypes.c_int)]
         lib.free_julia.restype = None
     
-        # Ahora sí pasamos 9 argumentos, incluyendo cr y ci
+    
         M_ptr = lib.julia(
             self.xmin, self.xmax,
             self.ymin, self.ymax,
@@ -1065,9 +1064,11 @@ class calculos_mandelbrot:
         return M.get()
     
     @register_fractal("Phoenix", "GPU_Cupy_kernel")
+    @medir_tiempo("Phoenix GPU")
     def hacer_phoenix_gpu(self) -> np.ndarray:...
 
     @register_fractal("Phoenix", "CPU_cpp")
+    @medir_tiempo("Phoenix CPP")
     def hacer_phoenix_cpp(self) -> np.ndarray:...
     
 
@@ -1152,9 +1153,11 @@ class calculos_mandelbrot:
         return M.get()
 
     @register_fractal("Burning Julia", "GPU_Cupy")
+    @medir_tiempo("Burning Julia GPU")
     def hacer_burning_julia_gpu(self) -> np.ndarray:...
 
     @register_fractal("Burning Julia", "CPU_cpp")
+    @medir_tiempo("Burning Julia CPP")
     def hacer_burning_julia_cpp(self) -> np.ndarray:...
         
 
@@ -1243,9 +1246,11 @@ class calculos_mandelbrot:
         return M.get()
     
     @register_fractal("Celtic Mandelbrot", "GPU_Cupy_kernel")
+    @medir_tiempo("Celtic Mandelbrot GPU")
     def hacer_celtic_mandelbrot_gpu(self) -> np.ndarray:...
     
     @register_fractal("Celtic Mandelbrot", "CPU_cpp")
+    @medir_tiempo("Celtic Mandelbrot CPP")
     def hacer_celtic_mandelbrot_cpp(self) -> np.ndarray:...
     
     
@@ -1339,7 +1344,9 @@ class calculos_mandelbrot:
         return M.get()
     
     @register_fractal("Nova", "GPU_Cupy_kernel")
+    @medir_tiempo("Nova GPU")
     def hacer_nova_gpu(self) -> np.ndarray:...
     
     @register_fractal("Nova", "CPU_cpp")
+    @medir_tiempo("Nova CPP")
     def hacer_nova_cpp(self) -> np.ndarray:...
