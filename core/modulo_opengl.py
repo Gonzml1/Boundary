@@ -378,7 +378,11 @@ class MandelbrotWidget(QOpenGLWidget):
         self.ui.max_iter_entrada.setText(f"{max_iter}")
 
 
-    def actualizar_parametros(self):
+    def actualizar_parametros(self) -> None:
+        """
+        Actualiza los parámetros del fractal según los valores de la UI.
+        """
+        
         self.cmap           =   str(self.ui.cmap_comboBox.currentText())
         self.zoom_in        =   float(self.ui.zoom_in_factor_entrada.text())
         self.zoom_out       =   float(self.ui.zoom_out_factor_entrada.text()) 
@@ -443,7 +447,6 @@ class MandelbrotWidget(QOpenGLWidget):
 
             # 1) Actualizar parámetros y generar fractal
             self.actualizar_parametros()
-            self.mandelbrot.calcular_fractal()
 
             data = self.mandelbrot.calcular_fractal()  # np.ndarray float64
 
@@ -484,6 +487,7 @@ class MandelbrotWidget(QOpenGLWidget):
         self.xmin, self.xmax = cx - dx, cx + dx
         self.ymin, self.ymax = cy - dy, cy + dy
         
+        self.actualizar_parametros()
         self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
         self.update()
 
@@ -501,6 +505,7 @@ class MandelbrotWidget(QOpenGLWidget):
             self.xmax = c_x + (self.xmax - c_x) * self.zoom_in
             self.ymin = c_y - (c_y - self.ymin) * self.zoom_in
             self.ymax = c_y + (self.ymax - c_y) * self.zoom_in
+            self.actualizar_parametros()
             self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
             self.update()
             
@@ -517,6 +522,7 @@ class MandelbrotWidget(QOpenGLWidget):
             self.ymin = c_y - (c_y - self.ymin) * self.zoom_out
             self.ymax = c_y + (self.ymax - c_y) * self.zoom_out
             
+            self.actualizar_parametros()
             self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
             self.update()
     
