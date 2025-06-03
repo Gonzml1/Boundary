@@ -8,7 +8,7 @@ from gui.MandelbrotGUI import Ui_Boundary
 from matplotlib import cm
 from typing import Callable
 from PyQt5 import QtCore
-
+    
 PALETTE_REGISTRY = []
 
 def register_palette(palette_name: str):
@@ -332,6 +332,12 @@ class MandelbrotWidget(QOpenGLWidget):
         self.palette_index = (self.palette_index + 1) % len(self.palettes)
         self.update()  # Fuerza un repaint (llamará de nuevo a paintGL)
 
+    def previous_palette(self):
+        """
+        Decrementa palette_index y actualiza el widget.
+        """
+        self.palette_index = (self.palette_index - 1) % len(self.palettes)
+        self.update()
     # Opcional: atajar una tecla para cambiar
 
 
@@ -524,6 +530,10 @@ class MandelbrotWidget(QOpenGLWidget):
                 
             elif event.key() == Qt.Key_P:    
                 self.next_palette()
+            
+            elif event.key() == Qt.Key_O:
+                self.previous_palette()
+                
             elif event.key() == Qt.Key_R:
                 self.reset_view()
 

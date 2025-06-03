@@ -48,6 +48,9 @@ class calculos_mandelbrot:
         self.x_np = np.linspace(self.xmin, self.xmax, self.width, dtype=np.float64)
         self.y_np = np.linspace(self.ymin, self.ymax, self.height, dtype=np.float64)
         self.ui   = ui
+        self.p  = 1.0
+        self.nova_m = 1.0
+        self.nova_k = 1.0
 #        self.x_cp = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
 #        self.y_cp = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
         self._llenar_combo_fractales()
@@ -72,7 +75,6 @@ class calculos_mandelbrot:
                              "CPU_Numpy" : self.hacer_newton_numpy,      "CPU_cpp": self.hacer_newton_cpp
         }
         }
-
 
     def _llenar_combo_fractales(self):
 
@@ -984,4 +986,178 @@ class calculos_mandelbrot:
         lib.free_newton(M_ptr)
         return M_copy    
     
-    
+    @register_fractal("Phoenix", "CPU_Numpy")
+    def hacer_phoenix_numpy(self) -> np.ndarray:
+        """
+        Phoenix Fractal (Mandelbrot‐style): 
+           z_{n+1} = z_n^2 + p*z_{n-1} + C,  con C en la malla.
+        Necesita almacenar z_n y z_{n-1} (aquí z y zp).
+        """
+        inicio = time.time()
+
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        X, Y = np.meshgrid(x, y)
+        C = X + 1j * Y
+        z = np.zeros(C.shape, dtype=np.complex128)
+        zp = np.zeros(C.shape, dtype=np.complex128)
+
+        M = np.zeros(C.shape, dtype=int)
+        mask = np.ones(C.shape, dtype=bool)
+
+        p = self.p
+
+        for n in range(self.max_iter):
+            z_next = z[mask] * z[mask] + p * zp[mask] + C[mask]
+
+            zp[mask] = z[mask]
+            z[mask] = z_next
+
+            escaped = np.abs(z) > 2.0
+            just_escaped = mask & escaped
+            M[just_escaped] = n
+            mask[just_escaped] = False
+
+            print(f"\rPHOENIX {n}", end="", flush=True)
+            if not mask.any():
+                break
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M
+
+    @register_fractal("Burning Julia", "CPU_Numpy")
+    def hacer_burning_julia_numpy(self) -> np.ndarray:
+        """
+        Burning Julia: z_{n+1} = (|Re(z_n)| + i|Im(z_n)|)^2 + c
+        con c = self.real + 1j*self.imag y z_0 = X + iY.
+        """
+        inicio = time.time()
+
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        X, Y = np.meshgrid(x, y)
+        z = X + 1j * Y  # z_0
+        M = np.zeros(z.shape, dtype=int)
+        mask = np.ones(z.shape, dtype=bool)
+
+        c = self.real + 1j * self.imag
+
+        for n in range(self.max_iter):
+
+            z_act = z[mask]
+
+            re_abs = np.abs(z_act.real)
+            im_abs = np.abs(z_act.imag)
+            z_abs = re_abs + 1j * im_abs
+            z_next = z_abs * z_abs + c
+
+            z[mask] = z_next
+            escaped = np.abs(z) > 2.0
+            just_escaped = mask & escaped
+            M[just_escaped] = n
+            mask[just_escaped] = False
+
+            print(f"\rBURNING JULIA {n}", end="", flush=True)
+            if not mask.any():
+                break
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M
+
+    @register_fractal("Celtic Mandelbrot", "CPU_Numpy")
+    def hacer_celtic_mandelbrot_numpy(self) -> np.ndarray:
+        """
+        Celtic Mandelbrot: z_{n+1} = sqrt(|Re(z_n)| + i|Im(z_n)|) + C
+        con C = X + iY y z_0 = 0.
+        """
+        inicio = time.time()
+
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        X, Y = np.meshgrid(x, y)
+        C = X + 1j * Y
+
+        z = np.zeros(C.shape, dtype=np.complex128)
+        M = np.zeros(C.shape, dtype=int)
+        mask = np.ones(C.shape, dtype=bool)
+
+        for n in range(self.max_iter):
+            z_act = z[mask]
+
+            re_abs = np.abs(z_act.real)
+            im_abs = np.abs(z_act.imag)
+            z_abs = re_abs + 1j * im_abs
+
+
+            z_sqrt = np.sqrt(z_abs)
+
+            z_next = z_sqrt + C[mask]
+
+            z[mask] = z_next
+
+
+            escaped = np.abs(z) > 2.0
+            just_escaped = mask & escaped
+            M[just_escaped] = n
+            mask[just_escaped] = False
+
+            print(f"\rCELTIC MANDELBROT {n}", end="", flush=True)
+            if not mask.any():
+                break
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M
+
+    @register_fractal("Nova", "CPU_Numpy")
+    def hacer_nova_numpy(self) -> np.ndarray:
+        """
+        Nova Fractal: z_{n+1} = z_n^m + C + k * z_n^{-m}
+        con C = X + iY, z_0 = C, m = self.nova_m, k = self.nova_k.
+        """
+        inicio = time.time()
+
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        X, Y = np.meshgrid(x, y)
+        C = X + 1j * Y
+
+        # Inicializamos z0 = C (variante común en Nova)
+        z = np.copy(C)
+
+        M = np.zeros(C.shape, dtype=int)
+        mask = np.ones(C.shape, dtype=bool)
+
+        m = self.nova_m
+        k = self.nova_k
+
+        for n in range(self.max_iter):
+            z_act = z[mask]
+
+            # Evitar división por cero
+            z_safe = np.where(z_act == 0, 1e-16 + 0j, z_act)
+
+            # z^m y z^{-m}
+            z_pow_m = z_safe ** m
+            z_pow_negm = z_safe ** (-m)
+
+            # Iteración Nova
+            z_next = z_pow_m + C[mask] + k * z_pow_negm
+
+            z[mask] = z_next
+
+            # Escape
+            escaped = np.abs(z) > 2.0
+            just_escaped = mask & escaped
+            M[just_escaped] = n
+            mask[just_escaped] = False
+
+            print(f"\rNOVA {n}", end="", flush=True)
+            if not mask.any():
+                break
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M
