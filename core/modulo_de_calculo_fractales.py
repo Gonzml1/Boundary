@@ -1012,7 +1012,7 @@ class calculos_mandelbrot:
         M = np.zeros(C.shape, dtype=int)
         mask = np.ones(C.shape, dtype=bool)
 
-        p = self.p
+        p = self.real + 1j * self.imag
 
         for n in range(self.max_iter):
             z_next = z[mask] * z[mask] + p * zp[mask] + C[mask]
@@ -1049,7 +1049,7 @@ class calculos_mandelbrot:
         zp = cp.zeros(C.shape, dtype=cp.complex128)
         M = cp.zeros(C.shape, dtype=int)
         mask = cp.ones(C.shape, dtype=bool)
-        p = self.p
+        p = self.imag + 1j * self.real  # p = c_im + i*c_re
         for n in range(self.max_iter):
             z_next = z[mask] * z[mask] + p * zp[mask] + C[mask]
             zp[mask] = z[mask]
@@ -1068,7 +1068,7 @@ class calculos_mandelbrot:
     
     @register_fractal("Phoenix", "GPU_Cupy_kernel")
     @medir_tiempo("Phoenix GPU")
-    def phoenix_gpu(self):
+    def hacer_phoenix_gpu(self):
         x = cp.linspace(self.xmin, self.xmax, self.width)
         y = cp.linspace(self.ymin, self.ymax, self.height)
         X, Y = cp.meshgrid(x, y)
@@ -1179,7 +1179,7 @@ class calculos_mandelbrot:
 
     @register_fractal("Burning Julia", "GPU_Cupy_kernel")
     @medir_tiempo("Burning Julia GPU")
-    def burning_julia_gpu(self):
+    def hacer_burning_julia_gpu(self):
         x = cp.linspace(self.xmin, self.xmax, self.width)
         y = cp.linspace(self.ymin, self.ymax, self.height)
         X, Y = cp.meshgrid(x, y)
@@ -1291,7 +1291,7 @@ class calculos_mandelbrot:
     
     @register_fractal("Celtic Mandelbrot", "GPU_Cupy_kernel")
     @medir_tiempo("Celtic Mandelbrot GPU")
-    def hacer_celtic_mandelbrot_cupy(self, z0=None) -> np.ndarray:
+    def hacer_celtic_mandelbrot_gpu(self, z0=None) -> np.ndarray:
         """
         Celtic Mandelbrot/Julia con kernel, eligiendo z0.
         Si z0=None, se usa z0 = 0 (Celtic Mandelbrot).
@@ -1387,6 +1387,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
+    @register_fractal("Nova", "GPU_Cupy")
     def hacer_nova_cupy(self) -> np.ndarray:
         """
         Nova Fractal: z_{n+1} = z_n^m + C + k * z_n^{-m}
@@ -1401,8 +1402,8 @@ class calculos_mandelbrot:
         z = cp.copy(C)
         M = cp.zeros(C.shape, dtype=int)
         mask = cp.ones(C.shape, dtype=bool)
-        m = self.nova_m
-        k = self.nova_k
+        m = self.imag
+        k = self.real
         for n in range(self.max_iter):
             z_act = z[mask]
             # Evitar división por cero
@@ -1427,7 +1428,35 @@ class calculos_mandelbrot:
     
     @register_fractal("Nova", "GPU_Cupy_kernel")
     @medir_tiempo("Nova GPU")
-    def hacer_nova_gpu(self) -> np.ndarray:...
+    def hacer_nova_gpu(self) -> np.ndarray:
+        """
+        Nova Fractal con ElementwiseKernel en CuPy.
+        z_{n+1} = z_n^m + C + k * z_n^{-m}
+        con C = X + iY, z_0 = C, m = self.nova_m, k = self.nova_k.
+        """
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+
+        z = cp.copy(C)  # z0 = C
+        mask = cp.ones(C.shape, dtype=cp.bool_)
+        M = cp.zeros(C.shape, dtype=cp.int32)
+
+        m = self.imag           # potencia (asegúrate que sea float)
+        k = self.real                  # número complejo
+
+        for n in range(self.max_iter):
+            z_new, mask_new = nova_kernel(z, C, mask, m, k)
+            just_escaped = mask & (~mask_new)
+            M[just_escaped] = n
+            z = z_new
+            mask = mask_new
+            print(f"\rNOVA {n}", end="", flush=True)
+            if not bool(mask.any()):
+                break
+
+        return M.get()
     
     @register_fractal("Nova", "CPU_cpp")
     @medir_tiempo("Nova CPP")

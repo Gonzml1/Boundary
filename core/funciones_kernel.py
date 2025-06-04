@@ -215,3 +215,26 @@ celtic_mandelbrot_kernel = cp.ElementwiseKernel(
     ''',
     name='celtic_mandelbrot'
 )
+
+
+
+nova_kernel = cp.ElementwiseKernel(
+    in_params='complex128 z, complex128 c, bool mask, float64 m, complex128 k',
+    out_params='complex128 z_out, bool mask_out',
+    operation='''
+        #include <thrust/complex.h>
+        if (mask) {
+            thrust::complex<double> z_safe = (z == thrust::complex<double>(0.0, 0.0))
+                ? thrust::complex<double>(1e-16, 0.0)
+                : z;
+            thrust::complex<double> z_pow_m = thrust::pow(z_safe, m);
+            thrust::complex<double> z_pow_negm = thrust::pow(z_safe, -m);
+            z_out = z_pow_m + c + k * z_pow_negm;
+            mask_out = (thrust::abs(z_out) <= 2.0);
+        } else {
+            z_out = z;
+            mask_out = false;
+        }
+    ''',
+    name='nova'
+)
