@@ -333,6 +333,15 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
     
+    @register_palette("prism")
+    def _paleta_prism(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'prism' de Matplotlib (colores suaves y claros).
+        """
+        cmap = cm.get_cmap('prism', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
     
     # ——— Método para pasar a la siguiente paleta ———
     def next_palette(self):
