@@ -105,7 +105,7 @@ class Ui_Boundary(object):
 
         self.layoutWidget = QWidget(self.centralwidget)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(980, 220, 131, 301))
+        self.layoutWidget.setGeometry(QRect(980, 220, 131, 396))
         self.verticalLayout_2 = QVBoxLayout(self.layoutWidget)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -171,6 +171,26 @@ class Ui_Boundary(object):
         self.horizontalSlider.setOrientation(Qt.Horizontal)
 
         self.verticalLayout_2.addWidget(self.horizontalSlider)
+
+        self.label_n_nova = QLabel(self.layoutWidget)
+        self.label_n_nova.setObjectName(u"label_n_nova")
+
+        self.verticalLayout_2.addWidget(self.label_n_nova)
+
+        self.n_nova = QLineEdit(self.layoutWidget)
+        self.n_nova.setObjectName(u"n_nova")
+
+        self.verticalLayout_2.addWidget(self.n_nova)
+
+        self.label_m_nova = QLabel(self.layoutWidget)
+        self.label_m_nova.setObjectName(u"label_m_nova")
+
+        self.verticalLayout_2.addWidget(self.label_m_nova)
+
+        self.m_nova = QLineEdit(self.layoutWidget)
+        self.m_nova.setObjectName(u"m_nova")
+
+        self.verticalLayout_2.addWidget(self.m_nova)
 
         self.layoutWidget_2 = QWidget(self.centralwidget)
         self.layoutWidget_2.setObjectName(u"layoutWidget_2")
@@ -306,6 +326,9 @@ class Ui_Boundary(object):
         self.label_coordenadas2 = QLabel(self.centralwidget)
         self.label_coordenadas2.setObjectName(u"label_coordenadas2")
         self.label_coordenadas2.setGeometry(QRect(860, 550, 191, 16))
+        self.p_nova = QLineEdit(self.centralwidget)
+        self.p_nova.setObjectName(u"p_nova")
+        self.p_nova.setGeometry(QRect(1140, 560, 113, 22))
         Boundary.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(Boundary)
         self.menubar.setObjectName(u"menubar")
@@ -345,6 +368,8 @@ class Ui_Boundary(object):
         self.zoom_in_factor_label.setText(QCoreApplication.translate("Boundary", u"Zoom in factor", None))
         self.zoom_in_factor_entrada.setText(QCoreApplication.translate("Boundary", u"0.5", None))
         self.exponente_label.setText(QCoreApplication.translate("Boundary", u"Exponente", None))
+        self.label_n_nova.setText(QCoreApplication.translate("Boundary", u"n nova", None))
+        self.label_m_nova.setText(QCoreApplication.translate("Boundary", u"m nova", None))
         self.generador_label.setText(QCoreApplication.translate("Boundary", u"Tipo de generador", None))
         self.generador_comboBox.setItemText(0, QCoreApplication.translate("Boundary", u"Sucesion", None))
         self.generador_comboBox.setItemText(1, QCoreApplication.translate("Boundary", u"Lsystem", None))

@@ -1,4 +1,4 @@
-#import cupy as cp
+import cupy as cp
 
 mandelbrot_kernel = cp.ElementwiseKernel(
     in_params='complex128 c, int32 max_iter',
@@ -164,4 +164,54 @@ mandelbrot_smooth_kernel = cp.ElementwiseKernel(
         }
     ''',
     name='mandelbrot_smooth_kernel'
+)
+
+burning_julia_kernel = cp.ElementwiseKernel(
+    in_params='complex128 z, complex128 c, bool mask',
+    out_params='complex128 z_out, bool mask_out',
+    operation='''
+        if (mask) {
+            thrust::complex<double> w = thrust::complex<double>(abs(z.real()), abs(z.imag()));
+            z_out = w * w + c;
+            mask_out = thrust::abs(z_out) <= 2.0;
+        } else {
+            z_out = z;
+            mask_out = false;
+        }
+    ''',
+    name='burning_julia'
+)
+
+phoenix_kernel = cp.ElementwiseKernel(
+    in_params='complex128 z, complex128 zp, complex128 C, bool mask, complex128 p',
+    out_params='complex128 z_out, complex128 zp_out, bool mask_out',
+    operation='''
+        if (mask) {
+            z_out = z * z + p * zp + C;
+            zp_out = z;
+            mask_out = (thrust::abs(z_out) <= 2.0);
+        } else {
+            z_out = z;
+            zp_out = zp;
+            mask_out = false;
+        }
+    ''',
+    name='phoenix'
+)
+
+celtic_mandelbrot_kernel = cp.ElementwiseKernel(
+    in_params='complex128 z, complex128 c, bool mask',
+    out_params='complex128 z_out, bool mask_out',
+    operation='''
+        if (mask) {
+            thrust::complex<double> w = thrust::complex<double>(abs(z.real()), abs(z.imag()));
+            thrust::complex<double> w_sqrt = thrust::sqrt(w);
+            z_out = w_sqrt + c;
+            mask_out = (thrust::abs(z_out) <= 2.0);
+        } else {
+            z_out = z;
+            mask_out = false;
+        }
+    ''',
+    name='celtic_mandelbrot'
 )

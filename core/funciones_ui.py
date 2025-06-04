@@ -101,6 +101,7 @@ def obtener_datos(self=Ui_Boundary()):
     formula       =   str(self.formula_entrada.text())
     zoom_out      =   float(self.zoom_out_factor_entrada.text())
     zoom_in       =   float(self.zoom_in_factor_entrada.text())
+
     
     return cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, zoom_in, zoom_out   
 

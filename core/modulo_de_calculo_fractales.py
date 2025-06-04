@@ -1,9 +1,9 @@
-#import cupy as cp
+import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-#from .funciones_kernel import *
+from .funciones_kernel import *
 import os
 from functools import wraps
 import ctypes
@@ -146,7 +146,7 @@ class calculos_mandelbrot:
         self.imag = imag
         return None
     
-    def calcular_fractal(self) -> np.ndarray:
+    def calcular_fractal2(self) -> np.ndarray:
         """
         Calcula el fractal según los parámetros actuales.
         Utiliza el registro de fractales para determinar la función a invocar.
@@ -160,7 +160,7 @@ class calculos_mandelbrot:
         else:
             raise ValueError(f"Fractal '{self.tipo_fractal}' no soportado.")
 
-    def calcular_fractal2(self) -> np.ndarray:
+    def calcular_fractal(self) -> np.ndarray:
         if self.tipo_fractal in FRACTAL_REGISTRY:
             if self.tipo_calculo in FRACTAL_REGISTRY[self.tipo_fractal]:
                 M = FRACTAL_REGISTRY[self.tipo_fractal][self.tipo_calculo](self)
@@ -1032,6 +1032,8 @@ class calculos_mandelbrot:
         fin = time.time()
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
+    
+    @register_fractal("Phoenix", "GPU_Cupy")
     def hacer_phoenix_cupy(self) -> np.ndarray:
         """
         Phoenix Fractal (Mandelbrot‐style): 
@@ -1061,11 +1063,33 @@ class calculos_mandelbrot:
                 break
         fin = time.time()
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        
         return M.get()
     
     @register_fractal("Phoenix", "GPU_Cupy_kernel")
     @medir_tiempo("Phoenix GPU")
-    def hacer_phoenix_gpu(self) -> np.ndarray:...
+    def phoenix_gpu(self):
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+        z = cp.zeros(C.shape, dtype=cp.complex128)
+        zp = cp.zeros(C.shape, dtype=cp.complex128)
+        mask = cp.ones(C.shape, dtype=cp.bool_)
+        M = cp.zeros(C.shape, dtype=cp.int32)
+        p = self.real + 1j * self.imag
+    
+        for n in range(self.max_iter):
+            z_new, zp_new, mask_new = phoenix_kernel(z, zp, C, mask, p)
+            just_escaped = mask & (~mask_new)
+            M[just_escaped] = n
+            z = z_new
+            zp = zp_new
+            mask = mask_new
+            if not bool(mask.any()):
+                break
+            
+        return M.get()
 
     @register_fractal("Phoenix", "CPU_cpp")
     @medir_tiempo("Phoenix CPP")
@@ -1112,8 +1136,8 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
 
-    @register_fractal("Burning Julia", "GPU_Cupy_kernel")
-    def haer_burning_julia_cupy(self) -> np.ndarray:
+    @register_fractal("Burning Julia", "GPU_Cupy")
+    def hacer_burning_julia_cupy(self) -> np.ndarray:
         """
         Burning Julia: z_{n+1} = (|Re(z_n)| + i|Im(z_n)|)^2 + c
         con c = self.real + 1j*self.imag y z_0 = X + iY.
@@ -1152,10 +1176,29 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M.get()
 
-    @register_fractal("Burning Julia", "GPU_Cupy")
-    @medir_tiempo("Burning Julia GPU")
-    def hacer_burning_julia_gpu(self) -> np.ndarray:...
 
+    @register_fractal("Burning Julia", "GPU_Cupy_kernel")
+    @medir_tiempo("Burning Julia GPU")
+    def burning_julia_gpu(self):
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        z = X + 1j * Y
+        mask = cp.ones(z.shape, dtype=cp.bool_)
+        M = cp.zeros(z.shape, dtype=cp.int32)
+        c = self.real + 1j * self.imag
+
+        for n in range(self.max_iter):
+            z_new, mask_new = burning_julia_kernel(z, c, mask)
+            just_escaped = mask & (~mask_new)
+            M[just_escaped] = n
+            z = z_new
+            mask = mask_new
+            if not bool(mask.any()):
+                break
+
+        return M.get()
+    
     @register_fractal("Burning Julia", "CPU_cpp")
     @medir_tiempo("Burning Julia CPP")
     def hacer_burning_julia_cpp(self) -> np.ndarray:...
@@ -1206,6 +1249,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
+    @register_fractal("Celtic Mandelbrot", "GPU_Cupy")
     def hacer_celtic_mandelbrot_cupy(self) -> np.ndarray:
         """
         Celtic Mandelbrot: z_{n+1} = sqrt(|Re(z_n)| + i|Im(z_n)|) + C
@@ -1247,7 +1291,45 @@ class calculos_mandelbrot:
     
     @register_fractal("Celtic Mandelbrot", "GPU_Cupy_kernel")
     @medir_tiempo("Celtic Mandelbrot GPU")
-    def hacer_celtic_mandelbrot_gpu(self) -> np.ndarray:...
+    def hacer_celtic_mandelbrot_cupy(self, z0=None) -> np.ndarray:
+        """
+        Celtic Mandelbrot/Julia con kernel, eligiendo z0.
+        Si z0=None, se usa z0 = 0 (Celtic Mandelbrot).
+        Si z0 es un array, puede ser X+1j*Y (Celtic Julia) o lo que quieras.
+        """
+        import time
+        inicio = time.time()
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+
+        # Selección de z0 (valor inicial)
+        if self.real is None:
+            z = cp.zeros(C.shape, dtype=cp.complex128)
+        elif np.isscalar(z0):
+            z = cp.full(C.shape, self.real, dtype=cp.complex128)
+        else:
+            # Se espera que z0 tenga misma forma que C (array tipo Julia, etc)
+            z = cp.array(self.real, dtype=cp.complex128)
+
+        mask = cp.ones(C.shape, dtype=cp.bool_)
+        M = cp.zeros(C.shape, dtype=cp.int32)
+
+        for n in range(self.max_iter):
+            z_new, mask_new = celtic_mandelbrot_kernel(z, C, mask)
+            just_escaped = mask & (~mask_new)
+            M[just_escaped] = n
+            z = z_new
+            mask = mask_new
+
+            print(f"\rCELTIC MANDELBROT GPU {n}", end="", flush=True)
+            if not bool(mask.any()):
+                break
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
     
     @register_fractal("Celtic Mandelbrot", "CPU_cpp")
     @medir_tiempo("Celtic Mandelbrot CPP")

@@ -451,7 +451,7 @@ class MandelbrotWidget(QOpenGLWidget):
             data = self.mandelbrot.calcular_fractal()  # np.ndarray float64
 
             # 2) Normalizar a [0,1]
-            norm = data / self.max_iter
+            norm = data/self.max_iter
 
             # 3) Elegir nombre y función de paleta actual
             name, func = self.palettes[self.palette_index]

@@ -127,7 +127,7 @@
       <x>980</x>
       <y>220</y>
       <width>131</width>
-      <height>301</height>
+      <height>396</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -220,6 +220,26 @@
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_n_nova">
+       <property name="text">
+        <string>n nova</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="n_nova"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_m_nova">
+       <property name="text">
+        <string>m nova</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="m_nova"/>
      </item>
     </layout>
    </widget>
@@ -495,6 +515,16 @@
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="p_nova">
+    <property name="geometry">
+     <rect>
+      <x>1140</x>
+      <y>560</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
     </property>
    </widget>
   </widget>
