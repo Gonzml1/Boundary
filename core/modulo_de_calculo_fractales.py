@@ -1093,7 +1093,37 @@ class calculos_mandelbrot:
 
     @register_fractal("Phoenix", "CPU_cpp")
     @medir_tiempo("Phoenix CPP")
-    def hacer_phoenix_cpp(self) -> np.ndarray:...
+    def hacer_phoenix_cpp(self) -> np.ndarray:
+        dll_path = r"codigos_cpp\phoenix.dll"
+        if not os.path.exists(dll_path):
+            print(f"Error: No se encuentra la DLL en {dll_path}")
+            exit(1)
+
+        try:
+            lib = ctypes.WinDLL(dll_path)
+        except OSError as e:
+            print(f"Error al cargar la DLL: {e}")
+            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
+            raise
+
+        lib.phoenix.argtypes = [
+            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+            ctypes.c_int, ctypes.c_int, ctypes.c_int,
+            ctypes.c_double, ctypes.c_double,
+        ]
+        lib.phoenix.restype = ctypes.POINTER(ctypes.c_int)
+        lib.free_phoenix.argtypes = [ctypes.POINTER(ctypes.c_int)]
+        lib.free_phoenix.restype = None
+
+        M_ptr = lib.phoenix(
+            self.xmin, self.xmax, self.ymin, self.ymax,
+            self.width, self.height, self.max_iter,
+            self.real, self.imag
+        )
+        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
+        M_copy = np.copy(M).reshape(self.height, self.width)
+        lib.free_phoenix(M_ptr)
+        return M_copy
     
 
     @register_fractal("Burning Julia", "CPU_Numpy")
@@ -1201,7 +1231,37 @@ class calculos_mandelbrot:
     
     @register_fractal("Burning Julia", "CPU_cpp")
     @medir_tiempo("Burning Julia CPP")
-    def hacer_burning_julia_cpp(self) -> np.ndarray:...
+    def hacer_burning_julia_cpp(self) -> np.ndarray:
+        dll_path = r"codigos_cpp\burning_julia.dll"
+        if not os.path.exists(dll_path):
+            print(f"Error: No se encuentra la DLL en {dll_path}")
+            exit(1)
+
+        try:
+            lib = ctypes.WinDLL(dll_path)
+        except OSError as e:
+            print(f"Error al cargar la DLL: {e}")
+            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
+            raise
+
+        lib.burning_julia.argtypes = [
+            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+            ctypes.c_int, ctypes.c_int, ctypes.c_int,
+            ctypes.c_double, ctypes.c_double,
+        ]
+        lib.burning_julia.restype = ctypes.POINTER(ctypes.c_int)
+        lib.free_burning_julia.argtypes = [ctypes.POINTER(ctypes.c_int)]
+        lib.free_burning_julia.restype = None
+
+        M_ptr = lib.burning_julia(
+            self.xmin, self.xmax, self.ymin, self.ymax,
+            self.width, self.height, self.max_iter,
+            self.real, self.imag
+        )
+        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
+        M_copy = np.copy(M).reshape(self.height, self.width)
+        lib.free_burning_julia(M_ptr)
+        return M_copy
         
 
     @register_fractal("Celtic Mandelbrot", "CPU_Numpy")
@@ -1333,7 +1393,35 @@ class calculos_mandelbrot:
     
     @register_fractal("Celtic Mandelbrot", "CPU_cpp")
     @medir_tiempo("Celtic Mandelbrot CPP")
-    def hacer_celtic_mandelbrot_cpp(self) -> np.ndarray:...
+    def hacer_celtic_mandelbrot_cpp(self) -> np.ndarray:
+        dll_path = r"codigos_cpp\celtic_mandelbrot.dll"
+        if not os.path.exists(dll_path):
+            print(f"Error: No se encuentra la DLL en {dll_path}")
+            exit(1)
+
+        try:
+            lib = ctypes.WinDLL(dll_path)
+        except OSError as e:
+            print(f"Error al cargar la DLL: {e}")
+            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
+            raise
+
+        lib.celtic_mandelbrot.argtypes = [
+            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+            ctypes.c_int, ctypes.c_int, ctypes.c_int,
+        ]
+        lib.celtic_mandelbrot.restype = ctypes.POINTER(ctypes.c_int)
+        lib.free_celtic_mandelbrot.argtypes = [ctypes.POINTER(ctypes.c_int)]
+        lib.free_celtic_mandelbrot.restype = None
+
+        M_ptr = lib.celtic_mandelbrot(
+            self.xmin, self.xmax, self.ymin, self.ymax,
+            self.width, self.height, self.max_iter
+        )
+        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
+        M_copy = np.copy(M).reshape(self.height, self.width)
+        lib.free_celtic_mandelbrot(M_ptr)
+        return M_copy
     
     
     @register_fractal("Nova", "CPU_Numpy")
@@ -1460,4 +1548,34 @@ class calculos_mandelbrot:
     
     @register_fractal("Nova", "CPU_cpp")
     @medir_tiempo("Nova CPP")
-    def hacer_nova_cpp(self) -> np.ndarray:...
+    def hacer_nova_cpp(self) -> np.ndarray:
+        dll_path = r"codigos_cpp\nova.dll"
+        if not os.path.exists(dll_path):
+            print(f"Error: No se encuentra la DLL en {dll_path}")
+            exit(1)
+
+        try:
+            lib = ctypes.WinDLL(dll_path)
+        except OSError as e:
+            print(f"Error al cargar la DLL: {e}")
+            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
+            raise
+
+        lib.nova.argtypes = [
+            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+            ctypes.c_int, ctypes.c_int, ctypes.c_int,
+            ctypes.c_double, ctypes.c_double,
+        ]
+        lib.nova.restype = ctypes.POINTER(ctypes.c_int)
+        lib.free_nova.argtypes = [ctypes.POINTER(ctypes.c_int)]
+        lib.free_nova.restype = None
+
+        M_ptr = lib.nova(
+            self.xmin, self.xmax, self.ymin, self.ymax,
+            self.width, self.height, self.max_iter,
+            self.nova_m, self.nova_k
+        )
+        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
+        M_copy = np.copy(M).reshape(self.height, self.width)
+        lib.free_nova(M_ptr)
+        return M_copy
