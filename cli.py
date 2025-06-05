@@ -14,13 +14,13 @@ def main() -> None:
         default="CPU_Numpy",
         help="Metodo de calculo: GPU_Cupy, GPU_Cupy_kernel, CPU_Numpy, etc."
     )
-    parser.add_argument("--width", type=int, default=1000)
-    parser.add_argument("--height", type=int, default=600)
-    parser.add_argument("--max-iter", type=int, default=256, dest="max_iter")
-    parser.add_argument("--xmin", type=float, default=-2.0)
-    parser.add_argument("--xmax", type=float, default=1.2)
-    parser.add_argument("--ymin", type=float, default=-0.9)
-    parser.add_argument("--ymax", type=float, default=0.9)
+    parser.add_argument("--width"     , type=int    , default=1000)
+    parser.add_argument("--height"    , type=int    , default=600)
+    parser.add_argument("--max-iter"  , type=int    , default=256, dest="ma         x_iter")
+    parser.add_argument("--xmin"      , type=float  , default=-2.0)
+    parser.add_argument("--xmax"      , type=float  , default=1.2)
+    parser.add_argument("--ymin"      , type=float  , default=-0.9)
+    parser.add_argument("--ymax"      , type=float  , default=0.9)
     parser.add_argument(
         "--real",
         type=float,
