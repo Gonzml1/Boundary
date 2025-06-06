@@ -4,7 +4,6 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from core.modulo_opengl import MandelbrotWidget
 import matplotlib.pyplot as plt
-import numpy as np
 from core.modulo_de_calculo_fractales import calculos_mandelbrot
 
 #calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)

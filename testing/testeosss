@@ -1,0 +1,41 @@
+import mpmath as mp
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Precisión alta para zoom
+mp.dps = 80  # 80 dígitos decimales
+
+# Centro del zoom y tamaño de ventana
+cx, cy = mp.mpf('-0.743643887037151'), mp.mpf('0.131825904205330')
+zoom = mp.mpf('1e-10')  # cuanto más chico, más profundo el zoom
+
+# Tamaño de imagen
+width, height = 300, 200
+
+# Crear imagen vacía
+image = np.zeros((height, width), dtype=np.uint16)
+
+max_iter = 80
+
+for iy in range(height):
+    for ix in range(width):
+        # Escalamos las coordenadas al plano complejo, con zoom
+        x = cx + (mp.mpf(ix) - width/2) * zoom / width
+        y = cy + (mp.mpf(iy) - height/2) * zoom / height
+        c = mp.mpc(x, y)
+        z = mp.mpc(0)
+        for n in range(max_iter):
+            z = z*z + c
+            if abs(z) > 2:
+                break
+        print(n, ix, iy)
+        image[iy, ix] = n
+
+plt.figure(figsize=(7, 5))
+plt.imshow(image, cmap='inferno', extent=[float(cx-zoom/2), float(cx+zoom/2), float(cy-zoom/2), float(cy+zoom/2)])
+plt.title("Zoom Mandelbrot (precisión alta)")
+plt.xlabel("Re(z)")
+plt.ylabel("Im(z)")
+plt.colorbar(label='Iteraciones')
+plt.tight_layout()
+plt.show()
