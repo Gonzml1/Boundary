@@ -1,6 +1,7 @@
 #include <vector>
 #include <windows.h>
 #include <cstdlib>
+#include <omp.h>  // <<— incluir OpenMP
 
 extern "C" {
 
@@ -11,13 +12,14 @@ int* julia(double xmin, double xmax,
            int max_iter,
            double cr, double ci)
 {
-    // usar nothrow para poder comprobar fallo de reserva
     int *M = new(std::nothrow) int[width * height];
     if (!M) return nullptr;
 
     double dx = (xmax - xmin) / (width  - 1);
     double dy = (ymax - ymin) / (height - 1);
 
+    // paralelizar ambos bucles
+    #pragma omp parallel for collapse(2)
     for (int j = 0; j < height; ++j) {
         double y0 = ymin + j * dy;
         for (int i = 0; i < width; ++i) {
@@ -26,7 +28,6 @@ int* julia(double xmin, double xmax,
             double zi = y0;
             int n = 0;
 
-            // iteración estándar de Julia
             while (n < max_iter && (zr*zr + zi*zi) <= 4.0) {
                 double zr_new = zr*zr - zi*zi + cr;
                 zi = 2.0*zr*zi + ci;
@@ -34,7 +35,6 @@ int* julia(double xmin, double xmax,
                 ++n;
             }
 
-            // guardamos el número de iteraciones (0..max_iter)
             M[j * width + i] = n;
         }
     }

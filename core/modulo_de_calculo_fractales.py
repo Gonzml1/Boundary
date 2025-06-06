@@ -1,9 +1,9 @@
-import cupy as cp
+#import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-from .funciones_kernel import *
+#from .funciones_kernel import *
 import os
 from functools import wraps
 import ctypes

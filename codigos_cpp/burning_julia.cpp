@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <cstdlib>
 #include <cmath>
+#include <omp.h>  // incluir OpenMP
 
 extern "C" {
 __declspec(dllexport)
@@ -14,9 +15,9 @@ int* burning_julia(double xmin, double xmax, double ymin, double ymax,
 
     double dx = (xmax - xmin) / (width - 1);
     double dy = (ymax - ymin) / (height - 1);
-
     std::complex<double> c(cr, ci);
 
+    #pragma omp parallel for collapse(2)
     for (int j = 0; j < height; ++j) {
         for (int i = 0; i < width; ++i) {
             double x = xmin + i * dx;
