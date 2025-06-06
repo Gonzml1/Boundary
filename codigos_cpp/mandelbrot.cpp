@@ -2,6 +2,7 @@
 #include <vector>
 #include <windows.h>
 #include <cstdlib>
+#include <omp.h>  // <<-- Agregar
 
 extern "C" {
     __declspec(dllexport) int* mandelbrot(double xmin, double xmax, double ymin, double ymax, int width, int height, int max_iter) {
@@ -11,6 +12,8 @@ extern "C" {
         double dx = (xmax - xmin) / (width - 1);
         double dy = (ymax - ymin) / (height - 1);
 
+        // Paralelizar ambos bucles con collapse(2)
+        #pragma omp parallel for collapse(2)
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
                 double x = xmin + i * dx;
