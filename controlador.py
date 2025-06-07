@@ -10,7 +10,7 @@ from gui.gui import MainWindow
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     ts.tema_oscuro(app)
-
+    
     window = MainWindow()
     window.show()
 

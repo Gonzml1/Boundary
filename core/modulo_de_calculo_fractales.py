@@ -247,7 +247,6 @@ class calculos_mandelbrot:
     @register_fractal("Mandelbrot", "GPU_Cupy_kernel")
     @medir_tiempo("Mandelbrot GPU")
     def hacer_mandelbrot_gpu(self) -> np.ndarray:
-        
         x = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
         y = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
         X, Y = cp.meshgrid(x, y)
