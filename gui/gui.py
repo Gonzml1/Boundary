@@ -10,7 +10,7 @@ from OpenGL.GL import *
 
 class Punto(QGraphicsEllipseItem):
     def __init__(self, callback):
-        super().__init__(-5, -5, 10, 10)
+        super().__init__(-10, -10, 20, 20)
         self.setBrush(QBrush(QColor("white")))
         self.setFlag(QGraphicsEllipseItem.ItemIsMovable, True)
         self.setFlag(QGraphicsEllipseItem.ItemSendsGeometryChanges, True)
@@ -30,7 +30,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = Ui_Boundary()
         self.ui.setupUi(self)
-
+        
         # Tema oscuro
         ts.tema_oscuro(QtWidgets.QApplication.instance())
 
@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
         self.punto.setPos(100, 100)
 
         # ComboBox por defecto
-        self.ui.tipo_calculo_comboBox.setCurrentIndex(3)
+        self.ui.tipo_calculo_comboBox.setCurrentIndex(4)
         self.ui.graphicsView.scene().changed.connect(mandelbrot.update)
         
 

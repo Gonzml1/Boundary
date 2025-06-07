@@ -456,9 +456,12 @@ class MandelbrotWidget(QOpenGLWidget):
 
             # 1) Actualizar parámetros y generar fractal
             self.actualizar_parametros()
-
-            data = self.mandelbrot.calcular_fractal()  # np.ndarray float64
-
+            try:
+                data = self.mandelbrot.calcular_fractal()  # np.ndarray float64
+            except Exception as e:
+                print(f"Error al calcular el fractal: {e}")
+                return
+            
             # 2) Normalizar a [0,1]
             norm = data/self.max_iter
 
@@ -560,6 +563,39 @@ class MandelbrotWidget(QOpenGLWidget):
             elif event.key() in (Qt.Key_Down, Qt.Key_S):
                 self.ymin += dy
                 self.ymax += dy
+                self.update()
+
+            elif event.key() == Qt.Key_Plus:
+                # Calcular el punto central actual
+                c_x = (self.xmin + self.xmax) / 2
+                c_y = (self.ymin + self.ymax) / 2
+
+                # Ajustar los límites en torno al centro con el factor de zoom
+                dx = (self.xmax - self.xmin) * self.zoom_in / 2
+                dy = (self.ymax - self.ymin) * self.zoom_in / 2
+                self.xmin, self.xmax = c_x - dx, c_x + dx
+                self.ymin, self.ymax = c_y - dy, c_y + dy
+
+                # Refrescar parámetros y repintar
+                self.actualizar_parametros()
+                self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax,
+                                        self.width, self.height, self.max_iter)
+                self.update()
+                
+            elif event.key() == Qt.Key_Minus:
+                c_x = (self.xmin + self.xmax) / 2
+                c_y = (self.ymin + self.ymax) / 2
+
+                # Ajustar los límites en torno al centro con el factor de zoom
+                dx = (self.xmax - self.xmin) * self.zoom_out / 2
+                dy = (self.ymax - self.ymin) * self.zoom_out / 2
+                self.xmin, self.xmax = c_x - dx, c_x + dx
+                self.ymin, self.ymax = c_y - dy, c_y + dy
+
+                # Refrescar parámetros y repintar
+                self.actualizar_parametros()
+                self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax,
+                                        self.width, self.height, self.max_iter)
                 self.update()
                 
             elif event.key() == Qt.Key_P:    
