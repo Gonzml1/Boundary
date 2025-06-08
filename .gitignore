@@ -1,3 +1,19 @@
-V:/ABoundary/__pycache__/
-V:/ABoundary/gui/__pycache__/
-V:/ABoundary/core/__pycache__/
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+
+# Compiled dynamic libraries
+*.so
+*.dll
+*.a
+
+# Build directories
+build/
+dist/
+*.egg-info/
+
+# Databases
+*.db
+
+# Misc generated files
+fractal.png
