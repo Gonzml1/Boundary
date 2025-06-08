@@ -1,9 +1,9 @@
-#import cupy as cp
+import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-#from .funciones_kernel import *
+from .funciones_kernel import *
 import os
 from functools import wraps
 import ctypes
@@ -15,12 +15,12 @@ from scipy.special import gamma
 
 FRACTAL_REGISTRY: dict[str, dict[str, callable]] = {}
 
-def register_fractal(fractal: str, calc: str):
+def register_fractal(fractal: str, calc: str) -> callable:
     """
     Decorador: registra la función en FRACTAL_REGISTRY bajo
     FRACTAL_REGISTRY[fractal][calc] = fn
     """
-    def deco(fn):
+    def deco(fn) -> callable:
         # Si no existe la clave 'fractal', la creamos:
         if fractal not in FRACTAL_REGISTRY:
             FRACTAL_REGISTRY[fractal] = {}
@@ -33,7 +33,8 @@ def register_fractal(fractal: str, calc: str):
 class calculos_mandelbrot:
     def __init__(self, xmin: float, xmax: float , ymin: float, ymax: float, 
                  width: int, height: int, max_iter: int, formula: str, 
-                 tipo_calculo: str, tipo_fractal: str, real: float, imag: float , ui=Ui_Boundary()) -> None:
+                 tipo_calculo: str, tipo_fractal: str, real: float, imag: float , 
+                 ui=Ui_Boundary()) -> None:
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
@@ -55,27 +56,6 @@ class calculos_mandelbrot:
 #        self.x_cp = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
 #        self.y_cp = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
         self._llenar_combo_fractales()
-        self.fractales= {
-        "Mandelbrot" :      {"GPU_Cupy": self.hacer_mandelbrot_cupy,    "GPU_Cupy_kernel": self.hacer_mandelbrot_gpu,   
-                             "CPU_Numpy": self.hacer_mandelbrot_numpy,   "CPU_cpp": self.hacer_mandelbrot_cpp,
-                             "CPU_c": self.hacer_mandelbrot_c
-        },
-        "Julia":            {"GPU_Cupy": self.hacer_julia_cupy,         "GPU_Cupy_kernel": self.hacer_julia_gpu,        
-                             "CPU_Numpy": self.hacer_julia_numpy,        "CPU_cpp": self.hacer_julia_cpp
-        },
-        "Burning Ship":     {"GPU_Cupy": self.hacer_burning_cupy,       "GPU_Cupy_kernel": self.hacer_burning_gpu,      
-                             "CPU_Numpy": self.hacer_burning_numpy,      "CPU_cpp": self.hacer_burning_cpp
-        }, 
-        "Tricorn":          {"GPU_Cupy" : self.hacer_tricorn_cupy,      "GPU_Cupy_kernel" : self.hacer_tricorn_gpu,     
-                             "CPU_Numpy" : self.hacer_tricorn_numpy,     "CPU_cpp": self.hacer_tricorn_cpp
-        },
-        "Circulo":          {"GPU_Cupy" : self.hacer_circulo_cupy,      "GPU_Cupy_kernel" : self.hacer_circulo_gpu,     
-                             "CPU_Numpy" : self.hacer_circulo_numpy,      "CPU_cpp": self.hacer_circulo_cpp
-        },
-        "Newton-Raphson":   {"GPU_Cupy" : self.hacer_newton_cupy,      "GPU_Cupy_kernel" : self.hacer_newton_gpu,     
-                             "CPU_Numpy" : self.hacer_newton_numpy,      "CPU_cpp": self.hacer_newton_cpp
-        }
-        }
 
     def _llenar_combo_fractales(self) -> None:
 
@@ -104,7 +84,6 @@ class calculos_mandelbrot:
         if nombre_fractal in FRACTAL_REGISTRY:
             for calc in FRACTAL_REGISTRY[nombre_fractal]:
                 self.ui.tipo_calculo_comboBox.addItem(calc)
-    
     
     @staticmethod
     def medir_tiempo(nombre) -> callable:
@@ -146,20 +125,6 @@ class calculos_mandelbrot:
         self.real = real
         self.imag = imag
         return None
-    
-    def calcular_fractal2(self) -> np.ndarray:
-        """
-        Calcula el fractal según los parámetros actuales.
-        Utiliza el registro de fractales para determinar la función a invocar.
-        """
-        if self.tipo_fractal in self.fractales:
-            if self.tipo_calculo in self.fractales[self.tipo_fractal]:
-                M = self.fractales[self.tipo_fractal][self.tipo_calculo]()
-                return M
-            else:
-                raise ValueError(f"Tipo de cálculo '{self.tipo_calculo}' no soportado para el fractal '{self.tipo_fractal}'.")
-        else:
-            raise ValueError(f"Fractal '{self.tipo_fractal}' no soportado.")
 
     def calcular_fractal(self) -> np.ndarray:
         if self.tipo_fractal in FRACTAL_REGISTRY:
@@ -213,6 +178,83 @@ class calculos_mandelbrot:
         plt.savefig(filepath, dpi=dpi, bbox_inches='tight', pad_inches=0, format="png")
         plt.close()
         return None
+
+    ###################################
+    # Métodos de cálculo de fractales #
+    ###################################
+    
+#    @register_fractal("Mandelbrotfast", "GPU_Cupy_kernel_fast")
+    @medir_tiempo("Mandelbrot CPP (Fast)")
+    def hacer_mandelbrotfast_cpp(self) -> np.ndarray:
+        dll_path = r"codigos_cpp\mandelbrot.dll"
+        if not os.path.exists(dll_path):
+            print(f"Error: No se encuentra la DLL en {dll_path}")
+            exit(1)
+
+        # Cargar la DLL con manejo de errores
+        try:
+            lib = ctypes.WinDLL(dll_path)
+        except OSError as e:
+            print(f"Error al cargar la DLL: {e}")
+            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
+            raise
+
+        lib.mandelbrot.argtypes = [
+            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+            ctypes.c_int, ctypes.c_int, ctypes.c_int
+        ]
+        lib.mandelbrot.restype = ctypes.POINTER(ctypes.c_int)
+        lib.free_mandelbrot.argtypes = [ctypes.POINTER(ctypes.c_int)]
+        lib.free_mandelbrot.restype = None
+
+        M_ptr = lib.mandelbrot(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
+        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
+        M_copy = np.copy(M).reshape(self.height, self.width)
+        lib.free_mandelbrot(M_ptr)
+        return M_copy
+
+#    @register_fractal("Mandelbrotprecision", "cpp_precision")
+    @medir_tiempo("Mandelbrot CPP (Precision)")
+    def hacer_mandelbrotprecision_cpp(self, precision: int = 100) -> np.ndarray:
+        """
+        Calcula el fractal Mandelbrot con una precisión específica.
+        """
+        dll_path = r"codigos_cpp\mandelbrotprecision.dll"
+        if not os.path.exists(dll_path):
+            print(f"Error: No se encuentra la DLL en {dll_path}")
+            exit(1)
+
+        # Cargar la DLL con manejo de errores
+        try:
+            lib = ctypes.WinDLL(dll_path)
+        except OSError as e:
+            print(f"Error al cargar la DLL: {e}")
+            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
+            raise
+
+        lib.mandelbrot_ap.argtypes = [
+            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+            ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int
+        ]
+        lib.mandelbrot_ap.restype = ctypes.POINTER(ctypes.c_int)
+        lib.free_mandelbrot_ap.argtypes = [ctypes.POINTER(ctypes.c_int)]
+        lib.free_mandelbrot_ap.restype = None
+
+        M_ptr = lib.mandelbrot_ap(
+            self.xmin, self.xmax, self.ymin, self.ymax,
+            self.width, self.height, self.max_iter, precision
+        )
+        
+        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
+        M_copy = np.copy(M).reshape(self.height, self.width)
+
+        lib.free_mandelbrot_ap(M_ptr)
+        
+        return M_copy
+    
+    ##############
+    # Mandelbrot #
+    ##############
     
     @register_fractal("Mandelbrot", "GPU_Cupy_kernel_smooth")
     @medir_tiempo("Mandelbrot GPU (Smooth Coloring)")
@@ -339,9 +381,6 @@ class calculos_mandelbrot:
         return M
     
     
-    ##############################################################
-    
-    
     @register_fractal("Mandelbrot", "CPU_cpp")
     @medir_tiempo("Mandelbrot CPP")
     def hacer_mandelbrot_cpp(self) -> np.ndarray:
@@ -416,8 +455,11 @@ class calculos_mandelbrot:
         # Devolvemos la matriz en 2D
         img = iters.reshape((self.height, self.width))
         return img
+
+    #########
+    # Julia #
+    #########
     
-    ###################################################################
     @register_fractal("Julia", "GPU_Cupy_kernel")
     def hacer_julia_gpu(self) -> np.ndarray:
         inicio = time.time()
@@ -492,7 +534,6 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
-
     @register_fractal("Julia", "CPU_cpp")
     @medir_tiempo("Julia CPP")
     def hacer_julia_cpp(self) -> np.ndarray:
@@ -540,7 +581,11 @@ class calculos_mandelbrot:
         lib.free_julia(M_ptr)
     
         return M_copy
-        
+    
+    ################
+    # Burning Ship #
+    ################
+
     @register_fractal("Burning Ship", "GPU_Cupy_kernel")
     def hacer_burning_gpu(self) -> np.ndarray:
         inicio = time.time()
@@ -648,6 +693,10 @@ class calculos_mandelbrot:
         lib.free_burning_ship(M_ptr)
         return M_copy
     
+    ###########
+    # Tricorn #
+    ###########
+
     @register_fractal("Tricorn", "GPU_Cupy_kernel")
     def hacer_tricorn_gpu(self) -> np.ndarray:
         inicio = time.time()
@@ -722,7 +771,6 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
-
     @register_fractal("Tricorn", "CPU_cpp")
     @medir_tiempo("Tricorn CPP")
     def hacer_tricorn_cpp(self) -> np.ndarray:
@@ -750,6 +798,10 @@ class calculos_mandelbrot:
         M_copy = np.copy(M).reshape(self.height, self.width)
         lib.free_tricorn(M_ptr)
         return M_copy
+    
+    ###########
+    # Circulo #
+    ###########
     
     @register_fractal("Circulo", "GPU_Cupy_kernel")
     def hacer_circulo_gpu(self) -> np.ndarray:
@@ -851,6 +903,10 @@ class calculos_mandelbrot:
         M_copy = np.copy(M).reshape(self.height, self.width)
         lib.free_circulo(M_ptr)
         return M_copy
+    
+    ##################
+    # Newton-Raphson #
+    ##################
     
     @register_fractal("Newton-Raphson", "GPU_Cupy_kernel")
     def hacer_newton_gpu(self) -> np.ndarray:
@@ -991,8 +1047,11 @@ class calculos_mandelbrot:
         M_copy = np.copy(M).reshape(self.height, self.width)
         lib.free_newton(M_ptr)
         return M_copy    
-    ######################################################################
-    
+
+    ###########
+    # Phoenix #
+    ###########
+
     @register_fractal("Phoenix", "CPU_Numpy")
     def hacer_phoenix_numpy(self) -> np.ndarray:
         """
@@ -1125,6 +1184,9 @@ class calculos_mandelbrot:
         lib.free_phoenix(M_ptr)
         return M_copy
     
+    #################
+    # Burning Julia #
+    #################
 
     @register_fractal("Burning Julia", "CPU_Numpy")
     def hacer_burning_julia_numpy(self) -> np.ndarray:
@@ -1206,7 +1268,6 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M.get()
 
-
     @register_fractal("Burning Julia", "GPU_Cupy_kernel")
     @medir_tiempo("Burning Julia GPU")
     def hacer_burning_julia_gpu(self):
@@ -1263,7 +1324,10 @@ class calculos_mandelbrot:
         lib.free_burning_julia(M_ptr)
         return M_copy
         
-
+    #####################
+    # Celtic Mandelbrot #
+    #####################
+    
     @register_fractal("Celtic Mandelbrot", "CPU_Numpy")
     def hacer_celtic_mandelbrot_numpy(self) -> np.ndarray:
         """
@@ -1423,7 +1487,10 @@ class calculos_mandelbrot:
         lib.free_celtic_mandelbrot(M_ptr)
         return M_copy
     
-    
+    ########
+    # Nova #
+    ########
+
     @register_fractal("Nova", "CPU_Numpy")
     def hacer_nova_numpy(self) -> np.ndarray:
         """

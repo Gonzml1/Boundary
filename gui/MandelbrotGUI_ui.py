@@ -34,10 +34,20 @@ class Ui_Boundary(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayoutWidget = QWidget(self.centralwidget)
         self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(1130, 220, 160, 291))
+        self.verticalLayoutWidget.setGeometry(QRect(1130, 220, 160, 356))
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.label_paso = QLabel(self.verticalLayoutWidget)
+        self.label_paso.setObjectName(u"label_paso")
+
+        self.verticalLayout.addWidget(self.label_paso)
+
+        self.paso_entrada = QLineEdit(self.verticalLayoutWidget)
+        self.paso_entrada.setObjectName(u"paso_entrada")
+
+        self.verticalLayout.addWidget(self.paso_entrada)
+
         self.xmax_label = QLabel(self.verticalLayoutWidget)
         self.xmax_label.setObjectName(u"xmax_label")
 
@@ -102,6 +112,13 @@ class Ui_Boundary(object):
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
+
+        self.slider_iteraciones = QSlider(self.verticalLayoutWidget)
+        self.slider_iteraciones.setObjectName(u"slider_iteraciones")
+        self.slider_iteraciones.setMaximum(512)
+        self.slider_iteraciones.setOrientation(Qt.Horizontal)
+
+        self.verticalLayout.addWidget(self.slider_iteraciones)
 
         self.layoutWidget = QWidget(self.centralwidget)
         self.layoutWidget.setObjectName(u"layoutWidget")
@@ -318,17 +335,12 @@ class Ui_Boundary(object):
         self.graphicsView = QGraphicsView(self.centralwidget)
         self.graphicsView.setObjectName(u"graphicsView")
         self.graphicsView.setGeometry(QRect(980, 10, 200, 200))
-        self.slider_iteraciones = QSlider(self.centralwidget)
-        self.slider_iteraciones.setObjectName(u"slider_iteraciones")
-        self.slider_iteraciones.setGeometry(QRect(1130, 520, 151, 22))
-        self.slider_iteraciones.setMaximum(512)
-        self.slider_iteraciones.setOrientation(Qt.Horizontal)
         self.label_coordenadas2 = QLabel(self.centralwidget)
         self.label_coordenadas2.setObjectName(u"label_coordenadas2")
         self.label_coordenadas2.setGeometry(QRect(860, 550, 191, 16))
         self.p_nova = QLineEdit(self.centralwidget)
         self.p_nova.setObjectName(u"p_nova")
-        self.p_nova.setGeometry(QRect(1140, 560, 113, 22))
+        self.p_nova.setGeometry(QRect(1140, 580, 113, 22))
         Boundary.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(Boundary)
         self.menubar.setObjectName(u"menubar")
@@ -345,6 +357,8 @@ class Ui_Boundary(object):
 
     def retranslateUi(self, Boundary):
         Boundary.setWindowTitle(QCoreApplication.translate("Boundary", u"Boundary", None))
+        self.label_paso.setText(QCoreApplication.translate("Boundary", u"Paso", None))
+        self.paso_entrada.setText(QCoreApplication.translate("Boundary", u"0.1", None))
         self.xmax_label.setText(QCoreApplication.translate("Boundary", u"xmax", None))
         self.xmax_entrada.setText(QCoreApplication.translate("Boundary", u"1.2", None))
         self.ymax_label.setText(QCoreApplication.translate("Boundary", u"ymax", None))

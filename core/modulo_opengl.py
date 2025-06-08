@@ -343,6 +343,42 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
     
+    @register_palette("Prism LUT")
+    def _palette_prism_from_norm(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Devuelve un array H×W×3 de uint8 con la paleta 'prism',
+        usando un LUT de 256 colores, a partir de norm (valores en [0,1]).
+        """
+        # 1) Crear la lookup table de 256 colores
+        lut = (cm.get_cmap('prism', 256)(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        # 2) Mapear norm [0,1] a índices 0–255
+        indices = np.uint8((norm * 255).clip(0, 255))
+        # 3) Devolver RGB
+        return lut[indices]
+    
+    @register_palette("Escape Speed")
+    def paleta_escape_speed_from_norm(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Paleta según rapidez de escape, aplicable a `norm` (valores en [0,1]):
+        - Escape rápido (norm bajo) → tonos cálidos
+        - Escape lento (norm alto) → tonos fríos
+
+        Parámetros:
+        - norm: array H×W con M/max_iter, valores en [0,1]
+
+        Devuelve:
+        - Array uint8 (H, W, 3) con los valores RGB.
+        """
+        # 1) Invertir para que norm bajo = rápido = índice alto
+        inv = np.clip(1 - norm, 0, 1)
+        # 2) Construir LUT de 256 colores (p.ej. 'inferno')
+        cmap = cm.get_cmap('inferno', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        # 3) Mapear inv [0,1] → índices 0–255
+        indices = (inv * 255).astype(np.uint8)
+        # 4) Devolver RGB
+        return lut[indices]
+    
     # ——— Método para pasar a la siguiente paleta ———
     def next_palette(self):
         """

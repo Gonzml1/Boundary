@@ -1,12 +1,11 @@
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QMainWindow, QGraphicsEllipseItem, QGraphicsScene
+from PyQt5.QtWidgets import QMainWindow, QGraphicsEllipseItem, QGraphicsScene, QGraphicsView
 from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtCore import QPointF
 import core.funciones_ui as md
 import gui.tema_oscuro as ts
 from gui.MandelbrotGUI import Ui_Boundary
 from OpenGL.GL import *
-
 
 class Punto(QGraphicsEllipseItem):
     def __init__(self, callback):
@@ -24,50 +23,72 @@ class Punto(QGraphicsEllipseItem):
             return QPointF(new_x, new_y)
         return super().itemChange(change, value)
 
+class GraphicsViewFlechas(QGraphicsView):
+    def __init__(self, *args, punto=None, ui=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.punto = punto
+        self.ui = ui
+
+    def keyPressEvent(self, event):
+        try:
+            paso = float(self.ui.paso_entrada.text())
+        except Exception:
+            paso = 1
+        pos = self.punto.pos()
+        if event.key() == QtCore.Qt.Key_Left:
+            self.punto.setPos(max(0, pos.x() - paso), pos.y())
+        elif event.key() == QtCore.Qt.Key_Right:
+            self.punto.setPos(min(200, pos.x() + paso), pos.y())
+        elif event.key() == QtCore.Qt.Key_Up:
+            self.punto.setPos(pos.x(), max(0, pos.y() - paso))
+        elif event.key() == QtCore.Qt.Key_Down:
+            self.punto.setPos(pos.x(), min(200, pos.y() + paso))
+        super().keyPressEvent(event)
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_Boundary()
         self.ui.setupUi(self)
-        
+
         # Tema oscuro
         ts.tema_oscuro(QtWidgets.QApplication.instance())
 
         # Mostrar fractal
-        mandelbrot=md.mostrar_fractal_opengl(self.ui)
+        mandelbrot = md.mostrar_fractal_opengl(self.ui)
 
         # Linkear botones
         md.linkeo_botones(self.ui)
 
         # Crear escena de tamaño fijo
         self.scene = QGraphicsScene(0, 0, 200, 200)
-        self.ui.graphicsView.setScene(self.scene)
 
-        # Desactivar scrollbars
-        self.ui.graphicsView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.ui.graphicsView.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-
-        # Ajustar el view para que no agregue márgenes extras
-        self.ui.graphicsView.setSceneRect(0, 0, 200, 200)
-        self.ui.graphicsView.setFixedSize(200, 200)
-
-        # Evitar que se pueda hacer zoom o mover con el mouse
-        self.ui.graphicsView.setInteractive(True)
-        
         # Punto movible
         self.punto = Punto(self.actualizar_coordenadas)
         self.scene.addItem(self.punto)
         self.punto.setPos(100, 100)
 
+        # Cambiás la clase del graphicsView original por la tuya
+        self.ui.graphicsView.__class__ = GraphicsViewFlechas
+        self.ui.graphicsView.punto = self.punto
+        self.ui.graphicsView.ui = self.ui    # <<---- ESTA LINEA ES CLAVE
+        self.ui.graphicsView.setScene(self.scene)
+        self.ui.graphicsView.setSceneRect(0, 0, 200, 200)
+        self.ui.graphicsView.setFixedSize(200, 200)
+        self.ui.graphicsView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.ui.graphicsView.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.ui.graphicsView.setInteractive(True)
+
         # ComboBox por defecto
         self.ui.tipo_calculo_comboBox.setCurrentIndex(4)
-        self.ui.graphicsView.scene().changed.connect(mandelbrot.update)
-        
+        self.scene.changed.connect(mandelbrot.update)
+
+        # Foco directo al graphicsView original
+        self.ui.graphicsView.setFocus()
 
     def actualizar_coordenadas(self, x, y):
-        x_real = (x / 100) * 2 -2
-        y_real = -((y / 100) * (2)-2)
+        x_real = (x / 100) * 2 - 2
+        y_real = -((y / 100) * 2 - 2)
         self.ui.real_julia_entrada.setText(f"{x_real:.5f}")
         self.ui.im_julia_entrada.setText(f"{y_real:.5f}")
         self.ui.label_coordenadas2.setText(f"Re: {x_real:.5f}, Im: {y_real:.5f}")

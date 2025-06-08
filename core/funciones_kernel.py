@@ -1,4 +1,4 @@
-#import cupy as cp
+import cupy as cp
 
 mandelbrot_kernel = cp.ElementwiseKernel(
     in_params='complex128 c, int32 max_iter',
