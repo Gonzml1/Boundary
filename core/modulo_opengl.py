@@ -378,8 +378,13 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = (inv * 255).astype(np.uint8)
         # 4) Devolver RGB
         return lut[indices]
-    
+    def duplicar(self=Ui_Boundary()):
+        self.ui.max_iter_entrada.setText(str(int(int(self.ui.max_iter_entrada.text())*2)))
+
+    def dividir(self=Ui_Boundary()):
+        self.ui.max_iter_entrada.setText(str(int(int(self.ui.max_iter_entrada.text())/2)))
     # ——— Método para pasar a la siguiente paleta ———
+    
     def next_palette(self):
         """
         Incrementa palette_index y actualiza el widget.
@@ -643,6 +648,14 @@ class MandelbrotWidget(QOpenGLWidget):
             elif event.key() == Qt.Key_R:
                 self.reset_view()
 
+            elif event.key() == Qt.Key_G:
+                self.duplicar()
+                self.update()
+            
+            elif event.key() == Qt.Key_H:
+                self.dividir()
+                self.update()
+                
         if str(self.ui.generador_comboBox.currentText()) == "Lsystem":
             if event.key() == Qt.Key_Plus:
                 self.zoom_factor *= 1.1  # Acercar

@@ -21,7 +21,7 @@ class Punto(QGraphicsEllipseItem):
             new_y = max(0, min(200, value.y()))
             self.callback(new_x, new_y)
             return QPointF(new_x, new_y)
-        return super().itemChange(change, value)
+        return super().itemChange(change, value) 
 
 class GraphicsViewFlechas(QGraphicsView):
     def __init__(self, *args, punto=None, ui=None, **kwargs):
@@ -80,7 +80,8 @@ class MainWindow(QMainWindow):
         self.ui.graphicsView.setInteractive(True)
 
         # ComboBox por defecto
-        self.ui.tipo_calculo_comboBox.setCurrentIndex(4)
+        self.ui.tipo_calculo_comboBox.setCurrentIndex(5)
+        self.ui.formula_entrada.setText("z**2 + c")
         self.scene.changed.connect(mandelbrot.update)
 
         # Foco directo al graphicsView original

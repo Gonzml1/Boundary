@@ -1,14 +1,14 @@
-import cupy as cp
+#import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-from .funciones_kernel import *
+#from .funciones_kernel import *
 import os
 from functools import wraps
 import ctypes
 from gui.MandelbrotGUI import Ui_Boundary
-from scipy.special import gamma
+#from scipy.special import gamma
 
 # cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
 # z[matriz] = z[matriz]**2 + C[matriz]    
@@ -182,6 +182,55 @@ class calculos_mandelbrot:
     ###################################
     # Métodos de cálculo de fractales #
     ###################################
+    @register_fractal("Mandelbrot", "CPU_cpp_entrada")
+    @medir_tiempo("Mandelbrot CPP (Entrada)")
+    def hacer_mandelbrot_cpp(self) -> np.ndarray:
+        """
+        Llama a la DLL de Mandelbrot dinámica, pasándole self.formula
+        (por ejemplo "z**3 + c**2 + 2*c**3") para que el C++ la parseé.
+        """
+        dll_path = r"codigos_cpp\mandelbrot_dynamic.dll"
+        if not os.path.exists(dll_path):
+            raise FileNotFoundError(f"No se encuentra la DLL en {dll_path}")
+
+        # Carga la DLL
+        lib = ctypes.WinDLL(dll_path)
+
+        # Mandamos:
+        #  xmin, xmax, ymin, ymax: double
+        #  width, height, max_iter: int
+        #  formula: const char*
+        lib.mandelbrot.argtypes = [
+            ctypes.c_double, ctypes.c_double,
+            ctypes.c_double, ctypes.c_double,
+            ctypes.c_int,    ctypes.c_int,
+            ctypes.c_int,    ctypes.c_char_p
+        ]
+        lib.mandelbrot.restype = ctypes.POINTER(ctypes.c_int)
+
+        lib.free_mandelbrot.argtypes = [ctypes.POINTER(ctypes.c_int)]
+        lib.free_mandelbrot.restype  = None
+
+        # Prepara la fórmula como bytes UTF-8
+        formula_bytes = self.formula.encode('utf-8')
+
+        # Llamada al DLL
+        M_ptr = lib.mandelbrot(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter,
+            ctypes.c_char_p(formula_bytes)
+        )
+        if not M_ptr:
+            raise RuntimeError("mandelbrot() devolvió nullptr")
+
+        # Convierte el buffer en un ndarray y libera la memoria C++
+        flat = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
+        M = flat.copy().reshape(self.height, self.width)
+        lib.free_mandelbrot(M_ptr)
+
+        return M
     
 #    @register_fractal("Mandelbrotfast", "GPU_Cupy_kernel_fast")
     @medir_tiempo("Mandelbrot CPP (Fast)")
