@@ -1,4 +1,4 @@
-#import cupy as cp
+import cupy as cp
 
 mandelbrot_kernel = cp.ElementwiseKernel(
     in_params='complex128 c, int32 max_iter',
@@ -237,4 +237,27 @@ nova_kernel = cp.ElementwiseKernel(
         }
     ''',
     name='nova'
+)
+
+julia_custom_kernel = cp.ElementwiseKernel(
+    in_params='complex128 c, float64 a, float64 b, int32 max_iter',
+    out_params='int32 result',
+    operation="""
+        complex<double> z_temp = c;
+        for (int i = 0; i < max_iter; ++i) {
+            // z = a*z^2 + c + b*exp((z^2 - 1.00001*z) / c^4)
+            complex<double> z2 = z_temp * z_temp;
+            complex<double> numerator = z2 - 1.00001 * z_temp;
+            complex<double> c4 = c * c * c * c;
+            complex<double> exp_part = exp(numerator / c4);
+            z_temp = a * (z2 + c) + b * exp_part;
+
+            if (real(z_temp) * real(z_temp) + imag(z_temp) * imag(z_temp) > 4.0) {
+                result = i;
+                return;
+            }
+        }
+        result = max_iter;
+    """,
+    name='julia_custom_kernel'
 )

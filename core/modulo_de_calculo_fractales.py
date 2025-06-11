@@ -1,14 +1,14 @@
-#import cupy as cp
+import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-#from .funciones_kernel import *
+from .funciones_kernel import *
 import os
 from functools import wraps
 import ctypes
 from gui.MandelbrotGUI import Ui_Boundary
-#from scipy.special import gamma
+from scipy.special import gamma
 
 # cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
 # z[matriz] = z[matriz]**2 + C[matriz]    
@@ -1733,34 +1733,74 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
 
-@register_fractal("Mandelbrot-Gamma", "CPU_Numpy")
-def hacer_mandelbrot_gamma(self) -> np.ndarray:
-    """
-    Mandelbrot con función Gamma: z_{n+1} = gamma(z_n)^2 + c
-    """
-    inicio = time.time()
+    @register_fractal("Mandelbrot-Gamma", "CPU_Numpy")
+    def hacer_mandelbrot_gamma(self) -> np.ndarray:
+        """
+        Mandelbrot con función Gamma: z_{n+1} = gamma(z_n)^2 + c
+        """
+        inicio = time.time()
 
-    x = np.linspace(self.xmin, self.xmax, self.width)
-    y = np.linspace(self.ymin, self.ymax, self.height)
-    X, Y = np.meshgrid(x, y)
-    C = X + 1j * Y   # <--- Ahora c depende de cada punto
-    z = np.zeros(C.shape, dtype=np.complex128)
-    M = np.zeros(C.shape, dtype=int)
-    matriz = np.ones(C.shape, dtype=bool)
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        X, Y = np.meshgrid(x, y)
+        C = X + 1j * Y   # <--- Ahora c depende de cada punto
+        z = np.zeros(C.shape, dtype=np.complex128)
+        M = np.zeros(C.shape, dtype=int)
+        matriz = np.ones(C.shape, dtype=bool)
 
-    for n in range(self.max_iter):
-        z_act = z[matriz]
-        c_act = C[matriz]
+        for n in range(self.max_iter):
+            z_act = z[matriz]
+            c_act = C[matriz]
+            try:
+                z_next = gamma(z_act) + c_act
+            except Exception as e:
+                z_next = np.full_like(z_act, np.inf, dtype=np.complex128)
+            z[matriz] = z_next
+
+            matriz = np.logical_and(matriz, np.abs(z) <= 100)  # Mantener solo los que no escaparon
+            M[matriz] = n
+            print(f"\rMANDELBROT-GAMMA {n}", end="", flush=True)
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M
+
+    @register_fractal("Julia-GPU", "GPU_Cupy")
+    @medir_tiempo("Julia GPU")
+    def hacer_julia_cupy(self) -> np.ndarray:
+        inicio = time.time()
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+        z = cp.zeros(C.shape, dtype=cp.complex128)
+        M = cp.zeros(C.shape, dtype=int)
+        matriz = cp.ones(C.shape, dtype=bool)
+        a = self.real
+        b = self.imag
+        for n in range(self.max_iter):
+            z[matriz]=a*z[matriz]**2+C[matriz] + b*cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4)
+            matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
+            M[matriz] = n
+            print(f"\rJULIA {n}", end="", flush=True)
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
+
+    @register_fractal("Julia-GPU", "GPU_Cupy_kernel")
+    @medir_tiempo("Julia GPU")
+    def hacer_julia_cupy_kernel_2(self) -> np.ndarray:
+        x = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
+        y = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
+        X, Y = cp.meshgrid(x, y)
+        C = (X + 1j * Y).ravel()
+
+        resultado = cp.empty(C.shape, dtype=cp.int32)
         try:
-            z_next = gamma(z_act) + c_act
+            julia_custom_kernel(C, float(self.real), float(self.imag), self.max_iter, resultado)
         except Exception as e:
-            z_next = np.full_like(z_act, np.inf, dtype=np.complex128)
-        z[matriz] = z_next
+            print(f"Error ejecutando kernel Julia: {e}")
+            return None
 
-        matriz = np.logical_and(matriz, np.abs(z) <= 100)  # Mantener solo los que no escaparon
-        M[matriz] = n
-        print(f"\rMANDELBROT-GAMMA {n}", end="", flush=True)
-
-    fin = time.time()
-    print("\nTiempo de ejecución:", fin - inicio, "segundos")
-    return M
+        resultado = resultado.reshape((self.height, self.width))
+        return resultado.get()
