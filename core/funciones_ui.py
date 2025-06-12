@@ -61,7 +61,7 @@ def mostrar_fractal_opengl(self=Ui_Boundary()):
     except ValueError:
         print("Error: Asegurate de que los campos tengan valores numéricos válidos.")
     
-def linkeo_botones(ui=Ui_Boundary()):
+def linkeo_botones(ui: Ui_Boundary) -> None:
     """Conecta los botones de la interfaz con sus acciones."""
     ui.boton_resetear.clicked.connect(lambda: resetear_entrada(ui))
     ui.boton_dividir.clicked.connect(lambda: dividir(ui))
