@@ -9,6 +9,7 @@ from functools import wraps
 import ctypes
 from gui.MandelbrotGUI import Ui_Boundary
 from scipy.special import gamma
+#from  .  import mandelbrot
 
 # cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
 # z[matriz] = z[matriz]**2 + C[matriz]    
@@ -1804,3 +1805,18 @@ class calculos_mandelbrot:
 
         resultado = resultado.reshape((self.height, self.width))
         return resultado.get()
+    
+    @register_fractal("Mandelbrot-Fortran", "CPU_Fortran")
+    @medir_tiempo("Mandelbrot Fortran")
+    def hacer_mandelbrot_fortran(self) -> np.ndarray:
+        # Llamada al módulo Fortran: devuelve directamente la matriz M
+        M = mandelbrot.mandelbrot(
+            self.xmin,
+            self.xmax,
+            self.ymin,
+            self.ymax,
+            self.width,
+            self.height,
+            self.max_iter
+        )
+        return M

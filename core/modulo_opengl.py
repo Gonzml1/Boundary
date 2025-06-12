@@ -356,8 +356,8 @@ class MandelbrotWidget(QOpenGLWidget):
         # 3) Devolver RGB
         return lut[indices]
     
-    @register_palette("Escape Speed")
-    def paleta_escape_speed_from_norm(self, norm: np.ndarray) -> np.ndarray:
+#    @register_palette("Escape Speed")
+    def _paleta_escape_speed_from_norm(self, norm: np.ndarray) -> np.ndarray:
         """
         Paleta según rapidez de escape, aplicable a `norm` (valores en [0,1]):
         - Escape rápido (norm bajo) → tonos cálidos
@@ -378,6 +378,195 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = (inv * 255).astype(np.uint8)
         # 4) Devolver RGB
         return lut[indices]
+
+    @register_palette("Cubehelix")
+    def _paleta_cubehelix(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'cubehelix' de Matplotlib (perceptualmente uniforme,
+        ideal para resaltar detalle). Muestreamos 1024 colores.
+        """
+        # 1) Generamos un LUT de 1024 entradas
+        cmap = cm.get_cmap('cubehelix', 1024)
+        lut = (cmap(np.linspace(0, 1, 1024))[:, :3] * 255).astype(np.uint8)  # (1024, 3)
+
+        # 2) Mapear norm ∈ [0,1] a índices 0..1023
+        indices = np.uint16((norm * 1023).clip(0, 1023))  # shape=(H,W), valores 0–1023
+
+        # 3) Indexar la LUT
+        return lut[indices]  # shape=(H, W, 3), dtype=uint8
+    
+    @register_palette("Spectral")
+    def _paleta_spectral(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'Spectral' de Matplotlib (divergente, multicolor).
+        """
+        cmap = cm.get_cmap('Spectral', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+
+    @register_palette("RdYlBu")
+    def _paleta_rdyalbu(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'RdYlBu' de Matplotlib (divergente rojo→amarillo→azul).
+        """
+        cmap = cm.get_cmap('RdYlBu', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+
+    @register_palette("Paired")
+    def _paleta_paired(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'Paired' de Matplotlib (cualitativo, pares de colores contrastantes).
+        """
+        cmap = cm.get_cmap('Paired', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+
+    @register_palette("Pastel1")
+    def _paleta_pastel1(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'Pastel1' de Matplotlib (cualitativo, colores suaves).
+        """
+        cmap = cm.get_cmap('Pastel1', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+
+    @register_palette("YlGnBu")
+    def _paleta_ylgnbu(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Colormap 'YlGnBu' de Matplotlib (secuencial amarillo→verde→azul).
+        """
+        cmap = cm.get_cmap('YlGnBu', 256)
+        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
+        indices = np.uint8((norm * 255).clip(0, 255))
+        return lut[indices]
+    
+    @register_palette("Iteraciones (HSV ciclo 64)")
+    def _paleta_iters_hsv(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Paleta basada en el número de iteraciones:
+        - Convertimos norm [0,1] de vuelta a iter (0..max_iter)
+        - Tomamos iter % 64 para indexar 64 colores HSV
+        """
+        # Reconstruir el entero de iteración
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = 64
+        # Generar LUT HSV de 64 colores
+        hsv_lut = cm.get_cmap('hsv', cycle)(np.arange(cycle))[:, :3]
+        lut = (hsv_lut * 255).astype(np.uint8)          # (64,3) uint8
+        # Indexar módulo ciclo
+        return lut[iters % cycle]     
+    
+    @register_palette("Iteraciones (Viridis ciclo 64)")
+    def _paleta_iters_viridis(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Paleta basada en el número de iteraciones:
+        - Reconstruye iter ∈ [0..max_iter] desde norm
+        - Usa iter % 64 para indexar un LUT de Viridis de 64 colores
+        """
+        # 1) Reconstruir conteo de iteraciones
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = 64
+
+        # 2) Generar LUT de Viridis con 64 entradas
+        cmap   = cm.get_cmap('viridis', cycle)
+        lut    = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)  # (64,3)
+
+        # 3) Indexar según iter % cycle
+        return lut[iters % cycle]  # shape=(H, W, 3), dtype=uint8
+    
+    @register_palette("Iteraciones (Twilight Shifted ciclo 64)")
+    def _paleta_iters_twilight_shifted(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Paleta basada en el número de iteraciones:
+        - Reconstruye iter ∈ [0..max_iter] desde norm
+        - Usa iter % 64 para indexar un LUT de Twilight Shifted de 64 colores
+        """
+        # 1) Reconstruir conteo de iteraciones
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = 64
+
+        # 2) Generar LUT de Twilight Shifted con 64 entradas
+        cmap   = cm.get_cmap('twilight_shifted', cycle)
+        lut    = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+        # (64,3)
+        # 3) Indexar según iter % cycle
+        return lut[iters % cycle]  # shape=(H, W, 3), dtype=uint8
+    
+    @register_palette("Iteraciones (Plasma ciclo 64)")
+    def _paleta_iters_plasma(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Paleta basada en el número de iteraciones:
+        - Reconstruye iter ∈ [0..max_iter] desde norm
+        - Usa iter % 64 para indexar un LUT de Plasma de 64 colores
+        """
+        # 1) Reconstruir conteo de iteraciones
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = 64
+
+        # 2) Generar LUT de Plasma con 64 entradas
+        cmap   = cm.get_cmap('plasma', cycle)
+        lut    = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)  # (64,3)
+        # 3) Indexar según iter % cycle
+        return lut[iters % cycle]
+
+    @register_palette("Grises cíclico")
+    def _paleta_grises_ciclico(self, norm: np.ndarray) -> np.ndarray:
+        """
+        Grises cíclico basado en iteraciones:
+        - Reconstruye iters ∈ [0..max_iter] desde norm
+        - Toma iters % cycle para definir la intensidad de gris
+        """
+        # 1) Reconstruir el conteo de iteraciones
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        # 2) Definir ciclo de, por ejemplo, 64 pasos
+        cycle = 64
+        mod = iters % cycle
+        # 3) Mapear mod ∈ [0..cycle-1] a gris ∈ [0..255]
+        gray = np.uint8(((mod.astype(float) / (cycle - 1)) * 255).clip(0, 255))
+        # 4) Devolver imagen H×W×3
+        return np.dstack([gray, gray, gray])
+
+    @register_palette("Iteraciones (Twilight Shifted ciclo 128)")
+    def _paleta_iters_twilight_128(self, norm: np.ndarray) -> np.ndarray:
+        """
+        - Reconstruye iter ∈ [0..max_iter] desde norm
+        - Usa iter % 128 para indexar un LUT de twilight_shifted de 128 colores
+        """
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = 128
+        cmap = cm.get_cmap('twilight_shifted', cycle)
+        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+        return lut[iters % cycle]
+
+    @register_palette("Iteraciones (Twilight Shifted ciclo 256)")
+    def _paleta_iters_twilight_256(self, norm: np.ndarray) -> np.ndarray:
+        """
+        - Reconstruye iter ∈ [0..max_iter] desde norm
+        - Usa iter % 256 para indexar un LUT de twilight_shifted de 256 colores
+        """
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = 256
+        cmap = cm.get_cmap('twilight_shifted', cycle)
+        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+        return lut[iters % cycle]
+
+    @register_palette("Iteraciones (Twilight Shifted ciclo 512)")
+    def _paleta_iters_twilight_512(self, norm: np.ndarray) -> np.ndarray:
+        """
+        - Reconstruye iter ∈ [0..max_iter] desde norm
+        - Usa iter % 512 para indexar un LUT de twilight_shifted de 512 colores
+        """
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = 512
+        cmap = cm.get_cmap('twilight_shifted', cycle)
+        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+        return lut[iters % cycle]
+    
     def duplicar(self=Ui_Boundary()):
         self.ui.max_iter_entrada.setText(str(int(int(self.ui.max_iter_entrada.text())*2)))
 
