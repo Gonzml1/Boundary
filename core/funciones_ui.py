@@ -8,22 +8,32 @@ from core.modulo_de_calculo_fractales import calculos_mandelbrot
 
 #calcular_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
 
-def guardar_imagen(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, ui):
+def guardar_imagen(ui: Ui_Boundary) -> None:
+    """Guardar la imagen del fractal usando los valores actuales de la UI."""
+    # Obtener nuevamente los datos para usar los valores que estén en pantalla
+    (_, xmin, xmax, ymin, ymax, width, height, max_iter,
+     formula, tipo_calculo, tipo_fractal, real, imag, _, _) = obtener_datos(ui)
+
     ruta, _ = QFileDialog.getSaveFileName(
         None,
         "Guardar imagen",
         "fractal.png",
-        "Imágenes PNG (*.png);;JPEG (*.jpg *.jpeg);;Todos los archivos (*)"
+        "Imágenes PNG (*.png);;JPEG (*.jpg *.jpeg);;Todos los archivos (*)",
     )
+
     calculos = calculos_mandelbrot(
         xmin, xmax, ymin, ymax, width, height, max_iter,
-        formula, tipo_calculo, tipo_fractal, real, imag, ui
+        formula, tipo_calculo, tipo_fractal, real, imag, ui,
     )
+
     if ruta:
-        # Reemplazá esto por tu lógica de fractal real
-        calculos.actualizar_fractal()
+        # Actualizar parámetros y generar el fractal
+        calculos.actualizar_fractal(
+            xmin, xmax, ymin, ymax, width, height, max_iter,
+            formula, tipo_calculo, tipo_fractal, real, imag,
+        )
         imagen_array = calculos.calcular_fractal()
-        plt.imsave(ruta, imagen_array,cmap='twilight_shifted')
+        plt.imsave(ruta, imagen_array, cmap="twilight_shifted")
         print(f"Imagen guardada en: {ruta}")
             
 
@@ -52,16 +62,12 @@ def mostrar_fractal_opengl(self=Ui_Boundary()):
         print("Error: Asegurate de que los campos tengan valores numéricos válidos.")
     
 def linkeo_botones(ui=Ui_Boundary()):
-    cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, zoom_in, zoom_out = obtener_datos(ui)
-    ui.boton_resetear.clicked.connect(lambda : resetear_entrada(ui))
-    ui.boton_dividir.clicked.connect(lambda : dividir(ui))
-    ui.boton_duplicar.clicked.connect(lambda : duplicar(ui))
-    ui.boton_guardar.clicked.connect(
-        lambda: guardar_imagen(
-            xmin, xmax, ymin, ymax, width, height, max_iter,
-            formula, tipo_calculo, tipo_fractal, real, imag, ui
-        )
-    )
+    """Conecta los botones de la interfaz con sus acciones."""
+    ui.boton_resetear.clicked.connect(lambda: resetear_entrada(ui))
+    ui.boton_dividir.clicked.connect(lambda: dividir(ui))
+    ui.boton_duplicar.clicked.connect(lambda: duplicar(ui))
+    # Al guardar se toman los valores vigentes en la interfaz
+    ui.boton_guardar.clicked.connect(lambda: guardar_imagen(ui))
     ui.slider_iteraciones.valueChanged.connect(lambda value: ui.max_iter_entrada.setText(str(value)))
     
 
