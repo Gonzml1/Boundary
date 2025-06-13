@@ -21,7 +21,7 @@ def guardar_imagen(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tip
     )
     if ruta:
         # Reemplazá esto por tu lógica de fractal real
-        calculos.actualizar_fractal()
+        calculos.actualizar_fractal(xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag)
         imagen_array = calculos.calcular_fractal()
         plt.imsave(ruta, imagen_array,cmap='twilight_shifted')
         print(f"Imagen guardada en: {ruta}")
@@ -56,12 +56,12 @@ def linkeo_botones(ui=Ui_Boundary()):
     ui.boton_resetear.clicked.connect(lambda : resetear_entrada(ui))
     ui.boton_dividir.clicked.connect(lambda : dividir(ui))
     ui.boton_duplicar.clicked.connect(lambda : duplicar(ui))
-    ui.boton_guardar.clicked.connect(
-        lambda: guardar_imagen(
-            xmin, xmax, ymin, ymax, width, height, max_iter,
-            formula, tipo_calculo, tipo_fractal, real, imag, ui
-        )
-    )
+ #   ui.boton_guardar.clicked.connect(
+  #      lambda: guardar_imagen(
+   #         xmin, xmax, ymin, ymax, width, height, max_iter,
+    #        formula, tipo_calculo, tipo_fractal, real, imag, ui
+     #   )
+    #)
     ui.slider_iteraciones.valueChanged.connect(lambda value: ui.max_iter_entrada.setText(str(value)))
     
 

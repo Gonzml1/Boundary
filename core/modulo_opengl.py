@@ -8,7 +8,8 @@ from gui.MandelbrotGUI import Ui_Boundary
 from matplotlib import cm
 from typing import Callable
 from PyQt5 import QtCore
-    
+from PyQt5.QtWidgets import QFileDialog
+import matplotlib.pyplot as plt
 PALETTE_REGISTRY = []
 
 def register_palette(palette_name: str):
@@ -54,7 +55,7 @@ class MandelbrotWidget(QOpenGLWidget):
             self.palettes.append((name, bound_fn))
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.palette_index = 0
-
+        self.ui.boton_guardar.clicked.connect(lambda: self.guardar_imagen())
 
     @register_palette("Grises")
     def _paleta_grises(self, norm: np.ndarray) -> np.ndarray:
@@ -591,7 +592,43 @@ class MandelbrotWidget(QOpenGLWidget):
 
 
     # ——— paintGL revisitado, usando el índice de paleta ———
-    
+    def guardar_imagen(self):
+        ruta, _ = QFileDialog.getSaveFileName(
+            None,
+            "Guardar imagen",
+            "fractal.png",
+            "PNG (*.png);;JPEG (*.jpg *.jpeg);;Todos los archivos (*)"
+        )
+        if not ruta:
+            return
+
+        # 1) Generar los datos del fractal
+        self.mandelbrot.actualizar_fractal(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            4*self.width, 4*self.height,
+            self.max_iter,
+            self.formula, self.tipo_calculo,
+            self.tipo_fractal,
+            self.real, self.imag
+        )
+        data = self.mandelbrot.calcular_fractal()  # np.ndarray de enteros [0..max_iter]
+
+        # 2) Normalizar a [0,1]
+        norm = data.astype(float) / self.max_iter
+
+        # 3) Elegir la paleta actual
+        name, func = self.palettes[self.palette_index]
+
+        # 4) Aplicar la paleta → rgb uint8 (H,W,3)
+        rgb = func(norm)
+
+        # 5) Invertir verticalmente si lo hacés en paintGL
+
+        # 6) Guardar la imagen directamente como RGB (sin pasar cmap)
+        # plt.imsave admite uint8 RGB si no le pasás cmap
+        plt.imsave(ruta, rgb)
+
     def reset_view(self):
         """
         Resetea la vista a los valores iniciales.
