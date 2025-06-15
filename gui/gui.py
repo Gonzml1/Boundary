@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
         # Cambiás la clase del graphicsView original por la tuya
         self.ui.graphicsView.__class__ = GraphicsViewFlechas
         self.ui.graphicsView.punto = self.punto
-        self.ui.graphicsView.ui = self.ui    # <<---- ESTA LINEA ES CLAVE
+        self.ui.graphicsView.ui = self.ui    # <<---- ESTA LINEA ES CLAVE NASHE
         self.ui.graphicsView.setScene(self.scene)
         self.ui.graphicsView.setSceneRect(0, 0, 200, 200)
         self.ui.graphicsView.setFixedSize(200, 200)

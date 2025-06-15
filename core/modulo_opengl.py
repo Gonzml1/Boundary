@@ -596,7 +596,7 @@ class MandelbrotWidget(QOpenGLWidget):
         ruta, _ = QFileDialog.getSaveFileName(
             None,
             "Guardar imagen",
-            "fractal.png",
+            f"fractal_{self.xmin:.5f}_{self.xmax:.5f}_{self.ymin:.5f}_{self.ymax:.5f}.png",
             "PNG (*.png);;JPEG (*.jpg *.jpeg);;Todos los archivos (*)"
         )
         if not ruta:
@@ -628,6 +628,7 @@ class MandelbrotWidget(QOpenGLWidget):
         # 6) Guardar la imagen directamente como RGB (sin pasar cmap)
         # plt.imsave admite uint8 RGB si no le pasás cmap
         plt.imsave(ruta, rgb)
+        print(f"Imagen guardada en: {ruta}")
 
     def reset_view(self):
         """
