@@ -1,15 +1,16 @@
-#import cupy as cp
+import cupy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
 from OpenGL.GL import *
-#from .funciones_kernel import *
+from .funciones_kernel import *
 import os
 from functools import wraps
 import ctypes
 from gui.MandelbrotGUI import Ui_Boundary
 from scipy.special import gamma
 #from  .  import mandelbrot
+from .backend_cpp import *
 
 # cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
 # z[matriz] = z[matriz]**2 + C[matriz]    
@@ -162,30 +163,13 @@ class calculos_mandelbrot:
         for var in variables:
             expression = expression.replace(var, f"{var}[{mask_name}]")
         return expression
-    
-    def guardar_mandelbrot(self, M, filepath, cmap1, dpi) -> None:
-        """
-        Guarda la imagen del fractal Mandelbrot en un archivo.
-        """
-        figsize = ((self.width) / dpi, self.height / dpi)
-        
-        fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
-        ax.axis('off')
-
-        ax.imshow(M, extent=(self.xmin, self.xmax, self.ymin, self.ymax), cmap=cmap1)
-
-        fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
-        
-        plt.savefig(filepath, dpi=dpi, bbox_inches='tight', pad_inches=0, format="png")
-        plt.close()
-        return None
 
     ###################################
     # Métodos de cálculo de fractales #
     ###################################
     @register_fractal("Mandelbrot", "CPU_cpp_entrada")
     @medir_tiempo("Mandelbrot CPP (Entrada)")
-    def hacer_mandelbrot_cpp(self) -> np.ndarray:
+    def hacer_mandelbrot_entrada_cpp(self) -> np.ndarray:
         """
         Llama a la DLL de Mandelbrot dinámica, pasándole self.formula
         (por ejemplo "z**3 + c**2 + 2*c**3") para que el C++ la parseé.
@@ -263,7 +247,7 @@ class calculos_mandelbrot:
         lib.free_mandelbrot(M_ptr)
         return M_copy
 
-#    @register_fractal("Mandelbrotprecision", "cpp_precision")
+    @register_fractal("Mandelbrotprecision", "cpp_precision")
     @medir_tiempo("Mandelbrot CPP (Precision)")
     def hacer_mandelbrotprecision_cpp(self, precision: int = 100) -> np.ndarray:
         """
@@ -335,29 +319,6 @@ class calculos_mandelbrot:
         resultado_2d = resultado.reshape((self.height, self.width))
         return resultado_2d.get()
 
-
-    @register_fractal("Mandelbrot", "GPU_Cupy_kernel")
-    @medir_tiempo("Mandelbrot GPU")
-    def hacer_mandelbrot_gpu(self) -> np.ndarray:
-        x = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
-        y = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
-        X, Y = cp.meshgrid(x, y)
-        C = X + 1j * Y  
-        C = C.ravel() 
-        
-        resultado = cp.empty(C.shape, dtype=cp.int32)
-        
-        try:
-            mandelbrot_kernel(C, self.max_iter, resultado)
-        except Exception as e:
-            print(f"Error executing Julia kernel: {e}")
-            return None
-            
-        resultado = resultado.reshape((self.height, self.width))
-        resultado_cpu = resultado.get()
-
-        return resultado_cpu
-    
     @medir_tiempo("Mandelbrot Entrada")
     def hacer_mandelbrot_con_entrada(self) -> np.ndarray:
         operacion = self.transformar_expresion(self.formula, ["z", "C"])
@@ -377,7 +338,33 @@ class calculos_mandelbrot:
             print(f"\rMANDELBROT {n}", end="", flush=True)
 
         return M.get()
-
+    
+    @register_fractal("Mandelbrot", "CPU_Numpy")
+    def hacer_mandelbrot_numpy(self) -> np.ndarray:
+        inicio = time.time()
+        
+        operacion = self.transformar_expresion(self.formula, ["z", "C"])
+        codigo = compile(operacion, "<string>", "exec")
+        
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        X, Y = np.meshgrid(x, y)
+        C = X + 1j * Y
+        z = np.zeros(C.shape, dtype=np.complex128)
+        M = np.zeros(C.shape, dtype=int)
+        matriz = np.ones(C.shape, dtype=bool)
+        
+        for n in range(self.max_iter):
+            exec(codigo)
+            matriz = np.logical_and(matriz, np.abs(z) <= 2)
+            M[matriz] = n
+            print(f"\rMANDELBROT {n}", end="", flush=True)
+            
+        fin = time.time() 
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        
+        return M 
+    
     @register_fractal("Mandelbrot", "GPU_Cupy")
     def hacer_mandelbrot_cupy(self) -> np.ndarray:
         inicio = time.time()
@@ -403,62 +390,42 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
     
         return M.get()
-
-    @register_fractal("Mandelbrot", "CPU_Numpy")
-    def hacer_mandelbrot_numpy(self) -> np.ndarray:
-        inicio = time.time()
+    @register_fractal("Mandelbrot", "GPU_Cupy_kernel")
+    @medir_tiempo("Mandelbrot GPU")
+    def hacer_mandelbrot_gpu(self) -> np.ndarray:
+        x = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
+        y = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y  
+        C = C.ravel() 
         
-        operacion = self.transformar_expresion(self.formula, ["z", "C"])
-        codigo = compile(operacion, "<string>", "exec")
+        resultado = cp.empty(C.shape, dtype=cp.int32)
         
-        x = np.linspace(self.xmin, self.xmax, self.width)
-        y = np.linspace(self.ymin, self.ymax, self.height)
-        X, Y = np.meshgrid(x, y)
-        C = X + 1j * Y
-        z = np.zeros(C.shape, dtype=np.complex128)
-        M = np.zeros(C.shape, dtype=int)
-        matriz = np.ones(C.shape, dtype=bool)
-        
-        for n in range(self.max_iter):
-            exec(codigo)
-            matriz = np.logical_and(matriz, np.abs(z) <= 2)
-            M[matriz] = n
-            print(f"\rMANDELBROT {n}", end="", flush=True)
+        try:
+            mandelbrot_kernel(C, self.max_iter, resultado)
+        except Exception as e:
+            print(f"Error executing Julia kernel: {e}")
+            return None
             
-        fin = time.time() 
-        print("\nTiempo de ejecución:", fin - inicio, "segundos")
-        
-        return M
+        resultado = resultado.reshape((self.height, self.width))
+        resultado_cpu = resultado.get()
+
+        return resultado_cpu
     
     
     @register_fractal("Mandelbrot", "CPU_cpp")
     @medir_tiempo("Mandelbrot CPP")
     def hacer_mandelbrot_cpp(self) -> np.ndarray:
-        dll_path = r"codigos_cpp\mandelbrot.dll"
-        if not os.path.exists(dll_path):
-            print(f"Error: No se encuentra la DLL en {dll_path}")
-            exit(1)
-
-        # Cargar la DLL con manejo de errores
-        try:
-            lib = ctypes.WinDLL(dll_path)
-        except OSError as e:
-            
-            print(f"Error al cargar la DLL: {e}")
-            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
-            raise
-        lib.mandelbrot.argtypes = [
-        ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-        ctypes.c_int, ctypes.c_int, ctypes.c_int
-        ]
-        lib.mandelbrot.restype = ctypes.POINTER(ctypes.c_int)
-        lib.free_mandelbrot.argtypes = [ctypes.POINTER(ctypes.c_int)]
-        lib.free_mandelbrot.restype = None
-        M_ptr = lib.mandelbrot(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
-        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M).reshape(self.height, self.width)
-        lib.free_mandelbrot(M_ptr)
-        return M_copy
+        ptr = mandelbrot_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter
+        )
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_mandelbrot(ptr)
+        return img
     
     ################
     # Para olvidar #
@@ -510,6 +477,50 @@ class calculos_mandelbrot:
     # Julia #
     #########
     
+    @register_fractal("Julia", "CPU_Numpy")
+    def hacer_julia_numpy(self) -> np.ndarray:
+        inicio = time.time()
+
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        X, Y = np.meshgrid(x, y)
+        C = X + 1j * Y
+        z = np.zeros(C.shape, dtype=np.complex128)
+        M = np.zeros(C.shape, dtype=int)
+        matriz = np.ones(C.shape, dtype=bool)
+
+        for n in range(self.max_iter):
+            z[matriz]=z[matriz]**2+(self.real+1j*self.imag)
+            matriz = np.logical_and(matriz, np.abs(z) <= 2)
+            M[matriz] = n
+            print(f"\rJULIA {n}", end="", flush=True)
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M
+    
+    @register_fractal("Julia", "GPU_Cupy")
+    def hacer_julia_cupy(self) -> np.ndarray:
+        inicio = time.time()
+
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+        z = cp.zeros(C.shape, dtype=cp.complex128)
+        M = cp.zeros(C.shape, dtype=int)
+        matriz = cp.ones(C.shape, dtype=bool)
+
+        for n in range(self.max_iter):
+            z[matriz]=z[matriz]**2+(self.real+1j*self.imag)
+            matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
+            M[matriz] = n
+            print(f"\rJULIA {n}", end="", flush=True)
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
+
     @register_fractal("Julia", "GPU_Cupy_kernel")
     def hacer_julia_gpu(self) -> np.ndarray:
         inicio = time.time()
@@ -539,103 +550,76 @@ class calculos_mandelbrot:
 
         return resultado_cpu
     
-    #revisar
-    @register_fractal("Julia", "GPU_Cupy")
-    def hacer_julia_cupy(self) -> np.ndarray:
-        inicio = time.time()
+    @register_fractal("Julia", "CPU_cpp")
+    @medir_tiempo("Julia CPP")
+    def hacer_julia_cpp(self) -> np.ndarray:
+        ptr = julia_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter,
+            self.real,   
+            self.imag    
+        )
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_julia(ptr)
+        return img
 
-        x = cp.linspace(self.xmin, self.xmax, self.width)
-        y = cp.linspace(self.ymin, self.ymax, self.height)
-        X, Y = cp.meshgrid(x, y)
-        C = X + 1j * Y
-        z = cp.zeros(C.shape, dtype=cp.complex128)
-        M = cp.zeros(C.shape, dtype=int)
-        matriz = cp.ones(C.shape, dtype=bool)
-
-        for n in range(self.max_iter):
-            z[matriz]=z[matriz]**2+(self.real+1j*self.imag)
-            matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
-            M[matriz] = n
-            print(f"\rJULIA {n}", end="", flush=True)
-
-        fin = time.time()
-        print("\nTiempo de ejecución:", fin - inicio, "segundos")
-        return M.get()
+    ################
+    # Burning Ship #
+    ################
     
-    @register_fractal("Julia", "CPU_Numpy")
-    def hacer_julia_numpy(self) -> np.ndarray:
+    @register_fractal("Burning Ship", "CPU_Numpy")
+    def hacer_burning_numpy(self) -> np.ndarray:
         inicio = time.time()
 
         x = np.linspace(self.xmin, self.xmax, self.width)
         y = np.linspace(self.ymin, self.ymax, self.height)
         X, Y = np.meshgrid(x, y)
         C = X + 1j * Y
-        z = np.zeros(C.shape, dtype=np.complex128)
+        z = np.zeros_like(C, dtype=np.complex128)
         M = np.zeros(C.shape, dtype=int)
         matriz = np.ones(C.shape, dtype=bool)
 
         for n in range(self.max_iter):
-            z[matriz]=z[matriz]**2+(self.real+1j*self.imag)
+            z_real = np.abs(z.real)
+            z_imag = np.abs(z.imag)
+            z_temp = (z_real + 1j * z_imag) ** 2 + C
+            z[matriz] = z_temp[matriz]
             matriz = np.logical_and(matriz, np.abs(z) <= 2)
             M[matriz] = n
-            print(f"\rJULIA {n}", end="", flush=True)
+            print(f"\rBurning Ship {n}", end="", flush=True)
 
         fin = time.time()
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
-    @register_fractal("Julia", "CPU_cpp")
-    @medir_tiempo("Julia CPP")
-    def hacer_julia_cpp(self) -> np.ndarray:
-        dll_path = r"codigos_cpp\julia.dll"
-        if not os.path.exists(dll_path):
-            print(f"Error: No se encuentra la DLL en {dll_path}")
-            exit(1)
-        try:
-            lib = ctypes.WinDLL(dll_path)
-        except OSError as e:
-            print(f"Error al cargar la DLL: {e}")
-            raise
-        
-        lib.julia.argtypes = [
-            ctypes.c_double,  # xmin
-            ctypes.c_double,  # xmax
-            ctypes.c_double,  # ymin
-            ctypes.c_double,  # ymax
-            ctypes.c_int,     # width
-            ctypes.c_int,     # height
-            ctypes.c_int,     # max_iter
-            ctypes.c_double,  # cr
-            ctypes.c_double,  # ci
-        ]
-        lib.julia.restype = ctypes.POINTER(ctypes.c_int)
-    
-        lib.free_julia.argtypes = [ctypes.POINTER(ctypes.c_int)]
-        lib.free_julia.restype = None
-    
-    
-        M_ptr = lib.julia(
-            self.xmin, self.xmax,
-            self.ymin, self.ymax,
-            self.width, self.height,
-            self.max_iter,
-            self.real,   # constante real de Julia
-            self.imag    # constante imaginaria de Julia
-        )
-    
-        # Convertimos el puntero a un array de NumPy
-        M_flat = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M_flat).reshape(self.height, self.width)
-    
-        # Liberamos la memoria en C
-        lib.free_julia(M_ptr)
-    
-        return M_copy
-    
-    ################
-    # Burning Ship #
-    ################
+    @register_fractal("Burning Ship", "GPU_Cupy")
+    def hacer_burning_cupy(self) -> np.ndarray:
+        inicio = time.time()
 
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+        z = cp.zeros_like(C, dtype=cp.complex128)
+        M = cp.zeros(C.shape, dtype=int)
+        matriz = cp.ones(C.shape, dtype=bool)
+
+        for n in range(self.max_iter):
+            z_real = cp.abs(z.real)
+            z_imag = cp.abs(z.imag)
+            z_temp = (z_real + 1j * z_imag) ** 2 + C
+            z[matriz] = z_temp[matriz]
+            matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
+            M[matriz] = n
+            print(f"\rBurning Ship {n}", end="", flush=True)
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
+    
     @register_fractal("Burning Ship", "GPU_Cupy_kernel")
     def hacer_burning_gpu(self) -> np.ndarray:
         inicio = time.time()
@@ -664,33 +648,26 @@ class calculos_mandelbrot:
 
         return resultado_cpu
     
-    @register_fractal("Burning Ship", "GPU_Cupy")
-    def hacer_burning_cupy(self) -> np.ndarray:
-        inicio = time.time()
-
-        x = cp.linspace(self.xmin, self.xmax, self.width)
-        y = cp.linspace(self.ymin, self.ymax, self.height)
-        X, Y = cp.meshgrid(x, y)
-        C = X + 1j * Y
-        z = cp.zeros_like(C, dtype=cp.complex128)
-        M = cp.zeros(C.shape, dtype=int)
-        matriz = cp.ones(C.shape, dtype=bool)
-
-        for n in range(self.max_iter):
-            z_real = cp.abs(z.real)
-            z_imag = cp.abs(z.imag)
-            z_temp = (z_real + 1j * z_imag) ** 2 + C
-            z[matriz] = z_temp[matriz]
-            matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
-            M[matriz] = n
-            print(f"\rBurning Ship {n}", end="", flush=True)
-
-        fin = time.time()
-        print("\nTiempo de ejecución:", fin - inicio, "segundos")
-        return M.get()
+    @register_fractal("Burning Ship", "CPU_cpp")
+    @medir_tiempo("Burning Ship CPP")
+    def hacer_burning_cpp2(self) -> np.ndarray:
+        ptr = burning_ship_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter
+        )
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_burning_ship(ptr)
+        return img
     
-    @register_fractal("Burning Ship", "CPU_Numpy")
-    def hacer_burning_numpy(self) -> np.ndarray:
+    ###########
+    # Tricorn #
+    ###########
+
+    @register_fractal("Tricorn", "CPU_Numpy")
+    def hacer_tricorn_numpy(self) -> np.ndarray:
         inicio = time.time()
 
         x = np.linspace(self.xmin, self.xmax, self.width)
@@ -702,51 +679,39 @@ class calculos_mandelbrot:
         matriz = np.ones(C.shape, dtype=bool)
 
         for n in range(self.max_iter):
-            z_real = np.abs(z.real)
-            z_imag = np.abs(z.imag)
-            z_temp = (z_real + 1j * z_imag) ** 2 + C
+            z_temp = np.conj(z)**2 + C
             z[matriz] = z_temp[matriz]
             matriz = np.logical_and(matriz, np.abs(z) <= 2)
             M[matriz] = n
-            print(f"\rBurning Ship {n}", end="", flush=True)
+            print(f"\rTRICORN {n}", end="", flush=True)
 
         fin = time.time()
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
+        
+    @register_fractal("Tricorn", "GPU_Cupy")
+    def hacer_tricorn_cupy(self) -> np.ndarray:
+        inicio = time.time()
+
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+        z = cp.zeros_like(C, dtype=cp.complex128)
+        M = cp.zeros(C.shape, dtype=int)
+        matriz = cp.ones(C.shape, dtype=bool)
+
+        for n in range(self.max_iter):
+            z_temp = cp.conj(z)**2 + C
+            z[matriz] = z_temp[matriz]
+            matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
+            M[matriz] = n
+            print(f"\rTRICORN {n}", end="", flush=True)
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
     
-
-    @register_fractal("Burning Ship", "CPU_cpp")
-    @medir_tiempo("Burning Ship CPP")
-    def hacer_burning_cpp(self) -> np.ndarray:
-        dll_path = r"codigos_cpp\burning_ship.dll"
-        if not os.path.exists(dll_path):
-            print(f"Error: No se encuentra la DLL en {dll_path}")
-            exit(1)
-
-        # Cargar la DLL con manejo de errores
-        try:
-            lib = ctypes.WinDLL(dll_path)
-        except OSError as e:
-            print(f"Error al cargar la DLL: {e}")
-            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
-            raise
-        lib.burning_ship.argtypes = [
-        ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-        ctypes.c_int, ctypes.c_int, ctypes.c_int
-        ]
-        lib.burning_ship.restype = ctypes.POINTER(ctypes.c_int)
-        lib.free_burning_ship.argtypes = [ctypes.POINTER(ctypes.c_int)]
-        lib.free_burning_ship.restype = None
-        M_ptr = lib.burning_ship(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
-        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M).reshape(self.height, self.width)
-        lib.free_burning_ship(M_ptr)
-        return M_copy
-    
-    ###########
-    # Tricorn #
-    ###########
-
     @register_fractal("Tricorn", "GPU_Cupy_kernel")
     def hacer_tricorn_gpu(self) -> np.ndarray:
         inicio = time.time()
@@ -775,31 +740,26 @@ class calculos_mandelbrot:
 
         return resultado_cpu
     
-    @register_fractal("Tricorn", "GPU_Cupy")
-    def hacer_tricorn_cupy(self) -> np.ndarray:
-        inicio = time.time()
-
-        x = cp.linspace(self.xmin, self.xmax, self.width)
-        y = cp.linspace(self.ymin, self.ymax, self.height)
-        X, Y = cp.meshgrid(x, y)
-        C = X + 1j * Y
-        z = cp.zeros_like(C, dtype=cp.complex128)
-        M = cp.zeros(C.shape, dtype=int)
-        matriz = cp.ones(C.shape, dtype=bool)
-
-        for n in range(self.max_iter):
-            z_temp = cp.conj(z)**2 + C
-            z[matriz] = z_temp[matriz]
-            matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
-            M[matriz] = n
-            print(f"\rTRICORN {n}", end="", flush=True)
-
-        fin = time.time()
-        print("\nTiempo de ejecución:", fin - inicio, "segundos")
-        return M.get()
+    @register_fractal("Tricorn", "CPU_cpp")
+    @medir_tiempo("Tricorn CPP")
+    def hacer_tricorn_cpp(self) -> np.ndarray:
+        ptr = tricorn_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter
+        )
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_tricorn(ptr)
+        return img
     
-    @register_fractal("Tricorn", "CPU_Numpy")
-    def hacer_tricorn_numpy(self) -> np.ndarray:
+    ###########
+    # Circulo #
+    ###########
+    
+    @register_fractal("Circulo", "CPU_Numpy")
+    def hacer_circulo_numpy(self) -> np.ndarray:
         inicio = time.time()
 
         x = np.linspace(self.xmin, self.xmax, self.width)
@@ -811,47 +771,36 @@ class calculos_mandelbrot:
         matriz = np.ones(C.shape, dtype=bool)
 
         for n in range(self.max_iter):
-            z_temp = np.conj(z)**2 + C
-            z[matriz] = z_temp[matriz]
+            z[matriz] = np.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
             matriz = np.logical_and(matriz, np.abs(z) <= 2)
             M[matriz] = n
-            print(f"\rTRICORN {n}", end="", flush=True)
+            print(f"\rCIRCULO {n}", end="", flush=True)
 
         fin = time.time()
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
-        return M
+        return M 
     
-    @register_fractal("Tricorn", "CPU_cpp")
-    @medir_tiempo("Tricorn CPP")
-    def hacer_tricorn_cpp(self) -> np.ndarray:
-        dll_path = r"codigos_cpp\tricorn.dll"
-        if not os.path.exists(dll_path):
-            print(f"Error: No se encuentra la DLL en {dll_path}")
-            exit(1)
+    @register_fractal("Circulo", "GPU_Cupy")
+    def hacer_circulo_cupy(self) -> np.ndarray:
+        inicio = time.time()
 
-        # Cargar la DLL con manejo de errores
-        try:
-            lib = ctypes.WinDLL(dll_path)
-        except OSError as e:
-            print(f"Error al cargar la DLL: {e}")
-            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
-            raise
-        lib.tricorn.argtypes = [
-        ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-        ctypes.c_int, ctypes.c_int, ctypes.c_int
-        ]
-        lib.tricorn.restype = ctypes.POINTER(ctypes.c_int)
-        lib.free_tricorn.argtypes = [ctypes.POINTER(ctypes.c_int)]
-        lib.free_tricorn.restype = None
-        M_ptr = lib.tricorn(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
-        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M).reshape(self.height, self.width)
-        lib.free_tricorn(M_ptr)
-        return M_copy
-    
-    ###########
-    # Circulo #
-    ###########
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+        z = cp.zeros_like(C, dtype=cp.complex128)
+        M = cp.zeros(C.shape, dtype=int)
+        matriz = cp.ones(C.shape, dtype=bool)
+
+        for n in range(self.max_iter):
+            z[matriz] = cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
+            matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
+            M[matriz] = n
+            print(f"\rCIRCULO {n}", end="", flush=True)
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
     
     @register_fractal("Circulo", "GPU_Cupy_kernel")
     def hacer_circulo_gpu(self) -> np.ndarray:
@@ -880,152 +829,24 @@ class calculos_mandelbrot:
         print(f"Tiempo total: {tiempo:.5f} segundos")
 
         return resultado_cpu
-    
-    @register_fractal("Circulo", "GPU_Cupy")
-    def hacer_circulo_cupy(self) -> np.ndarray:
-        inicio = time.time()
-
-        x = cp.linspace(self.xmin, self.xmax, self.width)
-        y = cp.linspace(self.ymin, self.ymax, self.height)
-        X, Y = cp.meshgrid(x, y)
-        C = X + 1j * Y
-        z = cp.zeros_like(C, dtype=cp.complex128)
-        M = cp.zeros(C.shape, dtype=int)
-        matriz = cp.ones(C.shape, dtype=bool)
-
-        for n in range(self.max_iter):
-            z[matriz] = cp.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
-            matriz = cp.logical_and(matriz, cp.abs(z) <= 2)
-            M[matriz] = n
-            print(f"\rCIRCULO {n}", end="", flush=True)
-
-        fin = time.time()
-        print("\nTiempo de ejecución:", fin - inicio, "segundos")
-        return M.get()
-    
-    @register_fractal("Circulo", "CPU_Numpy")
-    def hacer_circulo_numpy(self) -> np.ndarray:
-        inicio = time.time()
-
-        x = np.linspace(self.xmin, self.xmax, self.width)
-        y = np.linspace(self.ymin, self.ymax, self.height)
-        X, Y = np.meshgrid(x, y)
-        C = X + 1j * Y
-        z = np.zeros_like(C, dtype=np.complex128)
-        M = np.zeros(C.shape, dtype=int)
-        matriz = np.ones(C.shape, dtype=bool)
-
-        for n in range(self.max_iter):
-            z[matriz] = np.exp((z[matriz]**2 - 1.00001*z[matriz]) / C[matriz]**4) 
-            matriz = np.logical_and(matriz, np.abs(z) <= 2)
-            M[matriz] = n
-            print(f"\rCIRCULO {n}", end="", flush=True)
-
-        fin = time.time()
-        print("\nTiempo de ejecución:", fin - inicio, "segundos")
-        return M
-    
 
     @register_fractal("Circulo", "CPU_cpp")
     @medir_tiempo("Circulo CPP")
-    def hacer_circulo_cpp(self) -> np.ndarray:
-        dll_path = r"codigos_cpp\circulo.dll"
-        if not os.path.exists(dll_path):
-            print(f"Error: No se encuentra la DLL en {dll_path}")
-            exit(1)
-
-        # Cargar la DLL con manejo de errores
-        try:
-            lib = ctypes.WinDLL(dll_path)
-        except OSError as e:
-            print(f"Error al cargar la DLL: {e}")
-            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
-            raise
-        lib.circulo.argtypes = [
-        ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-        ctypes.c_int, ctypes.c_int, ctypes.c_int
-        ]
-        lib.circulo.restype = ctypes.POINTER(ctypes.c_int)
-        lib.free_circulo.argtypes = [ctypes.POINTER(ctypes.c_int)]
-        lib.free_circulo.restype = None
-        M_ptr = lib.circulo(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
-        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M).reshape(self.height, self.width)
-        lib.free_circulo(M_ptr)
-        return M_copy
+    def hacer_circulo_cpp2(self) -> np.ndarray:
+        ptr = circulo_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter
+        )
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_circulo(ptr)
+        return img
     
     ##################
     # Newton-Raphson #
     ##################
-    
-    @register_fractal("Newton-Raphson", "GPU_Cupy_kernel")
-    def hacer_newton_gpu(self) -> np.ndarray:
-        inicio = time.time()
-
-        x = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
-        y = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
-        X, Y = cp.meshgrid(x, y)
-        C = X + 1j * Y
-        C = C.ravel()
-
-        root_index = cp.empty(C.shape, dtype=cp.int32)
-        iter_count = cp.empty(C.shape, dtype=cp.int32)
-
-        try:
-            newton_kernel(C, self.max_iter, root_index, iter_count)
-        except Exception as e:
-            print(f"Error ejecutando el kernel de Newton: {e}")
-            return None
-
-        root_index = root_index.reshape((self.height, self.width))
-        root_index_cpu = root_index.get()
-        tiempo = time.time() - inicio
-        print(f"{self.max_iter} iteraciones")
-        print(f"Tiempo total: {tiempo:.5f} segundos")
-
-        return root_index_cpu
-    
-    @register_fractal("Newton-Raphson", "GPU_Cupy")
-    def hacer_newton_cupy(self) -> np.ndarray:
-        inicio = time.time()
-        
-        def f(z):
-            return z**3 - 1
-        def df(z):
-            return 3 * z**2
-
-        raices = cp.array([1 + 0j,
-                           -0.5 + 0.8660254j,
-                           -0.5 - 0.8660254j])  
-
-        tolerancia = 1e-6
-
-        x = cp.linspace(self.xmin, self.xmax, self.width)
-        y = cp.linspace(self.ymin, self.ymax, self.height)
-        X, Y = cp.meshgrid(x, y)
-        z = X + 1j * Y
-
-        M = cp.zeros(z.shape, dtype=int)      
-        N = cp.zeros(z.shape, dtype=int)      
-
-        for n in range(self.max_iter):
-            z = z - f(z) / df(z)
-
-            for i, r in enumerate(raices):
-                cerca = cp.abs(z - r) < tolerancia
-                sin_color = (M == 0)
-                M[cp.logical_and(cerca, sin_color)] = i + 1
-                N[cerca] = n
-
-            if cp.all(M > 0):
-                break  
-
-            print(f"\rNEWTON {n}", end="", flush=True)
-
-        fin = time.time()
-        print("\nTiempo de ejecución:", fin - inicio, "segundos")
-
-        return M.get() 
     
     @register_fractal("Newton-Raphson", "CPU_Numpy")
     def hacer_newton_numpy(self) -> np.ndarray:
@@ -1068,36 +889,90 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
 
         return M  
+    
+    @register_fractal("Newton-Raphson", "GPU_Cupy")
+    def hacer_newton_cupy(self) -> np.ndarray:
+        inicio = time.time()
+        
+        def f(z):
+            return z**3 - 1
+        def df(z):
+            return 3 * z**2
 
+        raices = cp.array([1 + 0j,
+                           -0.5 + 0.8660254j,
+                           -0.5 - 0.8660254j])  
+
+        tolerancia = 1e-6
+
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        z = X + 1j * Y
+
+        M = cp.zeros(z.shape, dtype=int)      
+        N = cp.zeros(z.shape, dtype=int)      
+
+        for n in range(self.max_iter):
+            z = z - f(z) / df(z)
+
+            for i, r in enumerate(raices):
+                cerca = cp.abs(z - r) < tolerancia
+                sin_color = (M == 0)
+                M[cp.logical_and(cerca, sin_color)] = i + 1
+                N[cerca] = n
+
+            if cp.all(M > 0):
+                break  
+
+            print(f"\rNEWTON {n}", end="", flush=True)
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+
+        return M.get() 
+
+    @register_fractal("Newton-Raphson", "GPU_Cupy_kernel")
+    def hacer_newton_gpu(self) -> np.ndarray:
+        inicio = time.time()
+
+        x = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
+        y = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+        C = C.ravel()
+
+        root_index = cp.empty(C.shape, dtype=cp.int32)
+        iter_count = cp.empty(C.shape, dtype=cp.int32)
+
+        try:
+            newton_kernel(C, self.max_iter, root_index, iter_count)
+        except Exception as e:
+            print(f"Error ejecutando el kernel de Newton: {e}")
+            return None
+
+        root_index = root_index.reshape((self.height, self.width))
+        root_index_cpu = root_index.get()
+        tiempo = time.time() - inicio
+        print(f"{self.max_iter} iteraciones")
+        print(f"Tiempo total: {tiempo:.5f} segundos")
+
+        return root_index_cpu
 
     @register_fractal("Newton-Raphson", "CPU_cpp")
     @medir_tiempo("Newton CPP")
-    def hacer_newton_cpp(self) -> np.ndarray:
-        dll_path = r"codigos_cpp\newton.dll"
-        if not os.path.exists(dll_path):
-            print(f"Error: No se encuentra la DLL en {dll_path}")
-            exit(1)
-
-        # Cargar la DLL con manejo de errores
-        try:
-            lib = ctypes.WinDLL(dll_path)
-        except OSError as e:
-            print(f"Error al cargar la DLL: {e}")
-            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
-            raise
-        lib.newton.argtypes = [
-        ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-        ctypes.c_int, ctypes.c_int, ctypes.c_int
-        ]
-        lib.newton.restype = ctypes.POINTER(ctypes.c_int)
-        lib.free_newton.argtypes = [ctypes.POINTER(ctypes.c_int)]
-        lib.free_newton.restype = None
-        M_ptr = lib.newton(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
-        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M).reshape(self.height, self.width)
-        lib.free_newton(M_ptr)
-        return M_copy    
-
+    def hacer_newton_cpp2(self) -> np.ndarray:
+        ptr = newton_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter
+        )
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_newton(ptr)
+        return img
+    
     ###########
     # Phoenix #
     ###########
@@ -1203,36 +1078,18 @@ class calculos_mandelbrot:
     @register_fractal("Phoenix", "CPU_cpp")
     @medir_tiempo("Phoenix CPP")
     def hacer_phoenix_cpp(self) -> np.ndarray:
-        dll_path = r"codigos_cpp\phoenix.dll"
-        if not os.path.exists(dll_path):
-            print(f"Error: No se encuentra la DLL en {dll_path}")
-            exit(1)
-
-        try:
-            lib = ctypes.WinDLL(dll_path)
-        except OSError as e:
-            print(f"Error al cargar la DLL: {e}")
-            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
-            raise
-
-        lib.phoenix.argtypes = [
-            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-            ctypes.c_int, ctypes.c_int, ctypes.c_int,
-            ctypes.c_double, ctypes.c_double,
-        ]
-        lib.phoenix.restype = ctypes.POINTER(ctypes.c_int)
-        lib.free_phoenix.argtypes = [ctypes.POINTER(ctypes.c_int)]
-        lib.free_phoenix.restype = None
-
-        M_ptr = lib.phoenix(
-            self.xmin, self.xmax, self.ymin, self.ymax,
-            self.width, self.height, self.max_iter,
-            self.real, self.imag
+        ptr = phoenix_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter,
+            self.real,  
+            self.imag    
         )
-        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M).reshape(self.height, self.width)
-        lib.free_phoenix(M_ptr)
-        return M_copy
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_phoenix(ptr)
+        return img
     
     #################
     # Burning Julia #
@@ -1343,37 +1200,19 @@ class calculos_mandelbrot:
     @register_fractal("Burning Julia", "CPU_cpp")
     @medir_tiempo("Burning Julia CPP")
     def hacer_burning_julia_cpp(self) -> np.ndarray:
-        dll_path = r"codigos_cpp\burning_julia.dll"
-        if not os.path.exists(dll_path):
-            print(f"Error: No se encuentra la DLL en {dll_path}")
-            exit(1)
-
-        try:
-            lib = ctypes.WinDLL(dll_path)
-        except OSError as e:
-            print(f"Error al cargar la DLL: {e}")
-            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
-            raise
-
-        lib.burning_julia.argtypes = [
-            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-            ctypes.c_int, ctypes.c_int, ctypes.c_int,
-            ctypes.c_double, ctypes.c_double,
-        ]
-        lib.burning_julia.restype = ctypes.POINTER(ctypes.c_int)
-        lib.free_burning_julia.argtypes = [ctypes.POINTER(ctypes.c_int)]
-        lib.free_burning_julia.restype = None
-
-        M_ptr = lib.burning_julia(
-            self.xmin, self.xmax, self.ymin, self.ymax,
-            self.width, self.height, self.max_iter,
-            self.real, self.imag
+        ptr = burning_julia_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter,
+            self.real,  
+            self.imag    
         )
-        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M).reshape(self.height, self.width)
-        lib.free_burning_julia(M_ptr)
-        return M_copy
-        
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_burning_julia(ptr)
+        return img
+    
     #####################
     # Celtic Mandelbrot #
     #####################
@@ -1507,35 +1346,17 @@ class calculos_mandelbrot:
     
     @register_fractal("Celtic Mandelbrot", "CPU_cpp")
     @medir_tiempo("Celtic Mandelbrot CPP")
-    def hacer_celtic_mandelbrot_cpp(self) -> np.ndarray:
-        dll_path = r"codigos_cpp\celtic_mandelbrot.dll"
-        if not os.path.exists(dll_path):
-            print(f"Error: No se encuentra la DLL en {dll_path}")
-            exit(1)
-
-        try:
-            lib = ctypes.WinDLL(dll_path)
-        except OSError as e:
-            print(f"Error al cargar la DLL: {e}")
-            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
-            raise
-
-        lib.celtic_mandelbrot.argtypes = [
-            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-            ctypes.c_int, ctypes.c_int, ctypes.c_int,
-        ]
-        lib.celtic_mandelbrot.restype = ctypes.POINTER(ctypes.c_int)
-        lib.free_celtic_mandelbrot.argtypes = [ctypes.POINTER(ctypes.c_int)]
-        lib.free_celtic_mandelbrot.restype = None
-
-        M_ptr = lib.celtic_mandelbrot(
-            self.xmin, self.xmax, self.ymin, self.ymax,
-            self.width, self.height, self.max_iter
+    def hacer_celtic_mandelbrot_cpp2(self) -> np.ndarray:
+        ptr = celtic_mandelbrot_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter
         )
-        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M).reshape(self.height, self.width)
-        lib.free_celtic_mandelbrot(M_ptr)
-        return M_copy
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_celtic_mandelbrot(ptr)
+        return img
     
     ########
     # Nova #
@@ -1666,40 +1487,19 @@ class calculos_mandelbrot:
     @register_fractal("Nova", "CPU_cpp")
     @medir_tiempo("Nova CPP")
     def hacer_nova_cpp(self) -> np.ndarray:
-        dll_path = r"codigos_cpp\nova.dll"
-        if not os.path.exists(dll_path):
-            print(f"Error: No se encuentra la DLL en {dll_path}")
-            exit(1)
-
-        try:
-            lib = ctypes.WinDLL(dll_path)
-        except OSError as e:
-            print(f"Error al cargar la DLL: {e}")
-            print("Verifica que la DLL y sus dependencias estén en el directorio o en el PATH.")
-            raise
-
-        lib.nova.argtypes = [
-            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-            ctypes.c_int, ctypes.c_int, ctypes.c_int,
-            ctypes.c_double, ctypes.c_double,
-        ]
-        lib.nova.restype = ctypes.POINTER(ctypes.c_int)
-        lib.free_nova.argtypes = [ctypes.POINTER(ctypes.c_int)]
-        lib.free_nova.restype = None
-
-        M_ptr = lib.nova(
-            self.xmin, self.xmax, self.ymin, self.ymax,
-            self.width, self.height, self.max_iter,
-            self.nova_m, self.nova_k
+        ptr = nova_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter,
+            self.imag,  
+            self.real   
         )
-        M = np.ctypeslib.as_array(M_ptr, shape=(self.height * self.width,))
-        M_copy = np.copy(M).reshape(self.height, self.width)
-        lib.free_nova(M_ptr)
-        return M_copy
-
-
-
-
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_nova(ptr)
+        return img
+    
     @register_fractal("Julia-Gamma", "CPU_Numpy")
     def hacer_julia_gamma(self) -> np.ndarray:
         """
@@ -1768,7 +1568,7 @@ class calculos_mandelbrot:
 
     @register_fractal("Julia-GPU", "GPU_Cupy")
     @medir_tiempo("Julia GPU")
-    def hacer_julia_cupy(self) -> np.ndarray:
+    def hacer_julia_cupy2(self) -> np.ndarray:
         inicio = time.time()
         x = cp.linspace(self.xmin, self.xmax, self.width)
         y = cp.linspace(self.ymin, self.ymax, self.height)
@@ -1820,3 +1620,206 @@ class calculos_mandelbrot:
             self.max_iter
         )
         return M
+    
+    ##################
+    # Coseno Fractal #
+    ##################
+    
+    @register_fractal("Coseno Fractal", "CPU_Numpy")
+    def hacer_cos_numpy(self) -> np.ndarray:
+        """
+        Coseno fractal: z_{n+1} = cos(z_n) + C
+        con C = X + iY y z_0 = 0.
+        """
+        inicio = time.time()
+
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        X, Y = np.meshgrid(x, y)
+        C = X + 1j * Y
+
+        z = np.zeros(C.shape, dtype=np.complex128)
+        M = np.zeros(C.shape, dtype=int)
+        mask = np.ones(C.shape, dtype=bool)
+
+        for n in range(self.max_iter):
+            z[mask] = np.cos(z[mask]/C[mask]) 
+            escaped = np.abs(z) > 2.0
+            just_escaped = mask & escaped
+            M[just_escaped] = n
+            mask[just_escaped] = False
+
+            print(f"\rCOSENO {n}", end="", flush=True)
+            if not mask.any():
+                break
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M
+    
+    @register_fractal("Coseno Fractal", "GPU_Cupy")
+    def hacer_cos_cupy(self) -> np.ndarray:
+        """
+        Coseno fractal: z_{n+1} = cos(z_n) + C
+        con C = X + iY y z_0 = 0.
+        """
+        inicio = time.time()
+
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+
+        z = cp.zeros(C.shape, dtype=cp.complex128)
+        M = cp.zeros(C.shape, dtype=int)
+        mask = cp.ones(C.shape, dtype=bool)
+
+        for n in range(self.max_iter):
+            z[mask] = cp.cos(z[mask]/C[mask]) 
+            escaped = cp.abs(z) > 2.0
+            just_escaped = mask & escaped
+            M[just_escaped] = n
+            mask[just_escaped] = False
+
+            print(f"\rCOSENO {n}", end="", flush=True)
+            if not mask.any():
+                break
+
+        fin = time.time()
+        print("\nTiempo de ejecución:", fin - inicio, "segundos")
+        return M.get()
+    
+    @register_fractal("Coseno Fractal", "GPU_Cupy_kernel")
+    @medir_tiempo("Coseno Fractal GPU")
+    def hacer_cos_cupy_kernel(self) -> np.ndarray:
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+
+        resultado = cp.empty(C.shape, dtype=cp.int32)
+        try:
+            coseno_kernel(C, self.max_iter, resultado)
+        except Exception as e:
+            print(f"Error ejecutando kernel Coseno: {e}")
+            return None
+
+        return resultado.get()
+    
+    @register_fractal("Coseno Fractal", "CPU_cpp")
+    @medir_tiempo("Coseno Fractal CPP")
+    def hacer_cos_cpp2(self) -> np.ndarray:
+        ptr = coseno_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter
+        )
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_coseno(ptr)
+        return img
+    
+    ######################
+    # Coseno+1/C Fractal #
+    ######################
+    
+    @register_fractal("Coseno+1/C Fractal", "CPU_Numpy")
+    def hacer_cos_inv_numpy(self) -> np.ndarray:
+        """
+        Fractal: z_{n+1} = cos(z_n) + 1/C
+        """
+        inicio = time.time()
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        X, Y = np.meshgrid(x, y)
+        C = X + 1j * Y
+
+        z = np.zeros(C.shape, dtype=np.complex128)
+        M = np.zeros(C.shape, dtype=int)
+        mask = np.ones(C.shape, dtype=bool)
+        for n in range(self.max_iter):
+            z[mask] = np.cos(z[mask]) + 1.0/C[mask]
+            esc = np.abs(z) > 16.0
+            js = mask & esc
+            M[js] = n
+            mask[js] = False
+            if not mask.any(): break
+        print("⏱", time.time() - inicio, "segundos")
+        return M
+
+
+    @register_fractal("Coseno+1/C Fractal", "GPU_Cupy")
+    def hacer_cos_inv_cupy(self) -> np.ndarray:
+        """
+        Fractal: z_{n+1} = cos(z_n) + 1/C en GPU
+        """
+        inicio = time.time()
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+
+        z = cp.zeros(C.shape, dtype=cp.complex128)
+        M = cp.zeros(C.shape, dtype=int)
+        mask = cp.ones(C.shape, dtype=bool)
+        for n in range(self.max_iter):
+            z[mask] = cp.cos(z[mask]) + 1.0/C[mask]
+            esc = cp.abs(z) > 16.0
+            js = mask & esc
+            M[js] = n
+            mask[js] = False
+            if not mask.any(): break
+        print("⏱", time.time() - inicio, "segundos")
+        return M.get()
+    
+    @register_fractal("Coseno+1/C Fractal", "GPU_Cupy_kernel")
+    @medir_tiempo("Coseno+1/C Fractal GPU")
+    def hacer_cos_inv_cupy_kernel(self) -> np.ndarray:
+        x = cp.linspace(self.xmin, self.xmax, self.width)
+        y = cp.linspace(self.ymin, self.ymax, self.height)
+        X, Y = cp.meshgrid(x, y)
+        C = X + 1j * Y
+
+        resultado = cp.empty(C.shape, dtype=cp.int32)
+        try:
+            cos_inv_kernel(C, self.max_iter, resultado)
+        except Exception as e:
+            print(f"Error ejecutando kernel: {e}")
+            return np.zeros(C.shape, dtype=np.int32)
+        return resultado.get()
+
+    @register_fractal("Coseno+1/C Fractal", "CPU_cpp")
+    @medir_tiempo("Coseno+1/C Fractal CPP")
+    def hacer_cos_inv_cpp2(self) -> np.ndarray:
+        ptr = coseno_inv_cpp(
+            self.xmin, self.xmax,
+            self.ymin, self.ymax,
+            self.width, self.height,
+            self.max_iter
+        )
+        flat = np.ctypeslib.as_array(ptr, shape=(self.width*self.height,))
+        img = flat.copy().reshape(self.height, self.width)
+        free_coseno_inv(ptr)
+        return img
+
+    @register_fractal("Julia Corazón", "CPU_Numpy")
+    @medir_tiempo("Julia Corazón CPU")
+    def julia_corazon(self):
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        X, Y = np.meshgrid(x, y)
+        z = X + 1j*Y
+        c = -0.123 + 0.745j
+
+        M = np.zeros(z.shape, int)
+        mask = np.ones(z.shape, bool)
+        for n in range(self.max_iter):
+            z[mask] = z[mask]**2 + c
+            escaped = np.abs(z) > 2
+            M[mask & escaped] = n
+            mask &= ~escaped
+            if not mask.any():
+                break
+        return M
+

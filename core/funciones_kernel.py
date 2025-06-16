@@ -1,4 +1,4 @@
-#import cupy as cp
+import cupy as cp
 
 mandelbrot_kernel = cp.ElementwiseKernel(
     in_params='complex128 c, int32 max_iter',
@@ -260,4 +260,40 @@ julia_custom_kernel = cp.ElementwiseKernel(
         result = max_iter;
     """,
     name='julia_custom_kernel'
+)
+
+coseno_kernel = cp.ElementwiseKernel(
+    in_params='complex128 c, int32 max_iter',
+    out_params='int32 result',
+    operation="""
+        // initialize z to 0
+        complex<double> z = 0;
+        for (int i = 0; i < max_iter; ++i) {
+            // z_{n+1} = cos(z_n / c)
+            z = cos(z / c);
+            // escape if |z| > 2
+            if (real(z)*real(z) + imag(z)*imag(z) > 4.0) {
+                result = i;
+                return;
+            }
+        }
+        result = max_iter;
+    """,
+    name='coseno_kernel'
+)
+
+cos_inv_kernel = cp.ElementwiseKernel(
+    in_params='complex128 c, int32 max_iter',
+    out_params='int32 result',
+    operation="""
+        complex<double> z = 0;
+        for(int i=0;i<max_iter;++i){
+            z = cos(z) + complex<double>(1.0,0.0)/c;
+            if(real(z)*real(z)+imag(z)*imag(z)>16*16){
+                result = i; return;
+            }
+        }
+        result = max_iter;
+    """,
+    name='cos_inv_kernel'
 )

@@ -57,9 +57,6 @@ class MainWindow(QMainWindow):
         # Mostrar fractal
         mandelbrot = md.mostrar_fractal_opengl(self.ui)
 
-        # Linkear botones
-        md.linkeo_botones(self.ui)
-
         # Crear escena de tamaño fijo
         self.scene = QGraphicsScene(0, 0, 200, 200)
 

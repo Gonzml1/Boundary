@@ -56,7 +56,8 @@ class MandelbrotWidget(QOpenGLWidget):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.palette_index = 0
         self.ui.boton_guardar.clicked.connect(lambda: self.guardar_imagen())
-
+        self.linkeo_botones()
+        
     @register_palette("Grises")
     def _paleta_grises(self, norm: np.ndarray) -> np.ndarray:
         """
@@ -596,7 +597,7 @@ class MandelbrotWidget(QOpenGLWidget):
         ruta, _ = QFileDialog.getSaveFileName(
             None,
             "Guardar imagen",
-            f"fractal_{self.xmin:.5f}_{self.xmax:.5f}_{self.ymin:.5f}_{self.ymax:.5f}.png",
+            f"fractal_{self.xmin:.16f}_{self.xmax:.16f}_{self.ymin:.16f}_{self.ymax:.16f}_{self.tipo_fractal}_.png",
             "PNG (*.png);;JPEG (*.jpg *.jpeg);;Todos los archivos (*)"
         )
         if not ruta:
@@ -630,6 +631,20 @@ class MandelbrotWidget(QOpenGLWidget):
         plt.imsave(ruta, rgb)
         print(f"Imagen guardada en: {ruta}")
 
+    def linkeo_botones(self):
+        self.ui.boton_dividir.clicked.connect(lambda : self.dividir())
+        self.ui.boton_duplicar.clicked.connect(lambda : self.duplicar())
+
+        self.ui.slider_iteraciones.valueChanged.connect(lambda value: self.ui.max_iter_entrada.setText(str(value)))
+    
+    def duplicar(self):
+        self.ui.max_iter_entrada.setText(str(int(int(self.ui.max_iter_entrada.text())*2)))
+        self.update()
+        
+    def dividir(self):
+        self.ui.max_iter_entrada.setText(str(int(int(self.ui.max_iter_entrada.text())/2)))
+        self.update()
+    
     def reset_view(self):
         """
         Resetea la vista a los valores iniciales.
