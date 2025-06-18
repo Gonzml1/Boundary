@@ -42,6 +42,8 @@ class MandelbrotWidget(QOpenGLWidget):
         self.zoom_in        =       zoom_in
         self.zoom_out       =       zoom_out
         self.zoom_factor    =       1.0
+        self.dragging       =       False
+        self.last_pos       =       None
         self.mandelbrot     =       calculos_mandelbrot(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter,self.formula, self.tipo_calculo, self.tipo_fractal, self.real, self.imag, self.ui)                               
         self.lsystem        =       None  
         self.setMouseTracking(True)
@@ -731,6 +733,22 @@ class MandelbrotWidget(QOpenGLWidget):
         y = event.y()
         real, imag = self.pixel_a_complejo(x, y)
         self.ui.label_coordenadas.setText(f"Re: {real:.16f}, Im: {imag:.16f}")
+
+        if self.dragging:
+            x0, y0 = self.last_pos.x(), self.last_pos.y()
+            c0_real, c0_imag = self.pixel_a_complejo(x0, y0)
+            dx = c0_real - real
+            dy = c0_imag - imag
+            self.xmin += dx
+            self.xmax += dx
+            self.ymin += dy
+            self.ymax += dy
+            self.last_pos = event.pos()
+            self.actualizar_parametros()
+            self.mostrar_parametros(
+                self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter
+            )
+            self.update()
     
     def pixel_a_complejo(self, x, y):
         real = self.xmin + (x / self.width) * (self.xmax - self.xmin)
@@ -845,6 +863,14 @@ class MandelbrotWidget(QOpenGLWidget):
             self.actualizar_parametros()
             self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
             self.update()
+
+        elif event.button() == Qt.MiddleButton:
+            self.dragging = True
+            self.last_pos = event.pos()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MiddleButton:
+            self.dragging = False
     
     def keyPressEvent(self, event):
         
