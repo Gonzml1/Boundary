@@ -2,12 +2,13 @@ import os
 import ctypes
 import numpy as np
 
+DIRECCION_DE_CARPETA= "codigos_dll"
 # --- Helper para carga de DLLs de fractales C++ ---
 class CPPBackend:
     def __init__(self, dll_name: str, dll_dir: str = None):
         # Determinar carpeta base de DLLs: por defecto ../codigos_cpp desde este archivo
         base_dir = dll_dir or os.path.abspath(
-            os.path.join(os.path.dirname(__file__), os.pardir, 'codigos_cpp')
+            os.path.join(os.path.dirname(__file__), os.pardir, DIRECCION_DE_CARPETA)
         )
         dll_path = os.path.join(base_dir, dll_name)
         if not os.path.exists(dll_path):
