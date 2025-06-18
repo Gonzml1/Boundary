@@ -272,8 +272,8 @@
      <rect>
       <x>830</x>
       <y>220</y>
-      <width>131</width>
-      <height>311</height>
+      <width>141</width>
+      <height>378</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -423,6 +423,38 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Clase de equiv</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="clase_equiv_entrada">
+       <property name="text">
+        <string>256</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QPushButton" name="boton_duplicar_clase_equiv">
+         <property name="text">
+          <string>x2</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="boton_dividir_clase_equiv">
+         <property name="text">
+          <string>/2</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="layoutWidget">
@@ -515,9 +547,9 @@
    <widget class="QLabel" name="label_coordenadas2">
     <property name="geometry">
      <rect>
-      <x>860</x>
-      <y>550</y>
-      <width>191</width>
+      <x>1130</x>
+      <y>590</y>
+      <width>141</width>
       <height>16</height>
      </rect>
     </property>
@@ -528,8 +560,8 @@
    <widget class="QLineEdit" name="p_nova">
     <property name="geometry">
      <rect>
-      <x>1140</x>
-      <y>580</y>
+      <x>1190</x>
+      <y>170</y>
       <width>113</width>
       <height>22</height>
      </rect>

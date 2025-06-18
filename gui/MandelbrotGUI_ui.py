@@ -211,7 +211,7 @@ class Ui_Boundary(object):
 
         self.layoutWidget_2 = QWidget(self.centralwidget)
         self.layoutWidget_2.setObjectName(u"layoutWidget_2")
-        self.layoutWidget_2.setGeometry(QRect(830, 220, 131, 311))
+        self.layoutWidget_2.setGeometry(QRect(830, 220, 141, 378))
         self.verticalLayout_4 = QVBoxLayout(self.layoutWidget_2)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
@@ -290,6 +290,31 @@ class Ui_Boundary(object):
 
         self.verticalLayout_4.addWidget(self.im_julia_entrada)
 
+        self.label = QLabel(self.layoutWidget_2)
+        self.label.setObjectName(u"label")
+
+        self.verticalLayout_4.addWidget(self.label)
+
+        self.clase_equiv_entrada = QLineEdit(self.layoutWidget_2)
+        self.clase_equiv_entrada.setObjectName(u"clase_equiv_entrada")
+
+        self.verticalLayout_4.addWidget(self.clase_equiv_entrada)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.boton_duplicar_clase_equiv = QPushButton(self.layoutWidget_2)
+        self.boton_duplicar_clase_equiv.setObjectName(u"boton_duplicar_clase_equiv")
+
+        self.horizontalLayout_2.addWidget(self.boton_duplicar_clase_equiv)
+
+        self.boton_dividir_clase_equiv = QPushButton(self.layoutWidget_2)
+        self.boton_dividir_clase_equiv.setObjectName(u"boton_dividir_clase_equiv")
+
+        self.horizontalLayout_2.addWidget(self.boton_dividir_clase_equiv)
+
+
+        self.verticalLayout_4.addLayout(self.horizontalLayout_2)
+
         self.layoutWidget1 = QWidget(self.centralwidget)
         self.layoutWidget1.setObjectName(u"layoutWidget1")
         self.layoutWidget1.setGeometry(QRect(830, 10, 141, 161))
@@ -337,10 +362,10 @@ class Ui_Boundary(object):
         self.graphicsView.setGeometry(QRect(980, 10, 200, 200))
         self.label_coordenadas2 = QLabel(self.centralwidget)
         self.label_coordenadas2.setObjectName(u"label_coordenadas2")
-        self.label_coordenadas2.setGeometry(QRect(860, 550, 191, 16))
+        self.label_coordenadas2.setGeometry(QRect(1130, 590, 141, 16))
         self.p_nova = QLineEdit(self.centralwidget)
         self.p_nova.setObjectName(u"p_nova")
-        self.p_nova.setGeometry(QRect(1140, 580, 113, 22))
+        self.p_nova.setGeometry(QRect(1190, 170, 113, 22))
         Boundary.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(Boundary)
         self.menubar.setObjectName(u"menubar")
@@ -410,6 +435,10 @@ class Ui_Boundary(object):
         self.real_julia_entrada.setText(QCoreApplication.translate("Boundary", u"0", None))
         self.im_julia_label.setText(QCoreApplication.translate("Boundary", u"Parte im de julia", None))
         self.im_julia_entrada.setText(QCoreApplication.translate("Boundary", u"0", None))
+        self.label.setText(QCoreApplication.translate("Boundary", u"Clase de equiv", None))
+        self.clase_equiv_entrada.setText(QCoreApplication.translate("Boundary", u"256", None))
+        self.boton_duplicar_clase_equiv.setText(QCoreApplication.translate("Boundary", u"x2", None))
+        self.boton_dividir_clase_equiv.setText(QCoreApplication.translate("Boundary", u"/2", None))
         self.hacer_fractal_label.setText(QCoreApplication.translate("Boundary", u"Generar Fractal", None))
         self.boton_hacer_fractal.setText(QCoreApplication.translate("Boundary", u"Generar", None))
         self.guardar_label.setText(QCoreApplication.translate("Boundary", u"Guardar mandelbrot", None))

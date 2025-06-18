@@ -2,7 +2,7 @@ import os
 import ctypes
 import numpy as np
 
-DIRECCION_DE_CARPETA= "codigos_dll"
+DIRECCION_DE_CARPETA = "codigos_cpp"
 # --- Helper para carga de DLLs de fractales C++ ---
 class CPPBackend:
     def __init__(self, dll_name: str, dll_dir: str = None):
@@ -14,7 +14,7 @@ class CPPBackend:
         if not os.path.exists(dll_path):
             raise FileNotFoundError(f"DLL no encontrada: {dll_path}")
         try:
-            self.lib = ctypes.WinDLL(dll_path)
+            self.lib = ctypes.CDLL(dll_path)
         except OSError as e:
             raise RuntimeError(f"Error cargando {dll_name}: {e}")
 

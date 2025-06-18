@@ -50,6 +50,7 @@ class MandelbrotWidget(QOpenGLWidget):
         self.ui.slider_iteraciones.valueChanged.connect(self.update)
         self.actualizar_parametros()
         self.palettes = []
+        self.clase_equiv = self.ui.clase_equiv_entrada.text()
         for name, fn in PALETTE_REGISTRY:
             bound_fn = fn.__get__(self, type(self))
             self.palettes.append((name, bound_fn))
@@ -57,7 +58,11 @@ class MandelbrotWidget(QOpenGLWidget):
         self.palette_index = 0
         self.ui.boton_guardar.clicked.connect(lambda: self.guardar_imagen())
         self.linkeo_botones()
-        
+    
+    ######################
+    # Paletas de colores #
+    ######################
+    
     @register_palette("Grises")
     def _paleta_grises(self, norm: np.ndarray) -> np.ndarray:
         """
@@ -568,12 +573,19 @@ class MandelbrotWidget(QOpenGLWidget):
         cmap = cm.get_cmap('twilight_shifted', cycle)
         lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
         return lut[iters % cycle]
-    
-    def duplicar(self=Ui_Boundary()):
-        self.ui.max_iter_entrada.setText(str(int(int(self.ui.max_iter_entrada.text())*2)))
 
-    def dividir(self=Ui_Boundary()):
-        self.ui.max_iter_entrada.setText(str(int(int(self.ui.max_iter_entrada.text())/2)))
+    @register_palette("Iteraciones variables (Twilight Shifted)")
+    def _paleta_iters_variable_twilight(self, norm: np.ndarray) -> np.ndarray:
+        """
+        - Reconstruye iter ∈ [0..max_iter] desde norm
+        - Usa iter % 512 para indexar un LUT de twilight_shifted de 512 colores
+        """
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = self.clase_equiv
+        cmap = cm.get_cmap('twilight_shifted', cycle)
+        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+        return lut[iters % cycle]
+        
     # ——— Método para pasar a la siguiente paleta ———
     
     def next_palette(self):
@@ -589,15 +601,16 @@ class MandelbrotWidget(QOpenGLWidget):
         """
         self.palette_index = (self.palette_index - 1) % len(self.palettes)
         self.update()
+        
     # Opcional: atajar una tecla para cambiar
 
 
     # ——— paintGL revisitado, usando el índice de paleta ———
-    def guardar_imagen(self):
+    def guardar_imagen(self) -> None:
         ruta, _ = QFileDialog.getSaveFileName(
             None,
             "Guardar imagen",
-            f"fractal_{self.xmin:.16f}_{self.xmax:.16f}_{self.ymin:.16f}_{self.ymax:.16f}_{self.tipo_fractal}_.png",
+            f"fractal_{self.xmin:.16f}_{self.xmax:.16f}_{self.ymin:.16f}_{self.ymax:.16f}_{self.tipo_fractal}.png",
             "PNG (*.png);;JPEG (*.jpg *.jpeg);;Todos los archivos (*)"
         )
         if not ruta:
@@ -634,6 +647,9 @@ class MandelbrotWidget(QOpenGLWidget):
     def linkeo_botones(self):
         self.ui.boton_dividir.clicked.connect(lambda : self.dividir())
         self.ui.boton_duplicar.clicked.connect(lambda : self.duplicar())
+        self.ui.boton_dividir_clase_equiv.clicked.connect(lambda : self.dividir_clase_equiv())
+        self.ui.boton_duplicar_clase_equiv.clicked.connect(lambda : self.duplicar_clase_equiv())
+
 
         self.ui.slider_iteraciones.valueChanged.connect(lambda value: self.ui.max_iter_entrada.setText(str(value)))
     
@@ -643,6 +659,14 @@ class MandelbrotWidget(QOpenGLWidget):
         
     def dividir(self):
         self.ui.max_iter_entrada.setText(str(int(int(self.ui.max_iter_entrada.text())/2)))
+        self.update()
+    
+    def dividir_clase_equiv(self=Ui_Boundary()):
+        self.ui.clase_equiv_entrada.setText(str(int(int(self.ui.clase_equiv_entrada.text())/2)))
+        self.update()
+    
+    def duplicar_clase_equiv(self=Ui_Boundary()):
+        self.ui.clase_equiv_entrada.setText(str(int(int(self.ui.clase_equiv_entrada.text())*2)))
         self.update()
     
     def reset_view(self):
@@ -686,6 +710,7 @@ class MandelbrotWidget(QOpenGLWidget):
         self.formula        =   str(self.ui.formula_entrada.text())
         self.real           =   float(self.ui.real_julia_entrada.text())
         self.imag           =   float(self.ui.im_julia_entrada.text())
+        self.clase_equiv    =   int(self.ui.clase_equiv_entrada.text())
         self.mandelbrot.actualizar_fractal(
                 self.xmin, self.xmax,
                 self.ymin, self.ymax,
@@ -892,12 +917,17 @@ class MandelbrotWidget(QOpenGLWidget):
 
             elif event.key() == Qt.Key_G:
                 self.duplicar()
-                self.update()
             
             elif event.key() == Qt.Key_H:
                 self.dividir()
-                self.update()
-                
+
+            elif event.key() == Qt.Key_B:
+                self.duplicar_clase_equiv()
+
+            elif event.key() == Qt.Key_N:
+                self.dividir_clase_equiv()
+
+            
         if str(self.ui.generador_comboBox.currentText()) == "Lsystem":
             if event.key() == Qt.Key_Plus:
                 self.zoom_factor *= 1.1  # Acercar

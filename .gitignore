@@ -5,14 +5,7 @@ __pycache__/
 
 # Compiled extension modules and libraries
 *.so
-*.pyd
-*.dll
-*.dylib
-*.o
 *.obj
-*.a
-*.lib
-*.exe
 
 # Build directories
 build/
