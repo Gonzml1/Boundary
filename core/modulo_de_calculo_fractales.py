@@ -36,7 +36,7 @@ class calculos_mandelbrot:
     def __init__(self, xmin: float, xmax: float , ymin: float, ymax: float, 
                  width: int, height: int, max_iter: int, formula: str, 
                  tipo_calculo: str, tipo_fractal: str, real: float, imag: float , 
-                 ui=Ui_Boundary()) -> None:
+                 ui=None) -> None:
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
@@ -57,7 +57,8 @@ class calculos_mandelbrot:
         self.nova_k = 1.0
 #        self.x_cp = cp.linspace(self.xmin, self.xmax, self.width, dtype=cp.float64)
 #        self.y_cp = cp.linspace(self.ymin, self.ymax, self.height, dtype=cp.float64)
-        self._llenar_combo_fractales()
+        if self.ui is not None:
+            self._llenar_combo_fractales()
 
     def _llenar_combo_fractales(self) -> None:
 
