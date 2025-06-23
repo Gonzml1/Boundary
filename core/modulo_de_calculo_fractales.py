@@ -291,7 +291,7 @@ class calculos_mandelbrot:
     # Mandelbrot #
     ##############
     
-    @register_fractal("Mandelbrot", "GPU_Cupy_kernel_smooth")
+   # @register_fractal("Mandelbrot", "GPU_Cupy_kernel_smooth")
     @medir_tiempo("Mandelbrot GPU (Smooth Coloring)")
     def hacer_mandelbrot_gpu_smooth(self) -> np.ndarray:
         # 1) Crear ejes reales en float64
@@ -340,7 +340,7 @@ class calculos_mandelbrot:
 
         return M.get()
     
-    @register_fractal("Mandelbrot", "CPU_Numpy")
+    #@register_fractal("Mandelbrot", "CPU_Numpy")
     def hacer_mandelbrot_numpy(self) -> np.ndarray:
         inicio = time.time()
         
@@ -366,7 +366,7 @@ class calculos_mandelbrot:
         
         return M 
     
-    @register_fractal("Mandelbrot", "GPU_Cupy")
+    #@register_fractal("Mandelbrot", "GPU_Cupy")
     def hacer_mandelbrot_cupy(self) -> np.ndarray:
         inicio = time.time()
 
@@ -478,7 +478,7 @@ class calculos_mandelbrot:
     # Julia #
     #########
     
-    @register_fractal("Julia", "CPU_Numpy")
+    #@register_fractal("Julia", "CPU_Numpy")
     def hacer_julia_numpy(self) -> np.ndarray:
         inicio = time.time()
 
@@ -500,7 +500,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
-    @register_fractal("Julia", "GPU_Cupy")
+    #@register_fractal("Julia", "GPU_Cupy")
     def hacer_julia_cupy(self) -> np.ndarray:
         inicio = time.time()
 
@@ -571,7 +571,7 @@ class calculos_mandelbrot:
     # Burning Ship #
     ################
     
-    @register_fractal("Burning Ship", "CPU_Numpy")
+    #@register_fractal("Burning Ship", "CPU_Numpy")
     def hacer_burning_numpy(self) -> np.ndarray:
         inicio = time.time()
 
@@ -596,7 +596,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
-    @register_fractal("Burning Ship", "GPU_Cupy")
+    #@register_fractal("Burning Ship", "GPU_Cupy")
     def hacer_burning_cupy(self) -> np.ndarray:
         inicio = time.time()
 
@@ -667,7 +667,7 @@ class calculos_mandelbrot:
     # Tricorn #
     ###########
 
-    @register_fractal("Tricorn", "CPU_Numpy")
+    #@register_fractal("Tricorn", "CPU_Numpy")
     def hacer_tricorn_numpy(self) -> np.ndarray:
         inicio = time.time()
 
@@ -690,7 +690,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
         
-    @register_fractal("Tricorn", "GPU_Cupy")
+    #@register_fractal("Tricorn", "GPU_Cupy")
     def hacer_tricorn_cupy(self) -> np.ndarray:
         inicio = time.time()
 
@@ -759,7 +759,7 @@ class calculos_mandelbrot:
     # Circulo #
     ###########
     
-    @register_fractal("Circulo", "CPU_Numpy")
+    #@register_fractal("Circulo", "CPU_Numpy")
     def hacer_circulo_numpy(self) -> np.ndarray:
         inicio = time.time()
 
@@ -781,7 +781,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M 
     
-    @register_fractal("Circulo", "GPU_Cupy")
+    #@register_fractal("Circulo", "GPU_Cupy")
     def hacer_circulo_cupy(self) -> np.ndarray:
         inicio = time.time()
 
@@ -849,7 +849,7 @@ class calculos_mandelbrot:
     # Newton-Raphson #
     ##################
     
-    @register_fractal("Newton-Raphson", "CPU_Numpy")
+    #@register_fractal("Newton-Raphson", "CPU_Numpy")
     def hacer_newton_numpy(self) -> np.ndarray:
         inicio = time.time()
         
@@ -891,7 +891,7 @@ class calculos_mandelbrot:
 
         return M  
     
-    @register_fractal("Newton-Raphson", "GPU_Cupy")
+    #@register_fractal("Newton-Raphson", "GPU_Cupy")
     def hacer_newton_cupy(self) -> np.ndarray:
         inicio = time.time()
         
@@ -978,7 +978,7 @@ class calculos_mandelbrot:
     # Phoenix #
     ###########
 
-    @register_fractal("Phoenix", "CPU_Numpy")
+    #@register_fractal("Phoenix", "CPU_Numpy")
     def hacer_phoenix_numpy(self) -> np.ndarray:
         """
         Phoenix Fractal (Mandelbrot‐style): 
@@ -1018,7 +1018,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
-    @register_fractal("Phoenix", "GPU_Cupy")
+    #@register_fractal("Phoenix", "GPU_Cupy")
     def hacer_phoenix_cupy(self) -> np.ndarray:
         """
         Phoenix Fractal (Mandelbrot‐style): 
@@ -1096,7 +1096,7 @@ class calculos_mandelbrot:
     # Burning Julia #
     #################
 
-    @register_fractal("Burning Julia", "CPU_Numpy")
+    #register_fractal("Burning Julia", "CPU_Numpy")
     def hacer_burning_julia_numpy(self) -> np.ndarray:
         """
         Burning Julia: z_{n+1} = (|Re(z_n)| + i|Im(z_n)|)^2 + c
@@ -1136,7 +1136,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
 
-    @register_fractal("Burning Julia", "GPU_Cupy")
+    #@register_fractal("Burning Julia", "GPU_Cupy")
     def hacer_burning_julia_cupy(self) -> np.ndarray:
         """
         Burning Julia: z_{n+1} = (|Re(z_n)| + i|Im(z_n)|)^2 + c
@@ -1218,7 +1218,7 @@ class calculos_mandelbrot:
     # Celtic Mandelbrot #
     #####################
     
-    @register_fractal("Celtic Mandelbrot", "CPU_Numpy")
+   # @register_fractal("Celtic Mandelbrot", "CPU_Numpy")
     def hacer_celtic_mandelbrot_numpy(self) -> np.ndarray:
         """
         Celtic Mandelbrot: z_{n+1} = sqrt(|Re(z_n)| + i|Im(z_n)|) + C
@@ -1263,7 +1263,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
-    @register_fractal("Celtic Mandelbrot", "GPU_Cupy")
+    #@register_fractal("Celtic Mandelbrot", "GPU_Cupy")
     def hacer_celtic_mandelbrot_cupy(self) -> np.ndarray:
         """
         Celtic Mandelbrot: z_{n+1} = sqrt(|Re(z_n)| + i|Im(z_n)|) + C
@@ -1363,7 +1363,7 @@ class calculos_mandelbrot:
     # Nova #
     ########
 
-    @register_fractal("Nova", "CPU_Numpy")
+    #@register_fractal("Nova", "CPU_Numpy")
     def hacer_nova_numpy(self) -> np.ndarray:
         """
         Nova Fractal: z_{n+1} = z_n^m + C + k * z_n^{-m}
@@ -1414,7 +1414,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
-    @register_fractal("Nova", "GPU_Cupy")
+    #@register_fractal("Nova", "GPU_Cupy")
     def hacer_nova_cupy(self) -> np.ndarray:
         """
         Nova Fractal: z_{n+1} = z_n^m + C + k * z_n^{-m}
@@ -1501,7 +1501,7 @@ class calculos_mandelbrot:
         free_nova(ptr)
         return img
     
-    @register_fractal("Julia-Gamma", "CPU_Numpy")
+   # @register_fractal("Julia-Gamma", "CPU_Numpy")
     def hacer_julia_gamma(self) -> np.ndarray:
         """
         Julia con función Gamma: z_{n+1} = gamma(z_n)^2 + c
@@ -1535,7 +1535,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
 
-    @register_fractal("Mandelbrot-Gamma", "CPU_Numpy")
+    #@register_fractal("Mandelbrot-Gamma", "CPU_Numpy")
     def hacer_mandelbrot_gamma(self) -> np.ndarray:
         """
         Mandelbrot con función Gamma: z_{n+1} = gamma(z_n)^2 + c
@@ -1567,7 +1567,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
 
-    @register_fractal("Julia-GPU", "GPU_Cupy")
+    #@register_fractal("Julia-GPU", "GPU_Cupy")
     @medir_tiempo("Julia GPU")
     def hacer_julia_cupy2(self) -> np.ndarray:
         inicio = time.time()
@@ -1626,7 +1626,7 @@ class calculos_mandelbrot:
     # Coseno Fractal #
     ##################
     
-    @register_fractal("Coseno Fractal", "CPU_Numpy")
+    #@register_fractal("Coseno Fractal", "CPU_Numpy")
     def hacer_cos_numpy(self) -> np.ndarray:
         """
         Coseno fractal: z_{n+1} = cos(z_n) + C
@@ -1658,7 +1658,7 @@ class calculos_mandelbrot:
         print("\nTiempo de ejecución:", fin - inicio, "segundos")
         return M
     
-    @register_fractal("Coseno Fractal", "GPU_Cupy")
+    #@register_fractal("Coseno Fractal", "GPU_Cupy")
     def hacer_cos_cupy(self) -> np.ndarray:
         """
         Coseno fractal: z_{n+1} = cos(z_n) + C
@@ -1725,7 +1725,7 @@ class calculos_mandelbrot:
     # Coseno+1/C Fractal #
     ######################
     
-    @register_fractal("Coseno+1/C Fractal", "CPU_Numpy")
+    #@register_fractal("Coseno+1/C Fractal", "CPU_Numpy")
     def hacer_cos_inv_numpy(self) -> np.ndarray:
         """
         Fractal: z_{n+1} = cos(z_n) + 1/C
@@ -1750,7 +1750,7 @@ class calculos_mandelbrot:
         return M
 
 
-    @register_fractal("Coseno+1/C Fractal", "GPU_Cupy")
+    #@register_fractal("Coseno+1/C Fractal", "GPU_Cupy")
     def hacer_cos_inv_cupy(self) -> np.ndarray:
         """
         Fractal: z_{n+1} = cos(z_n) + 1/C en GPU
@@ -1804,7 +1804,7 @@ class calculos_mandelbrot:
         free_coseno_inv(ptr)
         return img
 
-    @register_fractal("Julia Corazón", "CPU_Numpy")
+    #@register_fractal("Julia Corazón", "CPU_Numpy")
     @medir_tiempo("Julia Corazón CPU")
     def julia_corazon(self):
         x = np.linspace(self.xmin, self.xmax, self.width)

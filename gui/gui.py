@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
         self.ui.graphicsView.setInteractive(True)
 
         # ComboBox por defecto
-        self.ui.tipo_calculo_comboBox.setCurrentIndex(5)
+        self.ui.tipo_calculo_comboBox.setCurrentIndex(2)
         self.ui.formula_entrada.setText("z**2 + c")
         self.scene.changed.connect(mandelbrot.update)
 

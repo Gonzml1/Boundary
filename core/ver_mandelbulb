@@ -1,0 +1,68 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from ctypes import cdll, c_double, c_int, POINTER
+from skimage import measure
+import os
+
+# Parámetros del fractal
+xmin, xmax = -1.5, 1.5
+ymin, ymax = -1.5, 1.5
+zmin, zmax = -1.5, 1.5
+width, height, depth = 150, 150, 150
+max_iter = 100
+power = 8
+
+# Intentar cargar el volumen real desde la DLL
+dll_path = os.path.abspath("mandelbulb.dll")
+try:
+    dll = cdll.LoadLibrary(dll_path)
+    mandelbulb = dll.mandelbulb
+    mandelbulb.restype = POINTER(c_int)
+    free_mb = dll.free_mandelbulb
+    free_mb.argtypes = [POINTER(c_int)]
+    
+    ptr = mandelbulb(c_double(xmin), c_double(xmax),
+                     c_double(ymin), c_double(ymax),
+                     c_double(zmin), c_double(zmax),
+                     c_int(width), c_int(height), c_int(depth),
+                     c_int(max_iter), c_int(power))
+    vol = np.ctypeslib.as_array(ptr, shape=(depth * height * width,))
+    vol = vol.reshape((depth, height, width))
+    free_mb(ptr)
+except Exception as e:
+    # Fallback esférico si falla la carga
+    x = np.linspace(xmin, xmax, width)
+    y = np.linspace(ymin, ymax, height)
+    z = np.linspace(zmin, zmax, depth)
+    X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+    vol = ((X**2 + Y**2 + Z**2) < 1.0).astype(int) * max_iter
+
+# Espaciado real para marching_cubes
+dx = (xmax - xmin) / (width - 1)
+dy = (ymax - ymin) / (height - 1)
+dz = (zmax - zmin) / (depth - 1)
+
+# Capas internas a distintos niveles de iteración
+levels = [int(max_iter * frac) for frac in [0.3, 0.5, 0.7, 0.9]]
+colors = plt.cm.viridis(np.linspace(0.3, 0.9, len(levels)))
+
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+for lvl, col in zip(levels, colors):
+    verts, faces, _, _ = measure.marching_cubes(volume=vol, level=lvl, spacing=(dx, dy, dz))
+    ax.plot_trisurf(
+        verts[:, 0] + xmin,
+        verts[:, 1] + ymin,
+        faces,
+        verts[:, 2] + zmin,
+        color=col, alpha=0.4, linewidth=0
+    )
+
+ax.set_title("Mandelbulb: Capas internas con distintos umbrales")
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+ax.set_zlabel("Z")
+ax.set_box_aspect((1, 1, 1))
+plt.tight_layout()
+plt.show()

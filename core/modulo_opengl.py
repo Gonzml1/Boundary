@@ -10,9 +10,9 @@ from typing import Callable
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QFileDialog
 import matplotlib.pyplot as plt
-PALETTE_REGISTRY = []
+PALETTE_REGISTRY: list[tuple[str, Callable[[np.ndarray], np.ndarray]]] = []
 
-def register_palette(palette_name: str):
+def register_palette(palette_name: str) -> Callable[[Callable[[np.ndarray], np.ndarray]], Callable[[np.ndarray], np.ndarray]]:
     """
     Decorador que registra (nombre, función) en PALETTE_REGISTRY.
     La función _aún no_ está ligada a ninguna instancia.
@@ -612,7 +612,7 @@ class MandelbrotWidget(QOpenGLWidget):
         ruta, _ = QFileDialog.getSaveFileName(
             None,
             "Guardar imagen",
-            f"fractal_{self.xmin:.16f}_{self.xmax:.16f}_{self.ymin:.16f}_{self.ymax:.16f}_{self.tipo_fractal}.png",
+            f"fractal_{self.xmin:.16f}_{self.xmax:.16f}_{self.ymin:.16f}_{self.ymax:.16f}_{self.tipo_fractal}_{self.max_iter}.png",
             "PNG (*.png);;JPEG (*.jpg *.jpeg);;Todos los archivos (*)"
         )
         if not ruta:
