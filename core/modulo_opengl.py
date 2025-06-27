@@ -25,7 +25,7 @@ def register_palette(palette_name: str) -> Callable[[Callable[[np.ndarray], np.n
 class MandelbrotWidget(QOpenGLWidget):
     def __init__(self,cmap, xmin, xmax, ymin, ymax, width, height, max_iter, formula, tipo_calculo, tipo_fractal, real, imag, zoom_in, zoom_out, boundary=Ui_Boundary):
         super().__init__()
-        self.cmap           =       cmap
+        self.cmap           =       cmap    
         self.xmin           =       xmin
         self.xmax           =       xmax
         self.ymin           =       ymin
@@ -64,85 +64,42 @@ class MandelbrotWidget(QOpenGLWidget):
     ######################
     # Paletas de colores #
     ######################
+
+    # se queda, para proximamente implementar clase de equiv
     
-    @register_palette("Grises")
-    def _paleta_grises(self, norm: np.ndarray) -> np.ndarray:
+    @register_palette("Iteraciones variables (Bandas RGB variable)")
+    def _paleta_bandas_rgb_equiv(self, norm: np.ndarray) -> np.ndarray:
         """
-        Escala de grises: norm en [0,1] → (gray,gray,gray) en [0..255]
+        Paleta RGB cíclica tipo bandas con clase_equiv franjas.
+        - Divide [0,1] en `self.clase_equiv` franjas.
+        - Dentro de cada franja: transición lineal R→G→B→R...
         """
-        gray = np.uint8((norm * 255).clip(0, 255))
-        return np.dstack([gray, gray, gray])  # shape=(H,W,3)
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        mod = iters % self.clase_equiv
+        pos = mod / self.clase_equiv * 3  # Escalamos a [0,3)
 
-    @register_palette("Rojo→Amarillo→Blanco")
-    def _paleta_rojo_amarillo(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Rojo→Amarillo→Blanco:
-        - R siempre 255
-        - G crece linealmente de 0→255 para norm en [0,0.5], luego se mantiene 255
-        - B se activa solo para norm≥0.5, crece de 0→255 en [0.5,1]
-        """
-        r = np.uint8(255 * np.ones_like(norm))
-        g = np.uint8((np.clip(norm * 2, 0, 1) * 255).clip(0, 255))
-        b = np.uint8((np.clip((norm - 0.5) * 2, 0, 1) * 255).clip(0, 255))
-        return np.dstack([r, g, b])
-
-    @register_palette("HSV")
-    def _paleta_hsv(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Usa el colormap 'hsv' de Matplotlib:
-        - Crea una LUT de 256 colores HSV→RGB y para cada valor de norm indexa a la LUT.
-        """
-        # 1) Obtenemos la LUT (solo la generamos una vez si quieres optimizar)
-        cmap = cm.get_cmap('hsv', 256)                     # Colormap de 256 entradas
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)  # (256,3)
-
-        # 2) Mapeamos norm ∈ [0,1] a 0..255
-        indices = np.uint8((norm * 255).clip(0, 255))      # shape=(H,W), valores 0..255
-
-        # 3) Indexamos
-        return lut[indices]                                # shape=(H,W,3), dtype=uint8
-
-    @register_palette("Púrpura Psicodélica")
-    def _paleta_psicodelica(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Púrpura psicodélica usando funciones sinusoidales:
-        - Tres ciclos de color, fases desplazadas en R,G,B
-        """
-        # norm ∈ [0,1]
-        r = np.uint8((0.5 + 0.5 * np.sin(2 * np.pi * norm * 3 + 0)) * 255)
-        g = np.uint8((0.5 + 0.5 * np.sin(2 * np.pi * norm * 3 + 2)) * 255)
-        b = np.uint8((0.5 + 0.5 * np.sin(2 * np.pi * norm * 3 + 4)) * 255)
-        return np.dstack([r, g, b])
-
-    @register_palette("Bandas RGB")
-    def _paleta_bandas_rgb(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Bandas semilineales: divide norm en 3 franjas, con degradado lineal dentro de cada franja:
-        - franja0: rojo crece de 0→1
-        - franja1: verde crece de 0→1
-        - franja2: azul crece de 0→1
-        """
-        pos = norm * 3  # pos ∈ [0,3)
-        # En la primera porción (pos < 1): r=pos, g=0,b=0
-        # Segunda (1 ≤ pos < 2): r=2-pos, g=pos-1, b=0
-        # Tercera (2 ≤ pos < 3): r=0, g=3-pos, b=pos-2
         r = np.where(pos < 1, pos, np.where(pos < 2, 2 - pos, 0))
         g = np.where(pos < 1, 0, np.where(pos < 2, pos - 1, 3 - pos))
         b = np.where(pos < 2, 0, pos - 2)
-        rgb = np.dstack([r.clip(0,1), g.clip(0,1), b.clip(0,1)])
-        return np.uint8(rgb * 255)
 
+        rgb = np.stack([r.clip(0,1), g.clip(0,1), b.clip(0,1)], axis=-1)
+        return (rgb * 255).astype(np.uint8)
+    
+    # se queda, para proximamente implementar clase de equiv
     @register_palette("Cian→Magenta→Amarillo")
     def _paleta_inferno(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'inferno' de Matplotlib (una paleta predefinida).
         """
-        cmap = cm.get_cmap('inferno', 256)
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = self.clase_equiv
+        mod = iters % cycle
+        cmap = cm.get_cmap('inferno', cycle)
+        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+        return lut[mod]
     
-    @register_palette("Viridis")
+    # se queda, para proximamente implementar clase de equiv
+    #@register_palette("Viridis")
     def _paleta_viridis(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'viridis' de Matplotlib (verde-amarillo-azul oscuro).
@@ -151,8 +108,8 @@ class MandelbrotWidget(QOpenGLWidget):
         lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)  # (256,3)
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]  # (H, W, 3)
-
-    @register_palette("Plasma")
+    # se queda, para proximamente implementar clase de equiv
+    #@register_palette("Plasma")
     def _paleta_plasma(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'plasma' de Matplotlib (magenta-naranja-amarillo).
@@ -162,7 +119,8 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
 
-    @register_palette("Magma")
+    # se queda, para proximamente implementar clase de equiv
+    #@register_palette("Magma")
     def _paleta_magma(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'magma' de Matplotlib (negros-rosas-rojos).
@@ -172,7 +130,8 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
 
-    @register_palette("Cividis")
+    # se queda, para proximamente implementar clase de equiv
+    #@register_palette("Cividis")
     def _paleta_cividis(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'cividis' de Matplotlib (amarillo-azul verdoso, enfoque en perceptibilidad).
@@ -182,7 +141,8 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
 
-    @register_palette("Coolwarm")
+    # se queda, para proximamente implementar clase de equiv
+    #@register_palette("Coolwarm")
     def _paleta_coolwarm(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'coolwarm' de Matplotlib (azul frío a rojo cálido).
@@ -192,7 +152,8 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
 
-    @register_palette("Spring")
+    # se queda, para proximamente implementar clase de equiv
+    #@register_palette("Spring")
     def _paleta_spring(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'spring' de Matplotlib (magenta a amarillo).
@@ -202,7 +163,8 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
 
-    @register_palette("Summer")
+    # se queda, para proximamente implementar clase de equiv
+    #@register_palette("Summer")
     def _paleta_summer(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'summer' de Matplotlib (verde claro a amarillo).
@@ -212,7 +174,8 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
 
-    @register_palette("Autumn")
+    # se queda, para proximamente implementar clase de equiv
+    #@register_palette("Autumn")
     def _paleta_autumn(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'autumn' de Matplotlib (rojo a amarillo).
@@ -222,7 +185,8 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
     
-    @register_palette("Winter")
+    # se queda, para proximamente implementar clase de equiv
+    #@register_palette("Winter")
     def _paleta_winter(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'winter' de Matplotlib (verde azulado a azul).
@@ -232,7 +196,7 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
 
-    @register_palette("Jet")
+    #@register_palette("Jet")
     def _paleta_jet(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'jet' clásico (azul-cian-verde-amarillo-rojo).
@@ -241,8 +205,8 @@ class MandelbrotWidget(QOpenGLWidget):
         lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
-    
-    @register_palette("Twilight Shifted")
+
+   #@register_palette("Twilight Shifted")
     def _paleta_twilight_shifted(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'twilight_shifted' de Matplotlib (cambia de púrpura a amarillo).
@@ -252,7 +216,7 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
     
-    @register_palette("Turbo")
+    #@register_palette("Turbo")
     def _paleta_turbo(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'turbo' de Matplotlib (espectro de colores vibrantes).
@@ -262,7 +226,7 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
     
-    @register_palette("Rainbow")
+    #@register_palette("Rainbow")
     def _paleta_rainbow(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'rainbow' de Matplotlib (arcoíris).
@@ -272,7 +236,7 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
     
-    @register_palette("Ocean")
+    #@register_palette("Ocean")
     def _paleta_ocean(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'ocean' de Matplotlib (azul marino a verde).
@@ -282,7 +246,7 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
     
-    @register_palette("Pink")
+    #@register_palette("Pink")
     def _paleta_pink(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'pink' de Matplotlib (rosa claro).
@@ -290,79 +254,6 @@ class MandelbrotWidget(QOpenGLWidget):
         cmap = cm.get_cmap('pink', 256)
         lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
         indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
-    
-    @register_palette("Accent")
-    def _paleta_accent(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Colormap 'Accent' de Matplotlib (colores brillantes).
-        """
-        cmap = cm.get_cmap('Accent', 256)
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
-    
-    @register_palette("Dark2")
-    def _paleta_dark2(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Colormap 'Dark2' de Matplotlib (colores oscuros y saturados).
-        """
-        cmap = cm.get_cmap('Dark2', 256)
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
-    
-    @register_palette("Set1")
-    def _paleta_set1(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Colormap 'Set1' de Matplotlib (colores brillantes y saturados).
-        """
-        cmap = cm.get_cmap('Set1', 256)
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
-    
-    @register_palette("Set2")
-    def _paleta_set2(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Colormap 'Set2' de Matplotlib (colores suaves y agradables).
-        """
-        cmap = cm.get_cmap('Set2', 256)
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
-    
-    @register_palette("Set3")
-    def _paleta_set3(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Colormap 'Set3' de Matplotlib (colores variados y agradables).
-        """
-        cmap = cm.get_cmap('Set3', 256)
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
-    
-    @register_palette("prism")
-    def _paleta_prism(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Colormap 'prism' de Matplotlib (colores suaves y claros).
-        """
-        cmap = cm.get_cmap('prism', 256)
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
-    
-    @register_palette("Prism LUT")
-    def _palette_prism_from_norm(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Devuelve un array H×W×3 de uint8 con la paleta 'prism',
-        usando un LUT de 256 colores, a partir de norm (valores en [0,1]).
-        """
-        # 1) Crear la lookup table de 256 colores
-        lut = (cm.get_cmap('prism', 256)(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        # 2) Mapear norm [0,1] a índices 0–255
-        indices = np.uint8((norm * 255).clip(0, 255))
-        # 3) Devolver RGB
         return lut[indices]
     
 #    @register_palette("Escape Speed")
@@ -388,7 +279,8 @@ class MandelbrotWidget(QOpenGLWidget):
         # 4) Devolver RGB
         return lut[indices]
 
-    @register_palette("Cubehelix")
+    # se queda, para proximamente implementar clase de equiv
+    #@register_palette("Cubehelix")
     def _paleta_cubehelix(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'cubehelix' de Matplotlib (perceptualmente uniforme,
@@ -404,7 +296,7 @@ class MandelbrotWidget(QOpenGLWidget):
         # 3) Indexar la LUT
         return lut[indices]  # shape=(H, W, 3), dtype=uint8
     
-    @register_palette("Spectral")
+    #@register_palette("Spectral")
     def _paleta_spectral(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'Spectral' de Matplotlib (divergente, multicolor).
@@ -414,7 +306,7 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
 
-    @register_palette("RdYlBu")
+    #@register_palette("RdYlBu")
     def _paleta_rdyalbu(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'RdYlBu' de Matplotlib (divergente rojo→amarillo→azul).
@@ -424,158 +316,55 @@ class MandelbrotWidget(QOpenGLWidget):
         indices = np.uint8((norm * 255).clip(0, 255))
         return lut[indices]
 
-    @register_palette("Paired")
-    def _paleta_paired(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Colormap 'Paired' de Matplotlib (cualitativo, pares de colores contrastantes).
-        """
-        cmap = cm.get_cmap('Paired', 256)
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
-
-    @register_palette("Pastel1")
-    def _paleta_pastel1(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Colormap 'Pastel1' de Matplotlib (cualitativo, colores suaves).
-        """
-        cmap = cm.get_cmap('Pastel1', 256)
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
-
-    @register_palette("YlGnBu")
+    @register_palette("Iteracion varibales (YlGnBu variable)")
     def _paleta_ylgnbu(self, norm: np.ndarray) -> np.ndarray:
         """
         Colormap 'YlGnBu' de Matplotlib (secuencial amarillo→verde→azul).
         """
-        cmap = cm.get_cmap('YlGnBu', 256)
-        lut = (cmap(np.arange(256))[:, :3] * 255).astype(np.uint8)
-        indices = np.uint8((norm * 255).clip(0, 255))
-        return lut[indices]
-    
-    @register_palette("Iteraciones (HSV ciclo 64)")
-    def _paleta_iters_hsv(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Paleta basada en el número de iteraciones:
-        - Convertimos norm [0,1] de vuelta a iter (0..max_iter)
-        - Tomamos iter % 64 para indexar 64 colores HSV
-        """
-        # Reconstruir el entero de iteración
         iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
-        cycle = 64
-        # Generar LUT HSV de 64 colores
-        hsv_lut = cm.get_cmap('hsv', cycle)(np.arange(cycle))[:, :3]
-        lut = (hsv_lut * 255).astype(np.uint8)          # (64,3) uint8
-        # Indexar módulo ciclo
-        return lut[iters % cycle]     
-    
-    @register_palette("Iteraciones (Viridis ciclo 64)")
-    def _paleta_iters_viridis(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Paleta basada en el número de iteraciones:
-        - Reconstruye iter ∈ [0..max_iter] desde norm
-        - Usa iter % 64 para indexar un LUT de Viridis de 64 colores
-        """
-        # 1) Reconstruir conteo de iteraciones
-        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
-        cycle = 64
-
-        # 2) Generar LUT de Viridis con 64 entradas
-        cmap   = cm.get_cmap('viridis', cycle)
-        lut    = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)  # (64,3)
-
-        # 3) Indexar según iter % cycle
-        return lut[iters % cycle]  # shape=(H, W, 3), dtype=uint8
-    
-    @register_palette("Iteraciones (Twilight Shifted ciclo 64)")
-    def _paleta_iters_twilight_shifted(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Paleta basada en el número de iteraciones:
-        - Reconstruye iter ∈ [0..max_iter] desde norm
-        - Usa iter % 64 para indexar un LUT de Twilight Shifted de 64 colores
-        """
-        # 1) Reconstruir conteo de iteraciones
-        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
-        cycle = 64
-
-        # 2) Generar LUT de Twilight Shifted con 64 entradas
-        cmap   = cm.get_cmap('twilight_shifted', cycle)
-        lut    = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
-        # (64,3)
-        # 3) Indexar según iter % cycle
-        return lut[iters % cycle]  # shape=(H, W, 3), dtype=uint8
-    
-    @register_palette("Iteraciones (Plasma ciclo 64)")
-    def _paleta_iters_plasma(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Paleta basada en el número de iteraciones:
-        - Reconstruye iter ∈ [0..max_iter] desde norm
-        - Usa iter % 64 para indexar un LUT de Plasma de 64 colores
-        """
-        # 1) Reconstruir conteo de iteraciones
-        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
-        cycle = 64
-
-        # 2) Generar LUT de Plasma con 64 entradas
-        cmap   = cm.get_cmap('plasma', cycle)
-        lut    = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)  # (64,3)
-        # 3) Indexar según iter % cycle
-        return lut[iters % cycle]
-
-    @register_palette("Grises cíclico")
-    def _paleta_grises_ciclico(self, norm: np.ndarray) -> np.ndarray:
-        """
-        Grises cíclico basado en iteraciones:
-        - Reconstruye iters ∈ [0..max_iter] desde norm
-        - Toma iters % cycle para definir la intensidad de gris
-        """
-        # 1) Reconstruir el conteo de iteraciones
-        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
-        # 2) Definir ciclo de, por ejemplo, 64 pasos
-        cycle = 64
+        cycle = self.clase_equiv
         mod = iters % cycle
-        # 3) Mapear mod ∈ [0..cycle-1] a gris ∈ [0..255]
+        cmap = cm.get_cmap('YlGnBu', cycle)
+        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+        return lut[mod]
+    
+    @register_palette("Iteraciones variables (Viridis variable)")
+    def _pallete_iters_variable_viridis(self, norm: np.ndarray) -> np.ndarray:
+        """
+        - Reconstruye iter ∈ [0..max_iter] desde norm
+        - Usa iter % 64 para indexar un LUT de viridis de self.clase_equiv colores
+        """
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = self.clase_equiv
+        mod = iters % cycle
+        cmap = cm.get_cmap('viridis', cycle)
+        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+        return lut[mod]
+
+    @register_palette("Iteraciones variables (Plasma variable)")
+    def _pallete_iters_variable_plasma(self, norm: np.ndarray) -> np.ndarray:
+        """
+        - Reconstruye iter ∈ [0..max_iter] desde norm
+        - Usa iter % 64 para indexar un LUT de plasma de self.clase_equiv colores
+        """
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = self.clase_equiv
+        cmap= cm.get_cmap('plasma', cycle)
+        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+        return lut[iters % cycle]
+
+    @register_palette("Iteraciones variables (Grises)")
+    def _pallete_iters_variable_grises(self, norm: np.ndarray) -> np.ndarray:
+        """
+        - Reconstruye iter ∈ [0..max_iter] desde norm
+        - Usa iter % 64 para indexar un LUT de grises cíclico de self.clase_equiv colores
+        """
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = self.clase_equiv
+        mod = iters % cycle
         gray = np.uint8(((mod.astype(float) / (cycle - 1)) * 255).clip(0, 255))
-        # 4) Devolver imagen H×W×3
         return np.dstack([gray, gray, gray])
-
-    @register_palette("Iteraciones (Twilight Shifted ciclo 128)")
-    def _paleta_iters_twilight_128(self, norm: np.ndarray) -> np.ndarray:
-        """
-        - Reconstruye iter ∈ [0..max_iter] desde norm
-        - Usa iter % 128 para indexar un LUT de twilight_shifted de 128 colores
-        """
-        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
-        cycle = 128
-        cmap = cm.get_cmap('twilight_shifted', cycle)
-        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
-        return lut[iters % cycle]
-
-    @register_palette("Iteraciones (Twilight Shifted ciclo 256)")
-    def _paleta_iters_twilight_256(self, norm: np.ndarray) -> np.ndarray:
-        """
-        - Reconstruye iter ∈ [0..max_iter] desde norm
-        - Usa iter % 256 para indexar un LUT de twilight_shifted de 256 colores
-        """
-        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
-        cycle = 256
-        cmap = cm.get_cmap('twilight_shifted', cycle)
-        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
-        return lut[iters % cycle]
-
-    @register_palette("Iteraciones (Twilight Shifted ciclo 512)")
-    def _paleta_iters_twilight_512(self, norm: np.ndarray) -> np.ndarray:
-        """
-        - Reconstruye iter ∈ [0..max_iter] desde norm
-        - Usa iter % 512 para indexar un LUT de twilight_shifted de 512 colores
-        """
-        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
-        cycle = 512
-        cmap = cm.get_cmap('twilight_shifted', cycle)
-        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
-        return lut[iters % cycle]
-
+    
     @register_palette("Iteraciones variables (Twilight Shifted)")
     def _paleta_iters_variable_twilight(self, norm: np.ndarray) -> np.ndarray:
         """
@@ -683,10 +472,14 @@ class MandelbrotWidget(QOpenGLWidget):
         self.width = 1000
         self.height = 600
         self.zoom_factor = 1.0
-        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
+        self.clase_equiv = 128
+        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter, self.clase_equiv)
         self.update()
 
-    def mostrar_parametros(self, xmin, xmax, ymin, ymax, width, height, max_iter):
+    def mostrar_parametros(self, xmin, xmax, ymin, ymax, width, height, max_iter, clase_equiv):
+        """
+        Muestra los parámetros del fractal en la UI.
+        """
         self.ui.xmin_entrada.setText(f"{xmin}")
         self.ui.xmax_entrada.setText(f"{xmax}")
         self.ui.ymin_entrada.setText(f"{ymin}")
@@ -694,6 +487,7 @@ class MandelbrotWidget(QOpenGLWidget):
         self.ui.width_entrada.setText(f"{width}")
         self.ui.high_entrada.setText(f"{height}")
         self.ui.max_iter_entrada.setText(f"{max_iter}")
+        self.ui.clase_equiv_entrada.setText(f"{clase_equiv}")
 
 
     def actualizar_parametros(self) -> None:
@@ -746,7 +540,7 @@ class MandelbrotWidget(QOpenGLWidget):
             self.last_pos = event.pos()
             self.actualizar_parametros()
             self.mostrar_parametros(
-                self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter
+                self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter, self.clase_equiv
             )
             self.update()
     
@@ -826,7 +620,7 @@ class MandelbrotWidget(QOpenGLWidget):
         self.ymin, self.ymax = cy - dy, cy + dy
         
         self.actualizar_parametros()
-        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
+        self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter, self.clase_equiv)
         self.update()
 
     def mousePressEvent(self, event):
@@ -844,7 +638,7 @@ class MandelbrotWidget(QOpenGLWidget):
             self.ymin = c_y - (c_y - self.ymin) * self.zoom_in
             self.ymax = c_y + (self.ymax - c_y) * self.zoom_in
             self.actualizar_parametros()
-            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
+            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter, self.clase_equiv)
             self.update()
             
         elif event.button() == Qt.RightButton:
@@ -861,7 +655,7 @@ class MandelbrotWidget(QOpenGLWidget):
             self.ymax = c_y + (self.ymax - c_y) * self.zoom_out
             
             self.actualizar_parametros()
-            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter)
+            self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax, self.width, self.height, self.max_iter, self.clase_equiv)
             self.update()
 
         elif event.button() == Qt.MiddleButton:
@@ -913,7 +707,7 @@ class MandelbrotWidget(QOpenGLWidget):
                 # Refrescar parámetros y repintar
                 self.actualizar_parametros()
                 self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax,
-                                        self.width, self.height, self.max_iter)
+                                        self.width, self.height, self.max_iter, self.clase_equiv)
                 self.update()
                 
             elif event.key() == Qt.Key_Minus:
@@ -929,7 +723,7 @@ class MandelbrotWidget(QOpenGLWidget):
                 # Refrescar parámetros y repintar
                 self.actualizar_parametros()
                 self.mostrar_parametros(self.xmin, self.xmax, self.ymin, self.ymax,
-                                        self.width, self.height, self.max_iter)
+                                        self.width, self.height, self.max_iter, self.clase_equiv)
                 self.update()
                 
             elif event.key() == Qt.Key_P:    
