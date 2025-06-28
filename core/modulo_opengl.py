@@ -10,6 +10,7 @@ from typing import Callable
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QFileDialog
 import matplotlib.pyplot as plt
+from PyQt5.QtCore import QTimer
 PALETTE_REGISTRY: list[tuple[str, Callable[[np.ndarray], np.ndarray]]] = []
 
 def register_palette(palette_name: str) -> Callable[[Callable[[np.ndarray], np.ndarray]], Callable[[np.ndarray], np.ndarray]]:
@@ -60,11 +61,31 @@ class MandelbrotWidget(QOpenGLWidget):
         self.palette_index = 0
         self.ui.boton_guardar.clicked.connect(lambda: self.guardar_imagen())
         self.linkeo_botones()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self._tick_animacion_color)
+        self.timer.start(30)  # 30 ms ≈ 33 fps
+        self.t_actual = 0.0  # tiempo interno
+        self.thickness = 10 + 5 * np.sin(self.t_actual * 0.5)
+        self._generar_malla_base()
+        
+
     
+    def _generar_malla_base(self):
+        x = np.linspace(self.xmin, self.xmax, self.width)
+        y = np.linspace(self.ymin, self.ymax, self.height)
+        self.X_base, self.Y_base = np.meshgrid(x, y)    
     ######################
     # Paletas de colores #
     ######################
+    def _campo_deformacion(self, t):
+        # Campo de flujo tipo vórtice
+        angle = 2 * np.pi * (self.X_base + self.Y_base + 0.1 * np.sin(t))
+        r = 0.002 * self.thickness * np.cos(3 * np.pi * self.Y_base + t)
 
+        dX = r * np.cos(angle)
+        dY = r * np.sin(angle)
+
+        return self.X_base + dX, self.Y_base + dY
     # se queda, para proximamente implementar clase de equiv
     
     @register_palette("Iteraciones variables (Bandas RGB variable)")
@@ -377,8 +398,46 @@ class MandelbrotWidget(QOpenGLWidget):
         lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
         return lut[iters % cycle]
         
-    # ——— Método para pasar a la siguiente paleta ———
+    @register_palette("Iteraciones variables (Twilight Shifted animada)")
+    def _paleta_iters_variable_twilight_animada(self, norm: np.ndarray) -> np.ndarray:
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = self.clase_equiv
+        offset = int((self.t_actual * 20) % cycle)  # campo de velocidad temporal
+        cmap = cm.get_cmap('twilight_shifted', cycle)
+        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+        return lut[(iters + offset) % cycle]
     
+    @register_palette("Campo turbulento animado")
+    def _paleta_flujo_turbulento(self, norm: np.ndarray) -> np.ndarray:
+        iters = np.uint32((norm * self.max_iter).clip(0, self.max_iter))
+        cycle = self.clase_equiv
+
+        # Obtenemos coordenadas normalizadas
+        h, w = norm.shape
+        y, x = np.meshgrid(np.linspace(0, 1, h), np.linspace(0, 1, w), indexing="ij")
+
+        # Campo de desplazamiento tipo vórtice suave
+        ang = 2 * np.pi * (x + y + 0.5 * np.sin(self.t_actual))
+        mag = self.thickness * 0.5 * np.cos(3 * np.pi * y + self.t_actual)
+
+        # Offset local por campo
+        offset = np.int32(mag * np.sin(ang + self.t_actual) * cycle / (2 * np.pi))
+
+        # Aplicamos el desplazamiento al índice de color
+        indices = (iters + offset) % cycle
+
+        # LUT
+        cmap = cm.get_cmap('twilight_shifted', cycle)
+        lut = (cmap(np.arange(cycle))[:, :3] * 255).astype(np.uint8)
+
+        return lut[indices]
+    
+    # ——— Método para pasar a la siguiente paleta ——
+
+    def _tick_animacion_color(self):
+        self.t_actual += 0.05  # velocidad de animación
+        self.update()
+
     def next_palette(self):
         """
         Incrementa palette_index y actualiza el widget.
